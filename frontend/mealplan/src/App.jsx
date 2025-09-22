@@ -1,11 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CustomerLayout from "./components/layouts/CustomerLayout.jsx";
 import SellerLayout from "./components/layouts/SellerLayout";
-
-// // Pages
-// import HomePage from "./pages/customer/HomePage";
-// import MenuPage from "./pages/customer/MenuPage";
-// import CartPage from "./pages/customer/CartPage";
+import CustomerShop from "./components/Customer/CustomerShop.jsx";
+import HomePage from "./components/Customer/homepage.jsx";
+import Login from "./components/auth/loginpage.jsx";
+import {useAuth} from "./context/AuthContext.jsx";
+import ShoppingCart from "./components/Customer/ShoppingCart.jsx";
+import Dashboard from "./components/Seller/DashBoard.jsx";
+import Orders from "./components/Seller/Order.jsx";
+import Products from "./components/Seller/Product.jsx";
 
 // import Dashboard from "./pages/seller/Dashboard";
 // import Orders from "./pages/seller/Orders";
@@ -13,25 +16,36 @@ import SellerLayout from "./components/layouts/SellerLayout";
 
 // import Login from "./pages/auth/Login";
 
+export function PrivateRoute({ children }) {
+  // const token = localStorage.getItem("token"); // token sau khi login
+  const {user} = useAuth();   // 'customer' hoặc 'seller'
+
+  if (user.role !== "seller") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        {/* <Route path="/login" element={<Login />} /> */}
-
+        <Route path="/login" element={<Login />} />
+        
         {/* Customer Routes */}
         <Route path="/customer" element={<CustomerLayout />}>
-          {/* <Route index element={<HomePage />} />
-          <Route path="menu" element={<MenuPage />} />
-          <Route path="cart" element={<CartPage />} /> */}
+          <Route path="customerShop" element={<CustomerShop />} />
+          <Route path="homePage" element={<HomePage />} />
+          <Route path="shoppingCart" element={<ShoppingCart />} />
         </Route>
 
         {/* Seller Routes */}
         <Route path="/seller" element={<SellerLayout />}>
-          {/* <Route index element={<Dashboard />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="products" element={<Products />} /> */}
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="order" element={<Orders />} />
+          <Route path="product" element={<Products />} />
         </Route>
 
         {/* Mặc định */}
