@@ -24,8 +24,8 @@ export default function CustomerLayout() {
       <header className="bg-black text-white p-4 flex justify-between">
         <div className="font-bold">FITFOOD.VN</div> {/* Logo */}
         <nav className="space-x-4">
-          <Link to="home">Trang chủ</Link>
-          <Link to="shop">Thực đơn</Link>
+          <Link to="homePage">Trang chủ</Link>
+          <Link to="customerShop">Thực đơn</Link>
           <Link to="shoppingCart">Giỏ hàng</Link>
 
           {!currentUser ? (

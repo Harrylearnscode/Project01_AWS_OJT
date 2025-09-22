@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = 'http://localhost:8080/api'; // 👈 Prefix chung cho toàn bộ API
+const baseURL = 'http://localhost:8080/api'; // Prefix chung cho toàn bộ API
 
 const axiosInstance = axios.create({
   baseURL,
