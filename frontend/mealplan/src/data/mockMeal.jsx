@@ -902,6 +902,8 @@ const mockMeals = [
 ]
 
 // Mock API function that simulates backend pagination
+// page: current page number (1-indexed)
+// itemsPerPage: number of items per page
 export const fetchFoodItems = async (page = 1, itemsPerPage = 12) => {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 800))
@@ -911,14 +913,16 @@ export const fetchFoodItems = async (page = 1, itemsPerPage = 12) => {
   const items = mockMeals.slice(startIndex, endIndex)
 
   return {
-    items,
-    currentPage: page,
-    totalPages: Math.ceil(mockMeals.length / itemsPerPage),
-    totalItems: mockMeals.length,
-    itemsPerPage,
+    items, //thông tin cơ bản của món ăn(id, name, description, price, image, type, country)
+    currentPage: page, //trang hiện tại
+    totalPages: Math.ceil(mockMeals.length / itemsPerPage), //tổng số trang
+    totalItems: mockMeals.length, //tổng số món ăn
+    itemsPerPage, //số món ăn trên mỗi trang
   }
 }
 
+// Mock API function to fetch meal details by ID
+// id: meal ID
 export const fetchMealDetail = async (id) => {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -929,9 +933,13 @@ export const fetchMealDetail = async (id) => {
     throw new Error("Meal not found")
   }
 
-  return meal
+  return meal //thông tin chi tiết của món ăn (thông tin cơ bản + ingredients + recipe)
 }
 
+// Mock API function to fetch related meals
+// currentMealId: current meal ID to exclude from related meals
+// limit: number of related meals to return
+// làm tương tự như fetchFoodItems nhưng loại bỏ món hiện tại và lấy ngẫu nhiên các món khác
 export const fetchRelatedMeals = async (currentMealId, limit = 4) => {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 300))
