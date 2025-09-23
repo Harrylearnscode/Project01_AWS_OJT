@@ -1,4 +1,4 @@
 package Project01.AWS.MealPlan.mapper;
 
-public class UserMapper {
+public class TypeMapper {
 }

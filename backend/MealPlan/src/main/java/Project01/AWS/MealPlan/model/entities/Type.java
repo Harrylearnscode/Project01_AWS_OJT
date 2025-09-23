@@ -1,7 +1,9 @@
-package Project01.AWS.MealPlan.model;
+package Project01.AWS.MealPlan.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "types")
@@ -10,13 +12,16 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Type {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "type_id")
     private Long typeId;
 
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
 
     @ManyToMany(mappedBy = "dishTypes")
-    private java.util.List<Dish> dishes;
+    @Builder.Default
+    private Set<Dish> dishes = new HashSet<>();
 }
-
