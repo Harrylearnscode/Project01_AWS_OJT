@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.model.entities;
 
+import Project01.AWS.MealPlan.model.enums.DishStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;
@@ -7,7 +8,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "dishes")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -35,8 +37,9 @@ public class Dish {
     @Column(name = "img_url")
     private String imgUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean active;
+    private DishStatus status;
 
     @Column
     private Double price;

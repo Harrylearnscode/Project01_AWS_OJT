@@ -8,7 +8,8 @@ import lombok.*;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"order_id", "ingredient_id"})
         })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "types")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
