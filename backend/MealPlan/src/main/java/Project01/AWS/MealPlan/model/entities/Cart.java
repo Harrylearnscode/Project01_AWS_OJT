@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "cart")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
