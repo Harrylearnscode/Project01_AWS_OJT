@@ -37,8 +37,40 @@ const ShopPage = () => {
   }
 
   const handleAddToCart = (product) => {
-    console.log("Added to cart:", product)
-    // Here you would typically update cart state or call an API
+    try {
+      // Get existing cart from localStorage
+      const existingCart = localStorage.getItem("mealplan-cart")
+      const cartItems = existingCart ? JSON.parse(existingCart) : []
+
+      // Check if item already exists in cart
+      const existingItemIndex = cartItems.findIndex((item) => item.id === product.id)
+
+      if (existingItemIndex >= 0) {
+        // If item exists, increment quantity
+        cartItems[existingItemIndex].quantity += 1
+      } else {
+        // If item doesn't exist, add new item with quantity 1
+        cartItems.push({
+          id: product.id,
+          quantity: 1,
+        })
+      }
+
+      // Save updated cart to localStorage
+      localStorage.setItem("mealplan-cart", JSON.stringify(cartItems))
+
+      // Show success feedback (you could add a toast notification here)
+      console.log(`Added ${product.name} to cart`)
+
+      // Optional: Dispatch a custom event to notify other components about cart update
+      window.dispatchEvent(
+        new CustomEvent("cartUpdated", {
+          detail: { product, cartItems },
+        }),
+      )
+    } catch (error) {
+      console.error("Error adding item to cart:", error)
+    }
   }
 
   if (loading) {

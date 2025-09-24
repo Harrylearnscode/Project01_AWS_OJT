@@ -1,19 +1,38 @@
 "use client"
 
-import { Plus, Clock, Users } from "lucide-react"
-import { Navigate, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { Plus, Clock, Users, Check } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const ProductCard = ({ product, onAddToCart }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [isAdding, setIsAdding] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
   const handleCardClick = () => {
-    navigate(`/customer/mealdetail/${product.id}`);
+    navigate(`/customer/mealdetail/${product.id}`)
   }
 
-
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation() // Prevent navigation when clicking add to cart
-    onAddToCart(product)
+
+    if (isAdding || justAdded) return
+
+    setIsAdding(true)
+
+    try {
+      await onAddToCart(product)
+
+      // Show success state
+      setJustAdded(true)
+      setTimeout(() => {
+        setJustAdded(false)
+      }, 2000) // Reset after 2 seconds
+    } catch (error) {
+      console.error("Failed to add to cart:", error)
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -69,13 +88,35 @@ const ProductCard = ({ product, onAddToCart }) => {
               <div className="text-sm text-muted-foreground line-through">${product.originalPrice}</div>
             )}
           </div>
+
           <button
             onClick={handleAddToCart}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            disabled={isAdding || justAdded}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+              justAdded
+                ? "bg-green-500 text-white"
+                : isAdding
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-accent hover:bg-accent/90 text-accent-foreground hover:scale-105"
+            }`}
             style={{ fontFamily: "Source Sans Pro, sans-serif" }}
           >
-            <Plus className="w-4 h-4" />
-            Add to Cart
+            {justAdded ? (
+              <>
+                <Check className="w-4 h-4" />
+                Added!
+              </>
+            ) : isAdding ? (
+              <>
+                <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                Add to Cart
+              </>
+            )}
           </button>
         </div>
       </div>
