@@ -1,4 +1,4 @@
-package Project01.AWS.MealPlan.config;
+package Project01.AWS.MealPlan.Configs;
 
 import Project01.AWS.MealPlan.repository.UserRepository;
 import org.springframework.context.annotation.Bean;

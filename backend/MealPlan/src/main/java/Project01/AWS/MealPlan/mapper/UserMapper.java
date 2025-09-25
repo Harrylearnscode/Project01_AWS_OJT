@@ -31,14 +31,14 @@ public class UserMapper {
             .active(user.isActive())
             .build();
     }
-    public static User toEntity(RegisterResponse dto) {
-        if (dto == null) return null;
-        return User.builder()
-                .userId(dto.getId())
-                .name(dto.getUsername())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .address(dto.getAddress())
-                .active(dto.isActive())
-      }
+//    public static User toEntity(RegisterResponse dto) {
+//        if (dto == null) return null;
+//        return User.builder()
+//                .userId(dto.getId())
+//                .name(dto.getUsername())
+//                .email(dto.getEmail())
+//                .phone(dto.getPhone())
+//                .address(dto.getAddress())
+//                .active(dto.isActive());
+//      }
 }

@@ -1,4 +1,4 @@
-package Project01.AWS.MealPlan.config;
+package Project01.AWS.MealPlan.Configs;
 
 import Project01.AWS.MealPlan.service.impl.JwtService;
 import jakarta.servlet.FilterChain;
