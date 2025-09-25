@@ -2,7 +2,9 @@ const APIENDPOINTS = {
     AUTH: {},
     CUSTOMER: {},
     SELLER: {},
-    PRODUCT: {},
+    DISH: {
+        GET_ACTIVE_DISHES: '/dishes/getAll',
+    },
     ORDER: {},
     SHOPPINGCART: {},
 };

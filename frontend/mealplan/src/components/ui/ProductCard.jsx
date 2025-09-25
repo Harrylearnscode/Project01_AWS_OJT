@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Clock, Users, Check } from "lucide-react"
+import { Plus, Clock, Users, Check, MapPin } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 const ProductCard = ({ product, onAddToCart }) => {
@@ -10,7 +10,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   const [justAdded, setJustAdded] = useState(false)
 
   const handleCardClick = () => {
-    navigate(`/customer/mealdetail/${product.id}`)
+    navigate(`/customer/mealdetail/${product.dishId}`)
   }
 
   const handleAddToCart = async (e) => {
@@ -43,7 +43,7 @@ const ProductCard = ({ product, onAddToCart }) => {
       {/* Product Image */}
       <div className="aspect-square overflow-hidden">
         <img
-          src={product.image || "/placeholder.svg"}
+          src={product.imgUrl || "/placeholder.svg"}
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
@@ -70,13 +70,34 @@ const ProductCard = ({ product, onAddToCart }) => {
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            <span>{product.prepTime}</span>
+            <span>{product.totalTime || product.prepareTime + product.cookingTime} min</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-3 h-3" />
             <span>{product.servings} servings</span>
           </div>
+          {product.countryName && (
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              <span>{product.countryName}</span>
+            </div>
+          )}
         </div>
+
+        {/* Dish Type Tags */}
+        {product.typeNames && product.typeNames.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {product.typeNames.slice(0, 2).map((type, index) => (
+              <span
+                key={index}
+                className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full"
+                style={{ fontFamily: "Source Sans Pro, sans-serif" }}
+              >
+                {type}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Price and Add to Cart */}
         <div className="flex items-center justify-between pt-2">
@@ -84,9 +105,6 @@ const ProductCard = ({ product, onAddToCart }) => {
             <div className="text-2xl font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
               ${product.price}
             </div>
-            {product.originalPrice && (
-              <div className="text-sm text-muted-foreground line-through">${product.originalPrice}</div>
-            )}
           </div>
 
           <button
