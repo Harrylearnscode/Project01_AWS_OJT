@@ -12,7 +12,7 @@ public class UserMapper {
                 .phone(entity.getPhone())
                 .address(entity.getAddress())
                 .role(entity.getRole())
-                .status(entity.getStatus())
+                .active(entity.isActive())
                 .build();
     }
 }

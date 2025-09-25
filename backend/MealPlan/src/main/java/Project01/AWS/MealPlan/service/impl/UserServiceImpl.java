@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
                     .address(request.getAddress())
                     .role(request.getRole())
                     .password(request.getPassword())
-                    .status(UserStatus.ACTIVE)
+                    .active(true)
                     .build();
             User saved = userRepository.save(entity);
             return UserMapper.toResponse(saved);
@@ -65,11 +65,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Cannot find user with ID: %s", id)
                 ));
-        if (user.getStatus() == UserStatus.DELETED) {
+        if (user.isActive() == false) {
             throw new ActionFailedException("User already deleted");
         }
         try {
-            user.setStatus(UserStatus.DELETED);
+            user.setActive(false);
             userRepository.save(user);
         } catch (Exception e) {
             throw new ActionFailedException(String.format("Failed to delete user with ID: %s", id));
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> getAllUsers() {
         try {
-            return userRepository.findAllByStatus(UserStatus.ACTIVE).stream()
+            return userRepository.findAllByActive(true).stream()
                     .map(UserMapper::toResponse)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserById(Long id) {
         try {
-            User user = userRepository.findByUserIdAndStatus(id, UserStatus.ACTIVE)
+            User user = userRepository.findByUserIdAndActive(id, true)
                     .orElseThrow(() -> new NotFoundException("User not found or deleted"));
             return UserMapper.toResponse(user);
         } catch (Exception e) {
