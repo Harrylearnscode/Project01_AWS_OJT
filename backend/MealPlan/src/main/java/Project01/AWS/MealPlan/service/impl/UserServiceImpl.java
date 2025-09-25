@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.service.impl;
 
+
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.model.entities.User;
@@ -96,5 +97,6 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new ActionFailedException(String.format("Failed to get user with ID: %s", id));
         }
+
     }
 }

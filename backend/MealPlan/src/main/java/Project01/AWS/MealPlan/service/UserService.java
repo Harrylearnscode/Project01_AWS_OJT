@@ -1,7 +1,10 @@
 package Project01.AWS.MealPlan.service;
 
+
+import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
+
 
 import java.util.List;
 
