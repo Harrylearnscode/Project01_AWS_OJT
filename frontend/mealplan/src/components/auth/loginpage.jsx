@@ -25,7 +25,7 @@ export default function Login() {
 
       // Điều hướng theo role
       if (user.role === "SELLER") {
-        setRedirectPath("/seller/dasboard"); // vào layout seller
+        setRedirectPath("/seller/dashboard"); // vào layout seller
       } else {
         setRedirectPath("/customer/homePage"); // vào trang HomePage cho customer
       }

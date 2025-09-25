@@ -6,14 +6,20 @@ import Project01.AWS.MealPlan.service.DishService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/dishes")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class DishController {
 
     private final DishService dishService;
@@ -65,7 +71,8 @@ public class DishController {
 
     @Operation(summary = "Lấy tất cả dish ACTIVE", description = "Trả về danh sách dish đang ACTIVE.")
     @GetMapping("/getAll")
-    public ResponseEntity<ResponseObject> getAllDishes() {
+    public ResponseEntity<ResponseObject> getAllDishes(
+    ) {
         List<DishResponse> responses = dishService.getAllDishes();
         return ResponseEntity.ok(
                 ResponseObject.builder()
