@@ -10,6 +10,9 @@ import Dashboard from "./components/Seller/DashBoard.jsx";
 import Orders from "./components/Seller/Order.jsx";
 import Products from "./components/Seller/Product.jsx";
 import CustomerMealDetail from "./components/Customer/mealdetail.jsx";
+import Checkout from "./components/Customer/Checkout.jsx"; 
+
+
 
 // import Dashboard from "./pages/seller/Dashboard";
 // import Orders from "./pages/seller/Orders";
@@ -41,6 +44,7 @@ function App() {
           <Route path="homePage" element={<HomePage />} />
           <Route path="shoppingCart" element={<ShoppingCart />} />
           <Route path="mealdetail/:id" element={<CustomerMealDetail />} />
+          <Route path="checkout" element={<CustomerMealDetail />} />
         </Route>
 
         {/* Seller Routes */}

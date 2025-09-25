@@ -10,7 +10,8 @@ import lombok.*;
                 @UniqueConstraint(columnNames = {"cart_id", "ingredient_id"})
         }
 )
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

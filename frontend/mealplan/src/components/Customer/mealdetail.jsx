@@ -53,9 +53,44 @@ useEffect(() => {
     navigate("/customer/customerShop")
   }
 
-  const handleAddToCart = () => {
-    console.log(`Added ${quantity} x ${meal.name} to cart`)
+  const handleAddToCart = (product) => {
+    // console.log(`Added ${quantity} x ${meal.name} to cart`)
     // Here you would typically dispatch to a cart context or state management
+    try {
+      // Get existing cart from localStorage
+      const existingCart = localStorage.getItem("mealplan-cart")
+      const cartItems = existingCart ? JSON.parse(existingCart) : []
+
+      // Check if item already exists in cart
+      const existingItemIndex = cartItems.findIndex((item) => item.id === product.id)
+
+      if (existingItemIndex >= 0) {
+        // If item exists, increment quantity
+        cartItems[existingItemIndex].quantity += quantity
+      } else {
+        // If item doesn't exist, add new item with quantity 1
+        cartItems.push({
+          id: product.id,
+          quantity: quantity,
+        })
+      }
+
+      // Save updated cart to localStorage
+      localStorage.setItem("mealplan-cart", JSON.stringify(cartItems))
+
+      // Show success feedback (you could add a toast notification here)
+      console.log(`Added ${product.name} to cart`)
+
+      // Optional: Dispatch a custom event to notify other components about cart update
+      window.dispatchEvent(
+        new CustomEvent("cartUpdated", {
+          detail: { product, cartItems },
+        }),
+      )
+    } catch (error) {
+      console.error("Error adding item to cart:", error)
+    }
+
   }
 
   const calculateTotalKcal = () => {
@@ -215,12 +250,13 @@ useEffect(() => {
 
               {/* Add to Cart Button */}
               <button
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart(meal)}
                 className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 style={{ fontFamily: "Source Sans Pro, sans-serif" }}
               >
                 Add to Cart - ${(meal.price * quantity).toFixed(2)}
               </button>
+
             </div>
           </div>
         </div>

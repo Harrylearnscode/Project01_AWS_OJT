@@ -1,10 +1,24 @@
 package Project01.AWS.MealPlan.mapper;
 
-import Project01.AWS.MealPlan.model.dtos.user.RegisterResponse;
+
 import Project01.AWS.MealPlan.model.entities.User;
+import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
+import Project01.AWS.MealPlan.model.dtos.user.RegisterResponse;
 
 public class UserMapper {
-    public RegisterResponse userToRegisterResponse(User user) {
+    public static UserResponse toResponse(User entity) {
+        if (entity == null) return null;
+        return UserResponse.builder()
+                .userId(entity.getUserId())
+                .name(entity.getName())
+                .phone(entity.getPhone())
+                .address(entity.getAddress())
+                .role(entity.getRole())
+                .active(entity.isActive())
+
+                .build();
+    }
+      public RegisterResponse userToRegisterResponse(User user) {
         if(user == null) {
             return null;
         }
@@ -26,6 +40,5 @@ public class UserMapper {
                 .phone(dto.getPhone())
                 .address(dto.getAddress())
                 .active(dto.isActive())
-                .build();
-    }
+      }
 }

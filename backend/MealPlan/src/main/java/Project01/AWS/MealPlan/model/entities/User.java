@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.model.entities;
 
+import Project01.AWS.MealPlan.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,15 +15,16 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng
-    @Column(name = "user_id") // PK cột user_id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(nullable = false, length = 100)
@@ -38,11 +40,12 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false, length = 20)
-    private String role; // ví dụ: ADMIN, CUSTOMER
+    private String role;
 
     @Column(nullable = false)
     private String password;
 
+//    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private boolean active;
 
@@ -58,6 +61,7 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart carts;
+
 
     public User(String name, String email, String password, String address, String phone, String role, boolean active) {
         this.name = name;
@@ -98,4 +102,7 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return active;
     }
+
+
+
 }
