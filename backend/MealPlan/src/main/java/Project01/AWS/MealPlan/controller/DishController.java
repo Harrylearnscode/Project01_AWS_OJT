@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.controller;
 
 import Project01.AWS.MealPlan.model.dtos.requests.DishRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
 import Project01.AWS.MealPlan.service.DishService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,7 +74,7 @@ public class DishController {
     @GetMapping("/getAll")
     public ResponseEntity<ResponseObject> getAllDishes(
     ) {
-        List<DishResponse> responses = dishService.getAllDishes();
+        List<DishSummaryResponse> responses = dishService.getAllDishes();
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("GET_LIST_SUCCESS")
@@ -103,7 +104,7 @@ public class DishController {
     @Operation(summary = "Lấy dish theo countryId", description = "Trả về danh sách dish thuộc 1 country cụ thể.")
     @GetMapping("/getByCountry/{countryId}")
     public ResponseEntity<ResponseObject> getDishByCountryId(@PathVariable Long countryId) {
-        List<DishResponse> responses = dishService.getDishByCountryId(countryId);
+        List<DishSummaryResponse> responses = dishService.getDishByCountryId(countryId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("GET_LIST_SUCCESS")
@@ -118,7 +119,7 @@ public class DishController {
     @Operation(summary = "Lấy dish theo typeId", description = "Trả về danh sách dish thuộc 1 type cụ thể.")
     @GetMapping("/getByType/{typeId}")
     public ResponseEntity<ResponseObject> getDishByTypeId(@PathVariable Long typeId) {
-        List<DishResponse> responses = dishService.getDishByTypeId(typeId);
+        List<DishSummaryResponse> responses = dishService.getDishByTypeId(typeId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("GET_LIST_SUCCESS")
@@ -136,7 +137,7 @@ public class DishController {
             @PathVariable Long id,
             @RequestParam(defaultValue = "4") int limit) {
 
-        List<DishResponse> responses = dishService.getRelatedDishes(id, limit);
+        List<DishSummaryResponse> responses = dishService.getRelatedDishes(id, limit);
 
         return ResponseEntity.ok(
                 ResponseObject.builder()

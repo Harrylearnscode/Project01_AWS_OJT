@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.service.impl;
 import Project01.AWS.MealPlan.mapper.OrderMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.entities.Order;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.enums.OrderStatus;
@@ -10,6 +11,10 @@ import Project01.AWS.MealPlan.repository.OrderRepository;
 import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -73,9 +78,40 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
+    public PaginatedOrderResponse getAllOrders(String search, Pageable pageable) {
+        Sort validatedSort = pageable.getSort().stream()
+                .filter(order -> {
+                    String p = order.getProperty();
+                    return p.equals("orderId") || p.equals("address")
+                            || "orderTime".equals(p)
+                            || "endTime".equals(p)
+                            || "status".equals(p)
+                            || "deliveryPrice".equals(p)
+                            || "ingredientsPrice".equals(p)
+                            || "totalPrice".equals(p)
+                            || "user.userId".equals(p);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), Sort::by));
+
+        Pageable validatedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                validatedSort
+        );
+
+        Page<Order> orderPage = (search != null && !search.isBlank())
+                ? orderRepository.searchOrders(search, validatedPageable)
+                : orderRepository.findAll(validatedPageable);
+
+        List<OrderResponse> orderDTOs = orderPage.stream()
                 .map(OrderMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
+
+        return PaginatedOrderResponse.builder()
+                .orders(orderDTOs)
+                .totalElements(orderPage.getTotalElements())
+                .totalPages(orderPage.getTotalPages())
+                .currentPage(orderPage.getNumber())
+                .build();
     }
 }
