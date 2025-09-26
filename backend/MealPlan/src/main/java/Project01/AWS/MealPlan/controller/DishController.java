@@ -129,4 +129,24 @@ public class DishController {
                         .build()
         );
     }
+
+    @Operation(summary = "Lấy danh sách món liên quan", description = "Trả về danh sách dish liên quan (ngẫu nhiên), loại bỏ dish hiện tại.")
+    @GetMapping("/{id}/related")
+    public ResponseEntity<ResponseObject> getRelatedDishes(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "4") int limit) {
+
+        List<DishResponse> responses = dishService.getRelatedDishes(id, limit);
+
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_LIST_SUCCESS")
+                        .message("Get related dishes successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(responses)
+                        .build()
+        );
+    }
+
 }

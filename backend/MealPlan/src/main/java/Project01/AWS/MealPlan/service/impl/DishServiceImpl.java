@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -137,6 +138,18 @@ public class DishServiceImpl implements DishService {
     public List<DishResponse> getDishByTypeId(Long typeId) {
         return dishRepository.findByTypeIdAndStatus(typeId, DishStatus.ACTIVE)
                 .stream()
+                .map(DishMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<DishResponse> getRelatedDishes(Long currentDishId, int limit) {
+        List<Dish> availableMeals = dishRepository.findByStatusAndDishIdNot(DishStatus.ACTIVE, currentDishId);
+
+        Collections.shuffle(availableMeals);
+
+        return availableMeals.stream()
+                .limit(limit)
                 .map(DishMapper::toResponse)
                 .toList();
     }
