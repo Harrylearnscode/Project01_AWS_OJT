@@ -14,4 +14,5 @@ public interface DishService {
     DishResponse getDishById(Long id);
     List<DishResponse> getDishByCountryId(Long countryId);
     List<DishResponse> getDishByTypeId(Long typeId);
+    List<DishResponse> getRelatedDishes(Long currentDishId, int limit);
 }

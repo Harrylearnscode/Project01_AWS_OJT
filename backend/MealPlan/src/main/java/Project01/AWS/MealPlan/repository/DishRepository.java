@@ -17,4 +17,6 @@ public interface DishRepository extends JpaRepository<Dish, Long> {
 
     @Query("SELECT d FROM Dish d JOIN d.dishTypes t WHERE t.typeId = :typeId AND d.status = :status")
     List<Dish> findByTypeIdAndStatus(Long typeId, DishStatus status);
+
+    List<Dish> findByStatusAndDishIdNot(DishStatus status, Long dishId);
 }
