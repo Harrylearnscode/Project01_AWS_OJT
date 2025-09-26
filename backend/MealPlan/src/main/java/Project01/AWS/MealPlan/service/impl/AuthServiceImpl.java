@@ -9,6 +9,7 @@ import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.AuthService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,17 +29,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User register(RegisterUserDto registerRequest) {
-        User user = new User(registerRequest.getUsername(),
-                registerRequest.getEmail(),
-                bCryptPasswordEncoder.encode(registerRequest.getPassword()),
-                registerRequest.getAddress(),
-                registerRequest.getPhone(),
-                "CUSTOMER",
-                false);
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationExpiry(LocalDateTime.now().plusMinutes(15));
-        sendverificationEmail(user);
-        return userRepository.save(user);
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
+            throw new RuntimeException("Email already in use");
+        }
+        try {
+            User user = new User(
+                    registerRequest.getUsername(),
+                    registerRequest.getEmail(),
+                    bCryptPasswordEncoder.encode(registerRequest.getPassword()),
+                    registerRequest.getAddress(),
+                    registerRequest.getPhone(),
+                    "CUSTOMER",
+                    false
+            );
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationExpiry(LocalDateTime.now().plusMinutes(15));
+            sendverificationEmail(user);
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new RuntimeException("Email already exists!", ex);
+        }
     }
 
     public User authenticate(LoginUserDto loginUserDto) {
