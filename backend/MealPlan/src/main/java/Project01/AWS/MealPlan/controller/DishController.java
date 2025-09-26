@@ -99,4 +99,34 @@ public class DishController {
                         .build()
         );
     }
+
+    @Operation(summary = "Lấy dish theo countryId", description = "Trả về danh sách dish thuộc 1 country cụ thể.")
+    @GetMapping("/getByCountry/{countryId}")
+    public ResponseEntity<ResponseObject> getDishByCountryId(@PathVariable Long countryId) {
+        List<DishResponse> responses = dishService.getDishByCountryId(countryId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_LIST_SUCCESS")
+                        .message("Get dishes by country successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(responses)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Lấy dish theo typeId", description = "Trả về danh sách dish thuộc 1 type cụ thể.")
+    @GetMapping("/getByType/{typeId}")
+    public ResponseEntity<ResponseObject> getDishByTypeId(@PathVariable Long typeId) {
+        List<DishResponse> responses = dishService.getDishByTypeId(typeId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_LIST_SUCCESS")
+                        .message("Get dishes by type successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(responses)
+                        .build()
+        );
+    }
 }
