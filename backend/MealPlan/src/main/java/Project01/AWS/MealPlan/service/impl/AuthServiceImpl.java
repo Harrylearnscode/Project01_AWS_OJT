@@ -135,6 +135,11 @@ public class AuthServiceImpl implements AuthService {
         int code = (int)(Math.random() * 900000) + 100000; // tạo mã 6 chữ số
         return String.valueOf(code);
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 //    @Override
 //    public RegisterResponse register(RegisterUserDto registerRequest) {
 //        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
