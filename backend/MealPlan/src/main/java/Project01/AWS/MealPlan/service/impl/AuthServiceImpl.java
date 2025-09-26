@@ -1,9 +1,6 @@
 package Project01.AWS.MealPlan.service.impl;
 
-import Project01.AWS.MealPlan.model.dtos.user.LoginUserDto;
-import Project01.AWS.MealPlan.model.dtos.user.RegisterUserDto;
-import Project01.AWS.MealPlan.model.dtos.user.RegisterResponse;
-import Project01.AWS.MealPlan.model.dtos.user.VerifyUserDto;
+import Project01.AWS.MealPlan.model.dtos.user.*;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.AuthService;
@@ -140,28 +137,77 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
-//    @Override
-//    public RegisterResponse register(RegisterUserDto registerRequest) {
-//        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
-//            throw new RuntimeException("Email already in use");
-//        }
-//        User user = new User();
-//        user.setName(registerRequest.getUsername());
-//        user.setEmail(registerRequest.getEmail());
-//        user.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
-//        user.setAddress(registerRequest.getAddress());
-//        user.setPhone(registerRequest.getPhone());
-//        user.setRole("CUSTOMER");
-//        user.setActive(true);
-//        userRepository.save(user);
-//        return RegisterResponse.builder()
-//                .id(user.getUserId())
-//                .username(user.getName())
-//                .email(user.getEmail())
-//                .address(user.getAddress())
-//                .phone(user.getPhone())
-//                .role(user.getRole())
-//                .active(user.isActive())
-//                .build();
-//    }
+
+    private void sendPasswordResetEmail(User user) {
+        String subject = "Password Reset Code";
+        String resetCode = user.getVerificationCode();
+        String userName = user.getUsername() != null ? user.getUsername() : "Friend";
+
+        String html = String.format("""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height:1.4; color:#333;">
+        <div style="max-width:600px; margin:0 auto; padding:20px; border:1px solid #eaeaea; border-radius:8px;">
+          <h2 style="margin-top:0;">Password Reset Request</h2>
+          <p>Hello %s,</p>
+          <p>Use the code below to reset your password. This code will expire in <strong>15 minutes</strong>.</p>
+          <p style="font-size:24px; letter-spacing:2px; text-align:center; margin:20px 0; padding:12px; background:#f7f7f7; border-radius:6px;">
+            <strong>%s</strong>
+          </p>
+          <p>If you didn't request this, you can safely ignore this email.</p>
+        </div>
+      </body>
+    </html>
+    """, userName, resetCode);
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, html);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void requestPasswordReset(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationExpiry(LocalDateTime.now().plusMinutes(15));
+            userRepository.save(user);
+
+            sendPasswordResetEmail(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    public void resetPassword(ResetPasswordUserDto resetPasswordDto) {
+        // Validate password confirmation
+        if (!resetPasswordDto.getNewPassword().equals(resetPasswordDto.getConfirmPassword())) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
+        Optional<User> optionalUser = userRepository.findByEmail(resetPasswordDto.getEmail());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Check if verification code matches
+            if (!resetPasswordDto.getVerificationCode().equals(user.getVerificationCode())) {
+                throw new RuntimeException("Invalid verification code");
+            }
+
+            // Check if code has expired
+            if (user.getVerificationExpiry().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Verification code expired");
+            }
+
+            // Update password and clear verification code
+            user.setPassword(bCryptPasswordEncoder.encode(resetPasswordDto.getNewPassword()));
+            user.setVerificationCode(null);
+            user.setVerificationExpiry(null);
+
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
 }

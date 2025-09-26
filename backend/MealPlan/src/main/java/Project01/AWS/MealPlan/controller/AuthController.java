@@ -64,6 +64,26 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordUserDto resetPasswordDto) {
+        try {
+            authService.resetPassword(resetPasswordDto);
+            return ResponseEntity.ok("Password reset successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/request-code-reset-password")
+    public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
+        try {
+            authService.requestPasswordReset(email);
+            return ResponseEntity.ok("Password reset code sent successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 
 
