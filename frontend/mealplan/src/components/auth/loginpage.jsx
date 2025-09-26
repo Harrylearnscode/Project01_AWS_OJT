@@ -1,43 +1,26 @@
 import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
-
-const mockUsers = [
-  { username: "seller", password: "123456", role: "SELLER" },
-  { username: "customer", password: "123456", role: "CUSTOMER" },
-];
+import { useNavigate } from "react-router-dom";
+import AuthService from "../../api/service/Auth.service"; // nhớ import đúng path
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [redirectPath, setRedirectPath] = useState(null);
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const user = mockUsers.find(
-      (u) => u.username === username && u.password === password
-    );
+    try {
+      const response = await AuthService.login({ email, password });
+      console.log("Login success:", response);
 
-    if (user) {
-      // Lưu user vào localStorage
-      localStorage.setItem("currentUser", JSON.stringify(user));
-
-      // Điều hướng theo role
-      if (user.role === "SELLER") {
-        setRedirectPath("/seller/dashboard"); // vào layout seller
-      } else {
-        setRedirectPath("/customer/homePage"); // vào trang HomePage cho customer
-      }
-    } else {
-      setError("Sai username hoặc password!");
+      navigate("/customer/homePage"); 
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Sai email hoặc password!");
     }
   };
-
-  // Nếu đã có redirectPath thì Navigate
-  if (redirectPath) {
-    return <Navigate to={redirectPath} replace />;
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -50,13 +33,13 @@ export default function Login() {
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         <div className="mb-4">
-          <label className="block text-gray-600 text-sm mb-2">Username</label>
+          <label className="block text-gray-600 text-sm mb-2">Email</label>
           <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400"
-            placeholder="Nhập username"
+            placeholder="Nhập email"
           />
         </div>
 

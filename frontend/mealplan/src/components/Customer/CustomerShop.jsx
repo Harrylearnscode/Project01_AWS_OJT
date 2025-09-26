@@ -27,18 +27,18 @@ const ShopPage = () => {
         console.log("==> API data", response.data)
 
         const transformedDishes = response.data.map((dish) => ({
-          id: dish.dishId,
+          id: dish.id,
           name: dish.name,
           description: dish.description,
           price: dish.price,
           originalPrice: dish.price * 1.2,
           image: dish.imgUrl,
-          category: dish.countryName,
-          type: dish.typeNames[0] || "Main Course",
+          category: dish.country,
+          type: dish.types[0] || "Main Course",
           prepareTime: dish.prepareTime,
           cookingTime: dish.cookingTime,
           totalTime: dish.totalTime,
-          countryName: dish.countryName,
+          countryName: dish.country,
           typeNames: dish.typeNames,
         }))
 
