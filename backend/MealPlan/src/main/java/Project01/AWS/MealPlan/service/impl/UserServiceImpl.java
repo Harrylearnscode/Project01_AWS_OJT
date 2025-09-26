@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
                     .role(request.getRole())
                     .password(request.getPassword())
                     .active(true)
+                    .email(request.getEmail())
                     .build();
             User saved = userRepository.save(entity);
             return UserMapper.toResponse(saved);
@@ -52,6 +53,7 @@ public class UserServiceImpl implements UserService {
         existing.setAddress(request.getAddress());
         existing.setRole(request.getRole());
         existing.setPassword(request.getPassword());
+        existing.setEmail(request.getEmail());
         try {
             User updated = userRepository.save(existing);
             return UserMapper.toResponse(updated);

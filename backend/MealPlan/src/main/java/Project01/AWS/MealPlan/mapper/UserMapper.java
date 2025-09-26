@@ -15,7 +15,7 @@ public class UserMapper {
                 .address(entity.getAddress())
                 .role(entity.getRole())
                 .active(entity.isActive())
-
+                .email(entity.getEmail())
                 .build();
     }
       public RegisterResponse userToRegisterResponse(User user) {

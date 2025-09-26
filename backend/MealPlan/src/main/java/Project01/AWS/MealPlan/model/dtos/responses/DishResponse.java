@@ -3,6 +3,8 @@ package Project01.AWS.MealPlan.model.dtos.responses;
 import lombok.*;
 import Project01.AWS.MealPlan.model.enums.DishStatus;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -10,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class DishResponse {
-    private Long dishId;
+    private Long id;
     private String name;
     private String description;
     private Integer prepareTime;
@@ -18,8 +20,8 @@ public class DishResponse {
     private Integer totalTime;
     private String imgUrl;
     private Double price;
-    private DishStatus status;
-    private Long countryId;
-    private String countryName;
-    private Set<String> typeNames; // danh sách tên type
+    private String country;
+    private List<String> types;
+    private List<DishIngredientSimpleResponse> dishIngredients;
+    private Map<String, List<String>> recipes; // danh sách tên type
 }

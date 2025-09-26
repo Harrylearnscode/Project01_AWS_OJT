@@ -59,14 +59,16 @@ public class CartServiceImpl implements CartService {
     @Override
     public void deleteCart(Long id) {
         Cart cart = cartRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Cannot find cart with ID: %s", id)
-                ));
-        try {
-            cartRepository.delete(cart);
-        } catch (Exception e) {
-            throw new ActionFailedException(String.format("Failed to delete cart with ID: %s", id));
+                .orElseThrow(() -> new NotFoundException("Cannot find cart with ID: " + id));
+
+        User user = cart.getUser();
+        if (user != null) {
+            user.setCarts(null);
+            cart.setUser(null);
         }
+
+        cartRepository.delete(cart);
+        cartRepository.flush();
     }
 
     @Override
