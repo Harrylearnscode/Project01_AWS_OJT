@@ -11,14 +11,9 @@ import Orders from "./components/Seller/Order.jsx";
 import Products from "./components/Seller/Product.jsx";
 import CustomerMealDetail from "./components/Customer/mealdetail.jsx";
 import Checkout from "./components/Customer/Checkout.jsx"; 
+import Register from "./components/auth/registerpage.jsx";
+import Verify from "./components/auth/verify.jsx";
 
-
-
-// import Dashboard from "./pages/seller/Dashboard";
-// import Orders from "./pages/seller/Orders";
-// import Products from "./pages/seller/Products";
-
-// import Login from "./pages/auth/Login";
 
 export function PrivateRoute({ children }) {
   // const token = localStorage.getItem("token"); // token sau khi login
@@ -37,6 +32,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify" element={<Verify />} />
         
         {/* Customer Routes */}
         <Route path="/customer" element={<CustomerLayout />}>

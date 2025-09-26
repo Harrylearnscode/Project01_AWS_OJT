@@ -11,17 +11,19 @@ const axiosInstance = axios.create({
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;  
-    },
-    (error) => {
-        return Promise.reject(error);
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token && token !== "undefined" && token !== "null") {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Xoá header Authorization nếu chưa có token
+      delete config.headers.Authorization;
     }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
+
 
 axiosInstance.interceptors.response.use(
     (response) => response,

@@ -1,5 +1,9 @@
 const APIENDPOINTS = {
-    AUTH: {},
+    AUTH: {
+        LOGIN: '/auth/login',
+        REGISTER: '/auth/register',
+        VERIFY: '/auth/verify',
+    },
     CUSTOMER: {},
     SELLER: {},
     DISH: {
