@@ -2,11 +2,17 @@ package Project01.AWS.MealPlan.controller;
 
 
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
+import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.service.UserService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,17 +70,24 @@ public class UserController {
         );
     }
 
-    @Operation(summary = "Lấy tất cả user", description = "Trả về danh sách user")
+    @Operation(summary = "Lấy tất cả user", description = "Trả về danh sách user search là email. Sort mặc định là userId." +
+            " Sort(cần nhập đúng) bao gồm userId, name, phone, address, email, role, active.")
     @GetMapping("/getAll")
-    public ResponseEntity<ResponseObject> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ResponseEntity<ResponseObject> getAllUsers(
+            @RequestParam(value = "search", required = false) String search,
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "userId", direction = Sort.Direction.ASC)
+            }) Pageable pageable) {
+        PaginatedUserResponse userResponse = userService.getAllUsers(search, pageable);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("GET_LIST_SUCCESS")
                         .message("Get all users successfully")
                         .status(HttpStatus.OK)
                         .isSuccess(true)
-                        .data(users)
+                        .data(userResponse)
                         .build()
         );
     }

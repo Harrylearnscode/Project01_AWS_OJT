@@ -1,8 +1,13 @@
 package Project01.AWS.MealPlan.service.impl;
 
 
+import Project01.AWS.MealPlan.mapper.UserMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
+import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
+import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.enums.UserStatus;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
@@ -11,6 +16,10 @@ import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.UserService;
 import Project01.AWS.MealPlan.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,14 +89,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        try {
-            return userRepository.findAllByActive(true).stream()
-                    .map(UserMapper::toResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ActionFailedException("Failed to get users");
-        }
+    public PaginatedUserResponse getAllUsers(String search, Pageable pageable) {
+        Sort validatedSort = pageable.getSort().stream()
+                .filter(user -> {
+                    String p = user.getProperty();
+                    return p.equals("userId") || p.equals("name")
+                            || "phone".equals(p)
+                            || "address".equals(p)
+                            || "email".equals(p)
+                            || "role".equals(p)
+                            || "active".equals(p);
+                })
+                .collect(Collectors.collectingAndThen(Collectors.toList(), Sort::by));
+
+        Pageable validatedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                validatedSort
+        );
+
+        Page<User> userPage = (search != null && !search.isBlank())
+                ? userRepository.searchUsers(search, validatedPageable)
+                : userRepository.findAll(validatedPageable);
+
+        List<UserResponse> userDTOs = userPage.stream()
+                .map(UserMapper::toResponse)
+                .toList();
+
+        return PaginatedUserResponse.builder()
+                .users(userDTOs)
+                .totalElements(userPage.getTotalElements())
+                .totalPages(userPage.getTotalPages())
+                .currentPage(userPage.getNumber())
+                .build();
+    
     }
 
     @Override

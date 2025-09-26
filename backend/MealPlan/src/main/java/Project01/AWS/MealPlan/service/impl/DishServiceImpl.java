@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.service.impl;
 import Project01.AWS.MealPlan.mapper.DishMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.DishRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
 import Project01.AWS.MealPlan.model.entities.Country;
 import Project01.AWS.MealPlan.model.entities.Dish;
 import Project01.AWS.MealPlan.model.entities.Type;
@@ -102,12 +103,12 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public List<DishResponse> getAllDishes() {
+    public List<DishSummaryResponse> getAllDishes() {
         try {
             return dishRepository.findAll()
                     .stream()
                     .filter(d -> d.getStatus() == DishStatus.ACTIVE) // chỉ lấy active
-                    .map(DishMapper::toResponse)
+                    .map(DishMapper::toSummary)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new ActionFailedException("Failed to get dishes");
@@ -127,30 +128,30 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public List<DishResponse> getDishByCountryId(Long countryId) {
+    public List<DishSummaryResponse> getDishByCountryId(Long countryId) {
         return dishRepository.findByCountry_CountryIdAndStatus(countryId, DishStatus.ACTIVE)
                 .stream()
-                .map(DishMapper::toResponse)
+                .map(DishMapper::toSummary)
                 .toList();
     }
 
     @Override
-    public List<DishResponse> getDishByTypeId(Long typeId) {
+    public List<DishSummaryResponse> getDishByTypeId(Long typeId) {
         return dishRepository.findByTypeIdAndStatus(typeId, DishStatus.ACTIVE)
                 .stream()
-                .map(DishMapper::toResponse)
+                .map(DishMapper::toSummary)
                 .toList();
     }
 
     @Override
-    public List<DishResponse> getRelatedDishes(Long currentDishId, int limit) {
+    public List<DishSummaryResponse> getRelatedDishes(Long currentDishId, int limit) {
         List<Dish> availableMeals = dishRepository.findByStatusAndDishIdNot(DishStatus.ACTIVE, currentDishId);
 
         Collections.shuffle(availableMeals);
 
         return availableMeals.stream()
                 .limit(limit)
-                .map(DishMapper::toResponse)
+                .map(DishMapper::toSummary)
                 .toList();
     }
 }

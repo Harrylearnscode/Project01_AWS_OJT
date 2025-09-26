@@ -2,10 +2,16 @@ package Project01.AWS.MealPlan.controller;
 
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.service.OrderService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,16 +79,23 @@ public class OrderController {
                 .build());
     }
 
-    @Operation(summary = "Lấy tất cả đơn hàng")
+    @Operation(summary = "Lấy tất cả đơn hàng", description = "Trả về danh sách order search là address. Sort mặc định là orderId." +
+            " Sort(cần nhập đúng) bao gồm orderId, address, orderTime, endTime, status, deliveryPrice, ingredientsPrice, totalPrice, user.userId.")
     @GetMapping("/all")
-    public ResponseEntity<ResponseObject> getAllOrders() {
-        List<OrderResponse> responses = orderService.getAllOrders();
+    public ResponseEntity<ResponseObject> getAllOrders(
+        @RequestParam(value = "search", required = false) String search,
+        @ParameterObject
+        @PageableDefault(page = 0, size = 10)
+        @SortDefault.SortDefaults({
+                @SortDefault(sort = "orderId", direction = Sort.Direction.ASC)
+                }) Pageable pageable) {
+            PaginatedOrderResponse orderResponse = orderService.getAllOrders(search, pageable);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("GET_LIST_SUCCESS")
                 .message("Get all orders successfully")
                 .status(HttpStatus.OK)
                 .isSuccess(true)
-                .data(responses)
+                .data(orderResponse)
                 .build());
     }
 }

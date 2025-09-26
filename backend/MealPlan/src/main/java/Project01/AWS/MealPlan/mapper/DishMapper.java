@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.mapper;
 import java.util.LinkedHashMap;
 import Project01.AWS.MealPlan.model.dtos.responses.DishIngredientSimpleResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
 import Project01.AWS.MealPlan.model.entities.Dish;
 import Project01.AWS.MealPlan.model.entities.Recipe;
 import Project01.AWS.MealPlan.model.entities.Type;
@@ -52,6 +53,28 @@ public class DishMapper {
                 .types(types)
                 .dishIngredients(ingredients)
                 .recipes(recipes)
+                .build();
+    }
+
+    public static DishSummaryResponse toSummary(Dish dish) {
+        if (dish == null) return null;
+
+        // Types mapping
+        List<String> types = dish.getDishTypes().stream()
+                .map(Type::getName)
+                .toList();
+
+        return DishSummaryResponse.builder()
+                .id(dish.getDishId())
+                .name(dish.getName())
+                .description(dish.getDescription())
+                .prepareTime(dish.getPrepareTime())
+                .cookingTime(dish.getCookingTime())
+                .totalTime(dish.getTotalTime())
+                .imgUrl(dish.getImgUrl())
+                .price(dish.getPrice())
+                .country(dish.getCountry() != null ? dish.getCountry().getName() : null)
+                .types(types)
                 .build();
     }
 }
