@@ -124,4 +124,20 @@ public class DishServiceImpl implements DishService {
             throw new ActionFailedException("Failed to get dish");
         }
     }
+
+    @Override
+    public List<DishResponse> getDishByCountryId(Long countryId) {
+        return dishRepository.findByCountry_CountryIdAndStatus(countryId, DishStatus.ACTIVE)
+                .stream()
+                .map(DishMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<DishResponse> getDishByTypeId(Long typeId) {
+        return dishRepository.findByTypeIdAndStatus(typeId, DishStatus.ACTIVE)
+                .stream()
+                .map(DishMapper::toResponse)
+                .toList();
+    }
 }
