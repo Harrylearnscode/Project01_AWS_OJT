@@ -1,6 +1,7 @@
 package Project01.AWS.MealPlan.mapper;
 
 
+import Project01.AWS.MealPlan.model.dtos.user.UserDto;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.model.dtos.user.RegisterResponse;
@@ -41,4 +42,16 @@ public class UserMapper {
 //                .address(dto.getAddress())
 //                .active(dto.isActive());
 //      }
+    public static UserDto toUserDto(User user) {
+        if (user == null) return null;
+
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getUserId());
+        userDto.setName(user.getName());
+        userDto.setEmail(user.getEmail());
+        userDto.setPhone(user.getPhone());
+        userDto.setAddress(user.getAddress());
+        userDto.setRole(user.getRole());
+        return userDto;
+    }
 }

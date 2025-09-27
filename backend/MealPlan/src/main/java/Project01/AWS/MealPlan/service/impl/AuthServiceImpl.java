@@ -210,4 +210,32 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("User not found");
         }
     }
+
+//    public User findOrCreateOAuth2User(String email, String name) {
+//        Optional<User> existingUser = userRepository.findByEmail(email);
+//
+//        if (existingUser.isPresent()) {
+//            User user = existingUser.get();
+//            // Activate the user if they login via OAuth2
+//            if (!user.isActive()) {
+//                user.setActive(true);
+//                user.setVerificationCode(null);
+//                user.setVerificationExpiry(null);
+//                return userRepository.save(user);
+//            }
+//            return user;
+//        } else {
+//            // Create new user for OAuth2 login
+//            User newUser = User.builder()
+//                    .name(name)
+//                    .email(email)
+//                    .password(bCryptPasswordEncoder.encode("OAUTH2_USER")) // Placeholder password
+//                    .role("CUSTOMER")
+//                    .active(true) // OAuth2 users are automatically activated
+//                    .build();
+//
+//            return userRepository.save(newUser);
+//        }
+//    }
+
 }

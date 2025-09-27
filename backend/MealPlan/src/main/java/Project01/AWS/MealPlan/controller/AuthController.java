@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.controller;
 
+import Project01.AWS.MealPlan.mapper.UserMapper;
 import Project01.AWS.MealPlan.model.dtos.user.*;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.service.AuthService;
@@ -8,6 +9,8 @@ import Project01.AWS.MealPlan.service.impl.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -40,7 +43,8 @@ public class AuthController {
         User authenticatedUser = authService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         User userInfo = authService.getUserByEmail(loginUserDto.getEmail());
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), userInfo);
+        UserDto userDto = UserMapper.toUserDto(userInfo);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), userDto);
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -84,24 +88,39 @@ public class AuthController {
         }
     }
 
-
-
-
-
-
-
-//    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterUserDto registerRequest){
-//        RegisterResponse registerResponse = authService.register(registerRequest);
-//        return ResponseEntity.ok().body(
-//            RegisterResponse.builder()
-//                .id(registerResponse.getId())
-//                .username(registerResponse.getUsername())
-//                .email(registerResponse.getEmail())
-//                    .role(registerResponse.getRole())
-//                .phone(registerResponse.getPhone())
-//                .address(registerResponse.getAddress())
-//                .active(registerResponse.isActive())
-//                .build()
-//        );
+//    @GetMapping("/oauth2/success")
+//    public ResponseEntity<?> oauth2LoginSuccess(Authentication authentication) {
+//        try {
+//            OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) authentication;
+//            Map<String, Object> attributes = oauth2Token.getPrincipal().getAttributes();
+//
+//            String email = (String) attributes.get("email");
+//            String name = (String) attributes.get("name");
+//
+//            // Check if user exists, if not create new user
+//            User user = authService.findOrCreateOAuth2User(email, name);
+//
+//            // Generate JWT token
+//            String jwtToken = jwtService.generateToken(user);
+//
+//            LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), user);
+//            return ResponseEntity.ok(loginResponse);
+//
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed: " + e.getMessage()));
+//        }
 //    }
+//
+//    @GetMapping("/oauth2/failure")
+//    public ResponseEntity<?> oauth2LoginFailure() {
+//        return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed"));
+//    }
+
+
+
+
+
+
+
+
 }
