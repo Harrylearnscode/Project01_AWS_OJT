@@ -19,7 +19,7 @@ export function PrivateRoute({ children }) {
   // const token = localStorage.getItem("token"); // token sau khi login
   const {user} = useAuth();   // 'customer' hoặc 'seller'
 
-  if (user.role !== "seller") {
+  if (user.role !== "SELLER") {
     return <Navigate to="/login" replace />;
   }
 

@@ -10,14 +10,15 @@ export default function CustomerLayout() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const user = localStorage.getItem("currentUser")
+    const user = JSON.parse(localStorage.getItem("currentUser"));
     if (user) {
-      setCurrentUser(JSON.parse(user))
+      setCurrentUser(user)
     }
   }, [])
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser")
+    localStorage.removeItem("token")
     setCurrentUser(null)
     navigate("/customer/homePage")
   }
@@ -83,7 +84,7 @@ export default function CustomerLayout() {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center gap-2 text-foreground">
                     <User className="w-4 h-4" />
-                    <span className="font-medium">Xin chào, {currentUser.username}</span>
+                    <span className="font-medium">Xin chào, {currentUser.name}</span>
                   </div>
                   <button
                     onClick={handleLogout}
@@ -157,7 +158,7 @@ export default function CustomerLayout() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-foreground">
                       <User className="w-4 h-4" />
-                      <span className="font-medium">Xin chào, {currentUser.username}</span>
+                      <span className="font-medium">Xin chào, {currentUser.name}</span>
                     </div>
                     <button
                       onClick={() => {

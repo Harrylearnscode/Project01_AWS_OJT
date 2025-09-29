@@ -10,7 +10,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   const [justAdded, setJustAdded] = useState(false)
 
   const handleCardClick = () => {
-    navigate(`/customer/mealdetail/${product.dishId}`)
+    navigate(`/customer/mealdetail/${product.id}`)
   }
 
   const handleAddToCart = async (e) => {

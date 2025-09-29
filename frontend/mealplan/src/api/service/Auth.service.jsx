@@ -5,7 +5,7 @@ const AuthService = {
   login: async (data) => {
     const response = await axiosInstance.post(APIENDPOINTS.AUTH.LOGIN, data);
     console.log("Response from login:", response); // Debug log
-    localStorage.setItem("currentUser", response.data);
+    localStorage.setItem("currentUser", JSON.stringify(response.data.user));
     localStorage.setItem("token", response.data.token);
     return response.data;
   },
