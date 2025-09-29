@@ -5,17 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a4ab3a-a5bb-48ff-982b-bc2ef81bfa29" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/.gitattributes" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MealPlan/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/test/java/Project01/AWS/MealPlan/MealPlanApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/test/java/Project01/AWS/MealPlan/MealPlanApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/api/endpoint.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/api/endpoint.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/api/service/Auth.service.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/api/service/Auth.service.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/api/service/Dish.service.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/api/service/Dish.service.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/mealdetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/mealdetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/layouts/CustomerLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/layouts/CustomerLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/ui/ProductCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/context/AuthContext.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,18 +25,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Harrylearnscode"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Harrylearnscode&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Harrylearnscode/Project01_AWS_OJT.git",
-    "accountId": "0854f836-d4ee-4289-bc97-476af16b817c"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Harrylearnscode/Project01_AWS_OJT.git&quot;,
+    &quot;accountId&quot;: &quot;0854f836-d4ee-4289-bc97-476af16b817c&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -44,29 +44,29 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="33ESEbZttuD7e8d3NJv6fohWc36" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.MealPlanApplication.executor": "Run",
-    "Application.Unnamed.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.MealPlanApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Project01.AWS.MealPlan.MealPlanApplication" />
