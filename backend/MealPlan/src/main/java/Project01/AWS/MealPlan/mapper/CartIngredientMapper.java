@@ -8,7 +8,7 @@ public class CartIngredientMapper {
         if (entity == null) return null;
         return CartIngredientResponse.builder()
                 .id(entity.getId())
-                .cartId(entity.getCart().getCartId())
+                .cartDishId(entity.getCartDish().getId())
                 .ingredientId(entity.getIngredient().getIngredientId())
                 .ingredientName(entity.getIngredient().getName())
                 .quantity(entity.getQuantity())

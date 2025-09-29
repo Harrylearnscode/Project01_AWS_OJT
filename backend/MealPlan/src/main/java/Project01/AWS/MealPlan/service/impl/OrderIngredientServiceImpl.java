@@ -5,8 +5,10 @@ import Project01.AWS.MealPlan.model.dtos.requests.OrderIngredientRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderIngredientResponse;
 import Project01.AWS.MealPlan.model.entities.Ingredient;
 import Project01.AWS.MealPlan.model.entities.Order;
+import Project01.AWS.MealPlan.model.entities.OrderDish;
 import Project01.AWS.MealPlan.model.entities.OrderIngredient;
 import Project01.AWS.MealPlan.repository.IngredientRepository;
+import Project01.AWS.MealPlan.repository.OrderDishRepository;
 import Project01.AWS.MealPlan.repository.OrderIngredientRepository;
 import Project01.AWS.MealPlan.repository.OrderRepository;
 import Project01.AWS.MealPlan.service.OrderIngredientService;
@@ -21,21 +23,26 @@ import java.util.stream.Collectors;
 public class OrderIngredientServiceImpl implements OrderIngredientService {
 
     private final OrderIngredientRepository orderIngredientRepository;
-    private final OrderRepository orderRepository;
+    private final OrderDishRepository orderDishRepository;
     private final IngredientRepository ingredientRepository;
 
     @Override
     public OrderIngredientResponse addIngredientToOrder(OrderIngredientRequest request) {
-        Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+        OrderDish orderDish = orderDishRepository.findById(request.getOrderDishId())
+                .orElseThrow(() -> new RuntimeException("OrderDish not found"));
         Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
                 .orElseThrow(() -> new RuntimeException("Ingredient not found"));
 
-        OrderIngredient orderIngredient = OrderIngredient.builder()
-                .order(order)
-                .ingredient(ingredient)
-                .quantity(request.getQuantity())
-                .build();
+        OrderIngredient orderIngredient = orderIngredientRepository
+                .findByOrderDish_IdAndIngredient_IngredientId(
+                        orderDish.getId(), ingredient.getIngredientId())
+                .orElse(OrderIngredient.builder()
+                        .orderDish(orderDish)
+                        .ingredient(ingredient)
+                        .quantity(0)
+                        .build());
+
+        orderIngredient.setQuantity(orderIngredient.getQuantity() + request.getQuantity());
 
         return OrderIngredientMapper.toDTO(orderIngredientRepository.save(orderIngredient));
     }
@@ -54,8 +61,8 @@ public class OrderIngredientServiceImpl implements OrderIngredientService {
     }
 
     @Override
-    public List<OrderIngredientResponse> getIngredientsByOrder(Long orderId) {
-        return orderIngredientRepository.findByOrder_OrderId(orderId).stream()
+    public List<OrderIngredientResponse> getIngredientsByOrderDish(Long orderDishId) {
+        return orderIngredientRepository.findByOrderDish_Id(orderDishId).stream()
                 .map(OrderIngredientMapper::toDTO)
                 .collect(Collectors.toList());
     }

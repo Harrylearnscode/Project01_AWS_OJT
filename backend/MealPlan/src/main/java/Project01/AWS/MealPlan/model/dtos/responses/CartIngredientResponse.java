@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartIngredientResponse {
     private Long id;
-    private Long cartId;
+    private Long cartDishId;
     private Long ingredientId;
     private String ingredientName;
     private Integer quantity;

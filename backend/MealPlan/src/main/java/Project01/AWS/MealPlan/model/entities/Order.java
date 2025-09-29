@@ -48,10 +48,6 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<OrderIngredient> orderIngredients = new HashSet<>();
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private Set<OrderDish> orderDishes = new HashSet<>();
 }
 

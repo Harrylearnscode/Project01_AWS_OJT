@@ -1,7 +1,10 @@
 package Project01.AWS.MealPlan.controller;
 
+import Project01.AWS.MealPlan.model.dtos.requests.AddDishToCartRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.CartDishRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
+import Project01.AWS.MealPlan.service.CartDishService;
 import Project01.AWS.MealPlan.service.CartService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+    private final CartDishService cartDishService;
 
     @Operation(summary = "Tạo giỏ hàng", description = "Khởi tạo giỏ hàng cho user.")
     @PostMapping("/create")
@@ -107,4 +111,73 @@ public class CartController {
                         .build()
         );
     }
+
+    @Operation(summary = "Thêm món vào giỏ hàng", description = "Thêm một món ăn (dish) vào giỏ của user.")
+    @PostMapping("/{userId}/add")
+    public ResponseEntity<ResponseObject> addDishToCart(
+            @PathVariable Long userId,
+            @RequestBody AddDishToCartRequest request) {
+        cartService.addDishToCart(userId, request);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("ADD_SUCCESS")
+                        .message("Dish added to cart successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Xóa món khỏi giỏ hàng", description = "Xóa một món khỏi giỏ dựa trên dishId.")
+    @DeleteMapping("/{userId}/remove/{dishId}")
+    public ResponseEntity<ResponseObject> removeDishFromCart(
+            @PathVariable Long userId,
+            @PathVariable Long dishId) {
+        cartService.removeDishFromCart(userId, dishId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("REMOVE_SUCCESS")
+                        .message("Dish removed from cart successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Cập nhật số lượng món trong giỏ", description = "Thay đổi quantity của một dish trong giỏ.")
+    @PutMapping("/{userId}/update")
+    public ResponseEntity<ResponseObject> updateDishQuantity(
+            @PathVariable Long userId,
+            @RequestBody AddDishToCartRequest request) {
+        cartService.updateDishInCart(userId, request);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("UPDATE_SUCCESS")
+                        .message("Dish quantity updated successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Checkout giỏ hàng", description = "Tiến hành checkout giỏ hàng theo cartId và userId, tạo order và trừ kho.")
+    @PostMapping("/{userId}/checkout/{cartId}")
+    public ResponseEntity<ResponseObject> checkout(
+            @PathVariable Long userId,
+            @PathVariable Long cartId) {
+        cartService.checkout(cartId, userId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("CHECKOUT_SUCCESS")
+                        .message("Checkout successfully, order created")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
 }

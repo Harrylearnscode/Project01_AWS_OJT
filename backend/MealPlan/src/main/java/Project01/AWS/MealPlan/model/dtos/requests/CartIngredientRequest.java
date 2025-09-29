@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CartIngredientRequest {
-    private Long cartId;
     private Long ingredientId;
     private Integer quantity;
 }

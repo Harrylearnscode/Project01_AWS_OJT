@@ -3,6 +3,9 @@ package Project01.AWS.MealPlan.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(
         name = "cart_dish",
@@ -28,6 +31,10 @@ public class CartDish {
     @ManyToOne
     @JoinColumn(name = "dish_id", nullable = false)
     private Dish dish;
+
+    @OneToMany(mappedBy = "cartDish", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<CartIngredient> ingredients = new HashSet<>();
 
     private Integer quantity;
 }

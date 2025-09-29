@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderIngredientRequest {
-    private Long orderDishId;
-    private Long ingredientId;
+public class AddDishToCartRequest {
+    private Long dishId;
     private Integer quantity;
+    private List<CartIngredientRequest> ingredients;
 }

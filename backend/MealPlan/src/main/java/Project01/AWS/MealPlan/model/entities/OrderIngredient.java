@@ -20,7 +20,7 @@ public class OrderIngredient {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private OrderDish orderDish;
 
     @ManyToOne
     @JoinColumn(name = "ingredient_id", nullable = false)

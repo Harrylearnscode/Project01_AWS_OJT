@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.service;
 
+import Project01.AWS.MealPlan.model.dtos.requests.AddDishToCartRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
 
@@ -12,4 +13,8 @@ public interface CartService {
     List<CartResponse> getAllCarts();
     CartResponse getCartById(Long id);
     CartResponse getCartByUserId(Long userId);
+    void addDishToCart(Long userId, AddDishToCartRequest request);
+    void removeDishFromCart(Long userId, Long dishId);
+    void updateDishInCart(Long userId, AddDishToCartRequest request);
+    void checkout(Long cartId, Long userId);
 }
