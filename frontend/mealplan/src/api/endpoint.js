@@ -8,6 +8,8 @@ const APIENDPOINTS = {
     SELLER: {},
     DISH: {
         GET_ACTIVE_DISHES: '/dishes/getAll',
+        GET_DISH_DETAIL: (id)=> `/dishes/getById/${id}`,
+        GET_RELATED_DISHES: (id)=> `/dishes/${id}/related`,
     },
     ORDER: {},
     SHOPPINGCART: {},
