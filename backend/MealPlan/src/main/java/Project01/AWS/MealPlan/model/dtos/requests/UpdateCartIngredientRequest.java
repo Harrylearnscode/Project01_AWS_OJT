@@ -1,4 +1,4 @@
-package Project01.AWS.MealPlan.model.dtos.responses;
+package Project01.AWS.MealPlan.model.dtos.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderIngredientResponse {
-    private Long id;
-    private Long orderDishId;
+public class UpdateCartIngredientRequest {
+    private Long cartDishId;
     private Long ingredientId;
-    private String ingredientName;
     private Integer quantity;
 }

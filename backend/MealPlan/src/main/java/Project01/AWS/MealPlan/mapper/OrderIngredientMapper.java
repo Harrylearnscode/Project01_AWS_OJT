@@ -8,7 +8,7 @@ public class OrderIngredientMapper {
         if (entity == null) return null;
         return OrderIngredientResponse.builder()
                 .id(entity.getId())
-                .orderId(entity.getOrder().getOrderId())
+                .orderDishId(entity.getOrderDish().getId())
                 .ingredientId(entity.getIngredient().getIngredientId())
                 .ingredientName(entity.getIngredient().getName())
                 .quantity(entity.getQuantity())

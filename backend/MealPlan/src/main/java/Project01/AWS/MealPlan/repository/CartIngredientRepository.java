@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartIngredientRepository extends JpaRepository<CartIngredient, Long> {
-    List<CartIngredient> findByCart_CartId(Long cartId);
-    Optional<CartIngredient> findByCart_CartIdAndIngredient_IngredientId(Long cartId, Long ingredientId);
+    List<CartIngredient> findByCartDish_Id(Long cartDishId);
+
+    Optional<CartIngredient> findByCartDish_IdAndIngredient_IngredientId(Long cartDishId, Long ingredientId);
 }

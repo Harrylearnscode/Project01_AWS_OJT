@@ -9,5 +9,5 @@ public interface OrderIngredientService {
     OrderIngredientResponse addIngredientToOrder(OrderIngredientRequest request);
     OrderIngredientResponse updateQuantity(Long id, Integer quantity);
     void removeIngredientFromOrder(Long id);
-    List<OrderIngredientResponse> getIngredientsByOrder(Long orderId);
+    List<OrderIngredientResponse> getIngredientsByOrderDish(Long orderDishId);
 }

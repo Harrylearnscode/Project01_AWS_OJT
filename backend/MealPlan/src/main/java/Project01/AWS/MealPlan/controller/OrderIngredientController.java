@@ -59,9 +59,9 @@ public class OrderIngredientController {
     }
 
     @Operation(summary = "Lấy danh sách nguyên liệu theo order")
-    @GetMapping("/by-order/{orderId}")
-    public ResponseEntity<ResponseObject> getIngredientsByOrder(@PathVariable Long orderId) {
-        List<OrderIngredientResponse> responses = orderIngredientService.getIngredientsByOrder(orderId);
+    @GetMapping("/by-order/{orderDishId}")
+    public ResponseEntity<ResponseObject> getIngredientsByOrder(@PathVariable Long orderDishId) {
+        List<OrderIngredientResponse> responses = orderIngredientService.getIngredientsByOrderDish(orderDishId);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("GET_LIST_SUCCESS")
                 .message("Get ingredients by order successfully")

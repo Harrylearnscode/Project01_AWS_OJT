@@ -1,6 +1,6 @@
 package Project01.AWS.MealPlan.controller;
 
-import Project01.AWS.MealPlan.model.dtos.requests.CartIngredientRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.UpdateCartIngredientRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CartIngredientResponse;
 import Project01.AWS.MealPlan.service.CartIngredientService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
@@ -21,7 +21,7 @@ public class CartIngredientController {
 
     @Operation(summary = "Thêm nguyên liệu vào giỏ")
     @PostMapping("/add")
-    public ResponseEntity<ResponseObject> addIngredientToCart(@RequestBody CartIngredientRequest request) {
+    public ResponseEntity<ResponseObject> addIngredientToCart(@RequestBody UpdateCartIngredientRequest request) {
         CartIngredientResponse response = cartIngredientService.addIngredientToCart(request);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("ADD_SUCCESS")
@@ -61,15 +61,16 @@ public class CartIngredientController {
     }
 
     @Operation(summary = "Lấy danh sách nguyên liệu trong giỏ")
-    @GetMapping("/getByCart/{cartId}")
-    public ResponseEntity<ResponseObject> getIngredientsByCart(@PathVariable Long cartId) {
-        List<CartIngredientResponse> responses = cartIngredientService.getIngredientsByCart(cartId);
+    @GetMapping("/getByCartDish/{cartDishId}")
+    public ResponseEntity<ResponseObject> getIngredientsByCartDish(@PathVariable Long cartDishId) {
+        List<CartIngredientResponse> responses = cartIngredientService.getIngredientsByCartDish(cartDishId);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("GET_LIST_SUCCESS")
-                .message("Get ingredients in cart successfully")
+                .message("Get ingredients in cart dish successfully")
                 .status(HttpStatus.OK)
                 .isSuccess(true)
                 .data(responses)
                 .build());
     }
+
 }

@@ -10,6 +10,5 @@ import java.util.Set;
 public class CartResponse {
     private Long cartId;
     private Long userId;
-    private Set<Long> dishIds;       // danh sách id món trong giỏ
-    private Set<Long> ingredientIds; // danh sách id nguyên liệu trong giỏ
+    private Set<CartDishResponse> dishes;
 }

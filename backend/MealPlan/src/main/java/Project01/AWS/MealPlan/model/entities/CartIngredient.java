@@ -22,8 +22,8 @@ public class CartIngredient {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
+    @JoinColumn(name = "cart_dish_id", nullable = false)
+    private CartDish cartDish;
 
     @ManyToOne
     @JoinColumn(name = "ingredient_id", nullable = false)
