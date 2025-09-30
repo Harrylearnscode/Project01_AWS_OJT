@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartIngredientRequest {
     private Long ingredientId;
-    private Integer quantity;
+    private Integer quantity; //Bình thường sẽ là delta, nhưng lúc add to cart thì sẽ là số lượng cụ thể
 }
