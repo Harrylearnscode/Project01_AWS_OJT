@@ -1,7 +1,10 @@
 package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.model.dtos.user.*;
+import Project01.AWS.MealPlan.model.entities.Cart;
 import Project01.AWS.MealPlan.model.entities.User;
+import Project01.AWS.MealPlan.model.exception.NotFoundException;
+import Project01.AWS.MealPlan.repository.CartRepository;
 import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.AuthService;
 import jakarta.mail.MessagingException;
@@ -23,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final CartRepository cartRepository;
 
     @Override
     public User register(RegisterUserDto registerRequest) {
@@ -54,6 +58,13 @@ public class AuthServiceImpl implements AuthService {
         if(!user.isActive()){
             throw new RuntimeException("Account not activated");
         }
+        Cart cart = cartRepository.findByUser_Email(loginUserDto.getEmail())
+                .orElseGet(() -> cartRepository.save(
+                        Cart.builder()
+                                .user(userRepository.findByEmail(loginUserDto.getEmail())
+                                        .orElseThrow(() -> new NotFoundException("User not found")))
+                                .build()
+                ));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginUserDto.getEmail(),
