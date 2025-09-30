@@ -5,35 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a4ab3a-a5bb-48ff-982b-bc2ef81bfa29" name="Changes" comment="Sort, Paging, Search: User, Order(haven't test). Fix to summary response of getAllDish, getDishByTypeId, getDishByCountryId, getRelatedDish">
-      <change afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/requests/UpdateCartIngredientRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MealPlan/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/CartController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/CartIngredientController.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/CartIngredientController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/DishIngredientController.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/DishIngredientController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/OrderIngredientController.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/controller/OrderIngredientController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/CartIngredientMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/CartIngredientMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/CartMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/CartMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/OrderIngredientMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/OrderIngredientMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/requests/CartIngredientRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/requests/CartIngredientRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/requests/OrderIngredientRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/requests/OrderIngredientRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/CartIngredientResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/CartIngredientResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/CartResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/CartResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/OrderIngredientResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/OrderIngredientResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Cart.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Cart.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/CartDish.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/CartDish.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/CartIngredient.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/CartIngredient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Order.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/OrderIngredient.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/OrderIngredient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/repository/CartIngredientRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/repository/CartIngredientRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/repository/OrderIngredientRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/repository/OrderIngredientRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/CartIngredientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/CartIngredientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/OrderIngredientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/OrderIngredientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/CartIngredientServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/CartIngredientServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/CartServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/CartServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/OrderIngredientServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/OrderIngredientServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MealPlan/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -61,7 +36,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Harrylearnscode/Project01_AWS_OJT.git&quot;,
-    &quot;accountId&quot;: &quot;4e45a70b-05e7-4957-b1d3-ffb17561001d&quot;
+    &quot;accountId&quot;: &quot;0854f836-d4ee-4289-bc97-476af16b817c&quot;
   }
 }</component>
   <component name="MavenImportPreferences">
@@ -83,42 +58,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.MealPlanApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/mealplan-module-2025-09-25&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.MealPlanApplication.executor": "Run",
+    "Application.Unnamed.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.MealPlanApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
-    <configuration name="MealPlanApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Project01.AWS.MealPlan.MealPlanApplication" />
       <module name="MealPlan" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="Project01.AWS.MealPlan.MealPlanApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
-        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

@@ -21,50 +21,49 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // tắt CSRF
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // tất cả request đều cho phép
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider);
+//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http
 //                .csrf(csrf -> csrf.disable())
 //                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/auth/**").permitAll()
+//                        .requestMatchers(
+////                                "/**",
+//                                "/api/dishes/**",
+//                                "/api/auth/**",
+//                                "/swagger-ui/**",
+//                                "/v3/api-docs/**",
+//                                "/swagger-resources/**",
+//                                "/webjars/**"
+//                        ).permitAll()
 //                        .anyRequest().authenticated()
 //                )
 //                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+////                .oauth2Login(oauth2 -> oauth2
+////                       .loginPage("/oauth2/authorization/google")
+////                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
+////                        .failureUrl("/api/auth/oauth2/failure")
+////                )
+////                .oauth2Login(Customizer.withDefaults())
+////                .formLogin(Customizer.withDefaults())
 //                .authenticationProvider(authenticationProvider)
 //                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 //
 //        return http.build();
 //    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-//                                "/**",
-                                "/api/dishes/**",
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .oauth2Login(oauth2 -> oauth2
-//                       .loginPage("/oauth2/authorization/google")
-//                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
-//                        .failureUrl("/api/auth/oauth2/failure")
-//                )
-//                .oauth2Login(Customizer.withDefaults())
-//                .formLogin(Customizer.withDefaults())
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
 
 //    @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {
