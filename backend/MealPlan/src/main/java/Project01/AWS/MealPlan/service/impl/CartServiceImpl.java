@@ -129,24 +129,47 @@ public class CartServiceImpl implements CartService {
                 ));
 
         // 2. Tạo CartDish mới
-        CartDish cartDish = CartDish.builder()
-                .cart(cart)
-                .dish(dishRepository.findById(request.getDishId())
-                        .orElseThrow(() -> new NotFoundException("Dish not found")))
-                .quantity(request.getQuantity())
-                .build();
+        Dish dish = dishRepository.findById(request.getDishId())
+                .orElseThrow(() -> new NotFoundException("Dish not found"));
+
+        CartDish cartDish = cartDishRepository.findByCart_CartIdAndDish_DishId(
+                cart.getCartId(),
+                request.getDishId()
+        ).orElse(null);
+
+        if (cartDish != null) {
+            cartDish.setQuantity(cartDish.getQuantity() + request.getQuantity());
+        } else {
+            cartDish = CartDish.builder()
+                    .cart(cart)
+                    .dish(dish)
+                    .quantity(request.getQuantity())
+                    .build();
+        }
+
         cartDish = cartDishRepository.save(cartDish);
 
-        // 3. Nếu có ingredients thì thêm vào luôn
+        // 3. Nếu có ingredients thì xử lý
         if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
             for (CartIngredientRequest ingReq : request.getIngredients()) {
                 Ingredient ingredient = ingredientRepository.findById(ingReq.getIngredientId())
                         .orElseThrow(() -> new NotFoundException("Ingredient not found"));
 
+                // Lấy số mặc định từ DishIngredient
+                DishIngredient dishIngredient = dish.getDishIngredients().stream()
+                        .filter(di -> di.getIngredient().getIngredientId().equals(ingReq.getIngredientId()))
+                        .findFirst()
+                        .orElseThrow(() -> new NotFoundException("DishIngredient not found for this dish"));
+
+                int defaultQty = dishIngredient.getQuantity();
+                int newQty = ingReq.getQuantity();
+                int delta = newQty - defaultQty;  // tính delta
+
+
                 CartIngredient cartIngredient = CartIngredient.builder()
                         .cartDish(cartDish)
                         .ingredient(ingredient)
-                        .quantity(ingReq.getQuantity())
+                        .quantity(delta)
                         .build();
 
                 cartIngredientRepository.save(cartIngredient);
