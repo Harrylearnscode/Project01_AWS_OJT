@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
     public void sendverificationEmail(User user) {
         String subject = "Your Verification Code";
         String verificationCode = user.getVerificationCode();
-        String userName = user.getUsername() != null ? user.getUsername() : "Friend";
+        String userName = user.getName() != null ? user.getName() : "Friend";
 
         // HTML email (Java text block)
         String html = String.format("""
@@ -149,10 +149,15 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public User getUserByName(String name) {
+        return userRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     private void sendPasswordResetEmail(User user) {
         String subject = "Password Reset Code";
         String resetCode = user.getVerificationCode();
-        String userName = user.getUsername() != null ? user.getUsername() : "Friend";
+        String userName = user.getName() != null ? user.getName() : "Friend";
 
         String html = String.format("""
     <html>
@@ -221,6 +226,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("User not found");
         }
     }
+
 
 //    public User findOrCreateOAuth2User(String email, String name) {
 //        Optional<User> existingUser = userRepository.findByEmail(email);

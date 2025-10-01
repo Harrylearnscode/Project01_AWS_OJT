@@ -80,8 +80,8 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return name;
-    }
+        return email;
+    } //tra ve email de dang nhap
 
     @Override
     public boolean isAccountNonExpired() {

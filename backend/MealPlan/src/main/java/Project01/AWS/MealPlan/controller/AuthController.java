@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,6 +89,21 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        try {
+            if (authentication != null && authentication.isAuthenticated()) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                User user = authService.getUserByEmail(userDetails.getUsername());
+                UserDto userDto = UserMapper.toUserDto(user);
+                return ResponseEntity.ok(userDto);
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+    }
+    
 //    @GetMapping("/oauth2/success")
 //    public ResponseEntity<?> oauth2LoginSuccess(Authentication authentication) {
 //        try {
