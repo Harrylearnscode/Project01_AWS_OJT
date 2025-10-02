@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.controller;
 import Project01.AWS.MealPlan.model.dtos.requests.AddDishToCartRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartDishRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.UpdateDishInCartRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
 import Project01.AWS.MealPlan.service.CartDishService;
 import Project01.AWS.MealPlan.service.CartService;
@@ -130,11 +131,10 @@ public class CartController {
     }
 
     @Operation(summary = "Xóa món khỏi giỏ hàng", description = "Xóa một món khỏi giỏ dựa trên dishId.")
-    @DeleteMapping("/{userId}/remove/{dishId}")
+    @DeleteMapping("/{cartDishId}/remove/")
     public ResponseEntity<ResponseObject> removeDishFromCart(
-            @PathVariable Long userId,
-            @PathVariable Long dishId) {
-        cartService.removeDishFromCart(userId, dishId);
+            @PathVariable Long cartDishId) {
+        cartService.removeDishFromCart(cartDishId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("REMOVE_SUCCESS")
@@ -149,9 +149,8 @@ public class CartController {
     @Operation(summary = "Cập nhật số lượng món trong giỏ", description = "Thay đổi quantity của một dish trong giỏ.")
     @PutMapping("/{userId}/update")
     public ResponseEntity<ResponseObject> updateDishQuantity(
-            @PathVariable Long userId,
-            @RequestBody AddDishToCartRequest request) {
-        cartService.updateDishInCart(userId, request);
+            @RequestBody UpdateDishInCartRequest request) {
+        cartService.updateDishInCart(request);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("UPDATE_SUCCESS")

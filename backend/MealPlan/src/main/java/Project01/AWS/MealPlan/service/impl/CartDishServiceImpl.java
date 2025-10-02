@@ -24,7 +24,7 @@ public class CartDishServiceImpl implements CartDishService {
     private final CartRepository cartRepository;
     private final DishRepository dishRepository;
 
-    @Override
+    /*@Override
     public CartDishResponse addDishToCart(CartDishRequest request) {
         Cart cart = cartRepository.findById(request.getCartId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
@@ -42,7 +42,7 @@ public class CartDishServiceImpl implements CartDishService {
         entity.setQuantity(entity.getQuantity() + request.getQuantity());
 
         return CartDishMapper.toDTO(cartDishRepository.save(entity));
-    }
+    }*/
 
     @Override
     public CartDishResponse updateQuantity(Long id, Integer quantity) {

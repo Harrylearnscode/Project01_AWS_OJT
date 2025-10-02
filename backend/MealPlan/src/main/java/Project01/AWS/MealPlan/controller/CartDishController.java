@@ -19,7 +19,7 @@ public class CartDishController {
 
     private final CartDishService cartDishService;
 
-    @Operation(summary = "Thêm món vào giỏ")
+    /*@Operation(summary = "Thêm món vào giỏ")
     @PostMapping("/add")
     public ResponseEntity<ResponseObject> addDishToCart(@RequestBody CartDishRequest request) {
         CartDishResponse response = cartDishService.addDishToCart(request);
@@ -30,7 +30,7 @@ public class CartDishController {
                 .isSuccess(true)
                 .data(response)
                 .build());
-    }
+    }*/
 
     @Operation(summary = "Cập nhật số lượng món")
     @PutMapping("/update/{id}")
