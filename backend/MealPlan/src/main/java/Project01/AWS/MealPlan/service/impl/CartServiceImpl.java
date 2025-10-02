@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.service.impl;
 import Project01.AWS.MealPlan.model.dtos.requests.AddDishToCartRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartIngredientRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UpdateCartIngredientRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.UpdateDishInCartRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.CartRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
 import Project01.AWS.MealPlan.model.entities.*;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,7 +121,6 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    @Override
     public void addDishToCart(Long userId, AddDishToCartRequest request) {
         Cart cart = cartRepository.findByUser_UserId(userId)
                 .orElseGet(() -> cartRepository.save(
@@ -128,104 +130,159 @@ public class CartServiceImpl implements CartService {
                                 .build()
                 ));
 
-        // 2. Tạo CartDish mới
         Dish dish = dishRepository.findById(request.getDishId())
                 .orElseThrow(() -> new NotFoundException("Dish not found"));
 
-        CartDish cartDish = cartDishRepository.findByCart_CartIdAndDish_DishId(
+        List<CartDish> existingCartDishes = cartDishRepository.findByCart_CartIdAndDish_DishId(
                 cart.getCartId(),
                 request.getDishId()
-        ).orElse(null);
+        );
 
-        if (cartDish != null) {
-            cartDish.setQuantity(cartDish.getQuantity() + request.getQuantity());
+        // Chuẩn hoá ingredients từ request (nếu null thì coi như empty)
+        List<CartIngredientRequest> reqIngredients =
+                request.getIngredients() != null ? request.getIngredients() : List.of();
+
+        CartDish matchedCartDish = null;
+
+        // So sánh với từng cartDish hiện có
+        for (CartDish cd : existingCartDishes) {
+            Set<CartIngredient> cartIngs = cartIngredientRepository.findByCartDish(cd);
+
+            boolean same = compareIngredients(cartIngs, reqIngredients);
+            if (same) {
+                matchedCartDish = cd;
+                break;
+            }
+        }
+
+        if (matchedCartDish != null) {
+            // Nếu tìm thấy bản giống hệt → tăng số lượng cartDish
+            matchedCartDish.setQuantity(matchedCartDish.getQuantity() + request.getQuantity());
+            cartDishRepository.save(matchedCartDish);
         } else {
-            cartDish = CartDish.builder()
+            // Nếu không có bản nào giống → tạo mới cartDish
+            CartDish newCartDish = CartDish.builder()
                     .cart(cart)
                     .dish(dish)
                     .quantity(request.getQuantity())
                     .build();
-        }
+            newCartDish = cartDishRepository.save(newCartDish);
 
-        cartDish = cartDishRepository.save(cartDish);
-
-        // 3. Nếu có ingredients thì xử lý
-        if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
-            for (CartIngredientRequest ingReq : request.getIngredients()) {
+            // Insert CartIngredient cho cartDish mới
+            for (CartIngredientRequest ingReq : reqIngredients) {
                 Ingredient ingredient = ingredientRepository.findById(ingReq.getIngredientId())
                         .orElseThrow(() -> new NotFoundException("Ingredient not found"));
 
-                // Lấy số mặc định từ DishIngredient
-                DishIngredient dishIngredient = dish.getDishIngredients().stream()
+                dish.getDishIngredients().stream()
                         .filter(di -> di.getIngredient().getIngredientId().equals(ingReq.getIngredientId()))
                         .findFirst()
                         .orElseThrow(() -> new NotFoundException("DishIngredient not found for this dish"));
 
-                int defaultQty = dishIngredient.getQuantity();
-                int newQty = ingReq.getQuantity();
-                int delta = newQty - defaultQty;  // tính delta
-
-
                 CartIngredient cartIngredient = CartIngredient.builder()
+                        .cartDish(newCartDish)
+                        .ingredient(ingredient)
+                        .quantity(ingReq.getQuantity())
+                        .build();
+                cartIngredientRepository.save(cartIngredient);
+            }
+        }
+    }
+
+    public void updateDishInCart(UpdateDishInCartRequest request) {
+        CartDish cartDish = cartDishRepository.findById(request.getCartDishId())
+                .orElseThrow(() -> new NotFoundException("CartDish not found"));
+
+        Long cartId = cartDish.getCart().getCartId();
+        Long dishId = request.getDishId();
+
+        // Tìm cartDish trùng: cùng cartId, dishId và nguyên liệu giống nhau
+        Optional<CartDish> existingCartDishOpt = cartDishRepository.findByCart_CartIdAndDish_DishId(cartId, dishId)
+                .stream()
+                .filter(cd -> compareIngredients(cd.getIngredients(), request.getIngredients()))
+                .findFirst();
+
+        if (existingCartDishOpt.isPresent()) {
+            CartDish existingCartDish = existingCartDishOpt.get();
+
+            if (!existingCartDish.getId().equals(cartDish.getId())) {
+                // Gộp quantity
+                existingCartDish.setQuantity(existingCartDish.getQuantity() + request.getQuantity());
+                cartDishRepository.save(existingCartDish);
+
+                // Xóa cartDish cũ và nguyên liệu liên quan để tránh duplicate key
+                cartIngredientRepository.deleteAll(cartDish.getIngredients());
+                cartDishRepository.delete(cartDish);
+            } else {
+                // Cập nhật quantity và nguyên liệu
+                cartDish.setQuantity(request.getQuantity());
+                updateCartIngredients(cartDish, request.getIngredients());
+                cartDishRepository.save(cartDish);
+            }
+        } else {
+            // Không trùng => update bình thường
+            cartDish.setQuantity(request.getQuantity());
+            cartDish.setDish(dishRepository.findById(dishId)
+                    .orElseThrow(() -> new NotFoundException("Dish not found")));
+            updateCartIngredients(cartDish, request.getIngredients());
+            cartDishRepository.save(cartDish);
+        }
+    }
+
+
+    private boolean compareIngredients(Set<CartIngredient> cartIngs, List<CartIngredientRequest> reqIngs) {
+        if (cartIngs.size() != reqIngs.size()) return false;
+
+        Map<Long, Integer> cartMap = cartIngs.stream()
+                .collect(Collectors.toMap(ci -> ci.getIngredient().getIngredientId(), CartIngredient::getQuantity));
+
+        for (CartIngredientRequest req : reqIngs) {
+            Integer qty = cartMap.get(req.getIngredientId());
+            if (qty == null || !qty.equals(req.getQuantity())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void updateCartIngredients(CartDish cartDish, List<CartIngredientRequest> ingredientRequests) {
+        // Lấy danh sách nguyên liệu hiện tại
+        Map<Long, CartIngredient> existingIngredients = cartDish.getIngredients()
+                .stream()
+                .collect(Collectors.toMap(ci -> ci.getIngredient().getIngredientId(), ci -> ci));
+
+        for (CartIngredientRequest req : ingredientRequests) {
+            Ingredient ingredient = ingredientRepository.findById(req.getIngredientId())
+                    .orElseThrow(() -> new NotFoundException("Ingredient not found"));
+
+            if (existingIngredients.containsKey(req.getIngredientId())) {
+                // Cập nhật quantity nếu đã tồn tại
+                CartIngredient existing = existingIngredients.get(req.getIngredientId());
+                existing.setQuantity(req.getQuantity());
+                cartIngredientRepository.save(existing);
+
+                existingIngredients.remove(req.getIngredientId()); // Đánh dấu đã xử lý
+            } else {
+                // Thêm mới nguyên liệu
+                CartIngredient newIngredient = CartIngredient.builder()
                         .cartDish(cartDish)
                         .ingredient(ingredient)
-                        .quantity(delta)
+                        .quantity(req.getQuantity())
                         .build();
-
-                cartIngredientRepository.save(cartIngredient);
+                cartIngredientRepository.save(newIngredient);
             }
+        }
+
+        // Xóa những nguyên liệu không còn trong request
+        for (CartIngredient toRemove : existingIngredients.values()) {
+            cartIngredientRepository.delete(toRemove);
         }
     }
 
-
-
     @Override
-    public void removeDishFromCart(Long userId, Long dishId) {
-        Cart cart = cartRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new NotFoundException("Cart not found for user"));
-
-        CartDish cartDish = cartDishRepository.findByCart_CartIdAndDish_DishId(
-                cart.getCartId(), dishId
-        ).orElseThrow(() -> new NotFoundException("Dish not found in cart"));
-
-        // Gọi CartDishService
-        cartDishService.removeDishFromCart(cartDish.getId());
-    }
-
-    @Override
-    @Transactional
-    public void updateDishInCart(Long userId, AddDishToCartRequest request) {
-        // 1. Tìm cart theo user
-        Cart cart = cartRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new NotFoundException("Cart not found for user"));
-
-        // 2. Lấy CartDish trong cart
-        CartDish cartDish = cartDishRepository.findByCart_CartIdAndDish_DishId(
-                cart.getCartId(), request.getDishId()
-        ).orElseThrow(() -> new NotFoundException("Dish not found in cart"));
-
-        // 3. Cập nhật số lượng dish
-        cartDish.setQuantity(request.getQuantity());
-        cartDishRepository.save(cartDish);
-
-        // 4. Nếu có ingredients thì update
-        if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
-            for (CartIngredientRequest ingReq : request.getIngredients()) {
-                Ingredient ingredient = ingredientRepository.findById(ingReq.getIngredientId())
-                        .orElseThrow(() -> new NotFoundException("Ingredient not found"));
-
-                CartIngredient cartIngredient = cartIngredientRepository
-                        .findByCartDish_IdAndIngredient_IngredientId(cartDish.getId(), ingredient.getIngredientId())
-                        .orElse(CartIngredient.builder()
-                                .cartDish(cartDish)
-                                .ingredient(ingredient)
-                                .quantity(0)
-                                .build());
-
-                cartIngredient.setQuantity(ingReq.getQuantity());
-                cartIngredientRepository.save(cartIngredient);
-            }
-        }
+    public void removeDishFromCart(Long cartDishId) {
+        CartDish cartDish = cartDishRepository.findById(cartDishId)
+                .orElseThrow(() -> new NotFoundException("Dish not found in cart"));
+        cartDishRepository.delete(cartDish); // Hibernate cascade sẽ xóa nguyên liệu
     }
 
     public void checkout(Long cartId, Long userId) {

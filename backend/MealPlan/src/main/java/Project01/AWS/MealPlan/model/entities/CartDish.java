@@ -7,12 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "cart_dish",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"cart_id", "dish_id"})
-        }
-)
+@Table(name = "cart_dish")
 @Getter
 @Setter
 @NoArgsConstructor

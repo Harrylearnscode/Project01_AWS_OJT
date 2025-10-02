@@ -6,7 +6,7 @@ import Project01.AWS.MealPlan.model.dtos.responses.CartDishResponse;
 import java.util.List;
 
 public interface CartDishService {
-    CartDishResponse addDishToCart(CartDishRequest request);
+    /*CartDishResponse addDishToCart(CartDishRequest request);*/
     CartDishResponse updateQuantity(Long id, Integer quantity);
     void removeDishFromCart(Long id);
     List<CartDishResponse> getDishesByCart(Long cartId);

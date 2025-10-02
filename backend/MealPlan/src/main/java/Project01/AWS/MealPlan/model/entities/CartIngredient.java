@@ -7,7 +7,7 @@ import lombok.*;
 @Table(
         name = "cart_ingredient",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"cart_id", "ingredient_id"})
+                @UniqueConstraint(columnNames = {"cart_dish_id", "ingredient_id"})
         }
 )
 @Getter
