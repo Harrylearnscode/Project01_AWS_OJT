@@ -6,6 +6,7 @@ import Project01.AWS.MealPlan.model.entities.Cart;
 import Project01.AWS.MealPlan.model.entities.CartDish;
 import Project01.AWS.MealPlan.model.entities.Dish;
 import Project01.AWS.MealPlan.mapper.CartDishMapper;
+import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.CartDishRepository;
 import Project01.AWS.MealPlan.repository.CartRepository;
 import Project01.AWS.MealPlan.repository.DishRepository;
@@ -62,5 +63,17 @@ public class CartDishServiceImpl implements CartDishService {
         return cartDishRepository.findByCart_CartId(cartId).stream()
                 .map(CartDishMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Double getCartDishTotalPrice(Long cartDishId) {
+        CartDish cartDish = cartDishRepository.findById(cartDishId)
+                .orElseThrow(() -> new NotFoundException("CartDish not found"));
+
+        double ingredientCost = cartDish.getIngredients().stream()
+                .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getPrice())
+                .sum();
+
+        return ingredientCost * cartDish.getQuantity();
     }
 }

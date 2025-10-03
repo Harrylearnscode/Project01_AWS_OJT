@@ -72,4 +72,17 @@ public class CartDishController {
                 .data(responses)
                 .build());
     }
+
+    @Operation(summary = "Lấy danh sách món trong giỏ")
+    @GetMapping("/getTotalPrice/{cartDishId}")
+    public ResponseEntity<ResponseObject> getCartDishTotalPrice(@PathVariable Long cartDishId) {
+        Double totalPrice = cartDishService.getCartDishTotalPrice(cartDishId);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .code("GET_LIST_SUCCESS")
+                .message("Get dishes in cart successfully")
+                .status(HttpStatus.OK)
+                .isSuccess(true)
+                .data(totalPrice)
+                .build());
+    }
 }
