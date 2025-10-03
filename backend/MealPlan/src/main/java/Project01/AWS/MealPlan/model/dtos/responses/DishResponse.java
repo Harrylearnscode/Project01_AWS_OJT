@@ -23,5 +23,5 @@ public class DishResponse {
     private String country;
     private List<String> types;
     private List<DishIngredientSimpleResponse> dishIngredients;
-    private Map<String, List<String>> recipes; // danh sách tên type
+    private Map<String, List<String>> recipes;
 }

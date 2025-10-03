@@ -180,9 +180,9 @@ public class CartController {
     }
 
     @Operation(summary = "Lấy tổng tiền của giỏ hàng")
-    @GetMapping("/cart/{cartId}/totalPrice")
-    public ResponseEntity<ResponseObject> getCartTotalPrice(@PathVariable Long cartId) {
-        Double totalPrice = cartService.getCartTotalPrice(cartId);
+    @GetMapping("/cart/{userId}/totalPrice")
+    public ResponseEntity<ResponseObject> getCartTotalPrice(@PathVariable Long userId) {
+        Double totalPrice = cartService.getCartTotalPrice(userId);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("GET_TOTAL_SUCCESS")
                 .message("Get total cart price successfully")

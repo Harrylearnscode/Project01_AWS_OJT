@@ -74,7 +74,7 @@ public class CartDishController {
     }
 
     @Operation(summary = "Lấy danh sách món trong giỏ")
-    @GetMapping("/getTotalPrice/{cartDishId}")
+    @GetMapping("/getCartDishPrice/{cartDishId}")
     public ResponseEntity<ResponseObject> getCartDishTotalPrice(@PathVariable Long cartDishId) {
         Double totalPrice = cartDishService.getCartDishTotalPrice(cartDishId);
         return ResponseEntity.ok(ResponseObject.builder()

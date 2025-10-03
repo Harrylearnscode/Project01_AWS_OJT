@@ -389,8 +389,9 @@ public class CartServiceImpl implements CartService {
         cartRepository.save(cart);
     }
 
-    public Double getCartTotalPrice(Long cartId) {
-        List<CartDish> cartDishes = cartDishRepository.findByCart_CartId(cartId);
+    @Override
+    public Double getCartTotalPrice(Long userId) {
+        List<CartDish> cartDishes = cartDishRepository.findByCart_User_UserId(userId);
 
         return cartDishes.stream()
                 .mapToDouble(cd -> {
