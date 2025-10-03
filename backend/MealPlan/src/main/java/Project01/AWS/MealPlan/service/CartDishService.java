@@ -10,4 +10,5 @@ public interface CartDishService {
     CartDishResponse updateQuantity(Long id, Integer quantity);
     void removeDishFromCart(Long id);
     List<CartDishResponse> getDishesByCart(Long cartId);
+    Double getCartDishTotalPrice(Long cartDishId);
 }

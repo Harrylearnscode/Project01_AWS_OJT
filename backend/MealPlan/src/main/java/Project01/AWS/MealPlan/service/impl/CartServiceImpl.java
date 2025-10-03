@@ -388,4 +388,17 @@ public class CartServiceImpl implements CartService {
         cart.getCartDishes().clear();
         cartRepository.save(cart);
     }
+
+    public Double getCartTotalPrice(Long cartId) {
+        List<CartDish> cartDishes = cartDishRepository.findByCart_CartId(cartId);
+
+        return cartDishes.stream()
+                .mapToDouble(cd -> {
+                    double ingredientCost = cd.getIngredients().stream()
+                            .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getPrice())
+                            .sum();
+                    return ingredientCost * cd.getQuantity();
+                })
+                .sum();
+    }
 }

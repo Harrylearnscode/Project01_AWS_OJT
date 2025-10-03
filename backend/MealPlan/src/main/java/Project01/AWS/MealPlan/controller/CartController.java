@@ -179,4 +179,16 @@ public class CartController {
         );
     }
 
+    @Operation(summary = "Lấy tổng tiền của giỏ hàng")
+    @GetMapping("/cart/{cartId}/totalPrice")
+    public ResponseEntity<ResponseObject> getCartTotalPrice(@PathVariable Long cartId) {
+        Double totalPrice = cartService.getCartTotalPrice(cartId);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .code("GET_TOTAL_SUCCESS")
+                .message("Get total cart price successfully")
+                .status(HttpStatus.OK)
+                .isSuccess(true)
+                .data(totalPrice)
+                .build());
+    }
 }
