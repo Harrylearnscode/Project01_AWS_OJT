@@ -61,9 +61,9 @@ public class CartDishController {
     }
 
     @Operation(summary = "Lấy danh sách món trong giỏ")
-    @GetMapping("/getByCart/{cartId}")
-    public ResponseEntity<ResponseObject> getDishesByCart(@PathVariable Long cartId) {
-        List<CartDishResponse> responses = cartDishService.getDishesByCart(cartId);
+    @GetMapping("/getByCart/{userID}")
+    public ResponseEntity<ResponseObject> getDishesByCart(@PathVariable Long userID) {
+        List<CartDishResponse> responses = cartDishService.getDishesByCart(userID);
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("GET_LIST_SUCCESS")
                 .message("Get dishes in cart successfully")

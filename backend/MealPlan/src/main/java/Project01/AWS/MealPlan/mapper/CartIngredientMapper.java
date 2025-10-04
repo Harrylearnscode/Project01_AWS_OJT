@@ -12,6 +12,7 @@ public class CartIngredientMapper {
                 .ingredientId(entity.getIngredient().getIngredientId())
                 .ingredientName(entity.getIngredient().getName())
                 .quantity(entity.getQuantity())
+                .unit(entity.getIngredient().getUnit())
                 .build();
     }
 }

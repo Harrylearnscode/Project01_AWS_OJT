@@ -59,8 +59,8 @@ public class CartDishServiceImpl implements CartDishService {
     }
 
     @Override
-    public List<CartDishResponse> getDishesByCart(Long cartId) {
-        return cartDishRepository.findByCart_CartId(cartId).stream()
+    public List<CartDishResponse> getDishesByCart(Long userID) {
+        return cartDishRepository.findByCart_User_UserId(userID).stream()
                 .map(CartDishMapper::toDTO)
                 .collect(Collectors.toList());
     }

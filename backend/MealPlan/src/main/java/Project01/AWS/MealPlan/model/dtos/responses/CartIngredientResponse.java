@@ -15,4 +15,5 @@ public class CartIngredientResponse {
     private Long ingredientId;
     private String ingredientName;
     private Integer quantity;
+    private String unit;
 }
