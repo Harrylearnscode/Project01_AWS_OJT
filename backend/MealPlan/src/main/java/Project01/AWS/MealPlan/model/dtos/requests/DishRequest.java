@@ -17,5 +17,5 @@ public class DishRequest {
     private String imgUrl;
     private Double price;
     private Long countryId;
-    private Set<Long> typeIds; // liên kết với Type
+    private Set<Long> typeIds;
 }

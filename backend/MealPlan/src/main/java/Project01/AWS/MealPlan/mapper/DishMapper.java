@@ -24,6 +24,7 @@ public class DishMapper {
                         .quantity(di.getQuantity())
                         .unit(di.getUnit())
                         .price(di.getIngredient().getPrice())
+                        .calories(di.getIngredient().getCalories())
                         .build())
                 .toList();
 

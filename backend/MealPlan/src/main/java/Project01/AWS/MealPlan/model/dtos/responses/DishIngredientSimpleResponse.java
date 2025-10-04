@@ -15,4 +15,5 @@ public class DishIngredientSimpleResponse {
     private Integer quantity;
     private String unit;
     private Double price;
+    private Double calories;
 }

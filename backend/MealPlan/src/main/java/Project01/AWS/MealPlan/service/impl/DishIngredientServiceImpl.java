@@ -40,6 +40,13 @@ public class DishIngredientServiceImpl implements DishIngredientService {
                 .unit(request.getUnit())
                 .build();
 
+        double totalPrice = dish.getDishIngredients().stream()
+                .mapToDouble(di -> di.getQuantity() * di.getIngredient().getPrice())
+                .sum();
+
+        dish.setPrice(totalPrice);
+        dishRepository.save(dish);
+
         dishIngredientRepository.save(dishIngredient);
         return DishIngredientMapper.toResponse(dishIngredient);
     }
@@ -75,6 +82,12 @@ public class DishIngredientServiceImpl implements DishIngredientService {
         dishIngredient.setUnit(request.getUnit());
 
         dishIngredientRepository.save(dishIngredient);
+
+        double totalPrice = dish.getDishIngredients().stream()
+                .mapToDouble(di -> di.getQuantity() * di.getIngredient().getPrice())
+                .sum();
+
+        dish.setPrice(totalPrice);
         return DishIngredientMapper.toResponse(dishIngredient);
     }
 

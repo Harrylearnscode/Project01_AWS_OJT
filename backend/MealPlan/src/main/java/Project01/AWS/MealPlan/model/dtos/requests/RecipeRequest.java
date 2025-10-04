@@ -10,5 +10,5 @@ public class RecipeRequest {
     private String type;
     private Integer step;
     private String content;
-    private Long dishId; // để map sang Dish entity
+    private Long dishId;
 }

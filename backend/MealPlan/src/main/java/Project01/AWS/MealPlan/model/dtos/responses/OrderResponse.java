@@ -20,6 +20,7 @@ public class OrderResponse {
     private Double deliveryPrice;
     private Double ingredientsPrice;
     private Double totalPrice;
+    private Double totalCalories;
     private OrderStatus status;
     private Long userId;
     private String userName;

@@ -11,4 +11,5 @@ public interface CartDishService {
     void removeDishFromCart(Long id);
     List<CartDishResponse> getDishesByCart(Long cartId);
     Double getCartDishTotalPrice(Long cartDishId);
+    Double getCartDishTotalCalories(Long cartDishId);
 }

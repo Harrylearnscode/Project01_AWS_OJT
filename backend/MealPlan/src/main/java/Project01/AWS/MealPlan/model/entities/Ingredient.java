@@ -29,6 +29,8 @@ public class Ingredient {
 
     private Integer stock;
 
+    private Double calories;
+
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<DishIngredient> dishIngredients = new HashSet<>();
