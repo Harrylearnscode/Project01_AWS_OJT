@@ -16,5 +16,4 @@ public class DishIngredientResponse {
     private Long ingredientId;
     private String ingredientName;
     private Integer quantity;
-    private String unit;
 }

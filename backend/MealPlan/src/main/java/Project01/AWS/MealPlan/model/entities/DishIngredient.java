@@ -27,7 +27,4 @@ public class DishIngredient {
 
     @Column(nullable = false)
     private Integer quantity;
-
-    @Column(length = 50)
-    private String unit;
 }
