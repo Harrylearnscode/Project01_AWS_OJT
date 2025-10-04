@@ -30,6 +30,7 @@ public class IngredientServiceImpl implements IngredientService {
                     .price(request.getPrice())
                     .unit(request.getUnit())
                     .stock(request.getStock())
+                    .calories(request.getCalories())
                     .build();
 
             Ingredient saved = ingredientRepository.save(ingredient);
@@ -48,6 +49,7 @@ public class IngredientServiceImpl implements IngredientService {
         existing.setPrice(request.getPrice());
         existing.setUnit(request.getUnit());
         existing.setStock(request.getStock());
+        existing.setCalories(request.getCalories());
 
         try {
             Ingredient updated = ingredientRepository.save(existing);

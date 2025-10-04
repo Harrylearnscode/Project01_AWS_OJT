@@ -191,4 +191,17 @@ public class CartController {
                 .data(totalPrice)
                 .build());
     }
+
+    @Operation(summary = "Lấy tổng calories của giỏ hàng")
+    @GetMapping("/cart/{userId}/totalCalories")
+    public ResponseEntity<ResponseObject> getCartTotalCalories(@PathVariable Long userId) {
+        Double totalCalories = cartService.getCartTotalCalories(userId);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .code("GET_TOTAL_SUCCESS")
+                .message("Get total cart price successfully")
+                .status(HttpStatus.OK)
+                .isSuccess(true)
+                .data(totalCalories)
+                .build());
+    }
 }

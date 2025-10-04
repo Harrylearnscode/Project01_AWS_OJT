@@ -73,7 +73,7 @@ public class CartDishController {
                 .build());
     }
 
-    @Operation(summary = "Lấy danh sách món trong giỏ")
+    @Operation(summary = "Lấy tiền của món trong giỏ")
     @GetMapping("/getCartDishPrice/{cartDishId}")
     public ResponseEntity<ResponseObject> getCartDishTotalPrice(@PathVariable Long cartDishId) {
         Double totalPrice = cartDishService.getCartDishTotalPrice(cartDishId);
@@ -83,6 +83,19 @@ public class CartDishController {
                 .status(HttpStatus.OK)
                 .isSuccess(true)
                 .data(totalPrice)
+                .build());
+    }
+
+    @Operation(summary = "Lấy calories của món trong giỏ")
+    @GetMapping("/getCartDishCalories/{cartDishId}")
+    public ResponseEntity<ResponseObject> getCartDishTotalCalories(@PathVariable Long cartDishId) {
+        Double totalCalories = cartDishService.getCartDishTotalCalories(cartDishId);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .code("GET_LIST_SUCCESS")
+                .message("Get dishes in cart successfully")
+                .status(HttpStatus.OK)
+                .isSuccess(true)
+                .data(totalCalories)
                 .build());
     }
 }

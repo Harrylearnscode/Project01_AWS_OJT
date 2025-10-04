@@ -76,4 +76,16 @@ public class CartDishServiceImpl implements CartDishService {
 
         return ingredientCost * cartDish.getQuantity();
     }
+
+    @Override
+    public Double getCartDishTotalCalories(Long cartDishId) {
+        CartDish cartDish = cartDishRepository.findById(cartDishId)
+                .orElseThrow(() -> new NotFoundException("CartDish not found"));
+
+        double calories = cartDish.getIngredients().stream()
+                .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getCalories())
+                .sum();
+
+        return calories * cartDish.getQuantity();
+    }
 }

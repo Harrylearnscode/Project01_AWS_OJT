@@ -402,4 +402,18 @@ public class CartServiceImpl implements CartService {
                 })
                 .sum();
     }
+
+    @Override
+    public Double getCartTotalCalories(Long userId) {
+        List<CartDish> cartDishes = cartDishRepository.findByCart_User_UserId(userId);
+
+        return cartDishes.stream()
+                .mapToDouble(cd -> {
+                    double calories = cd.getIngredients().stream()
+                            .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getCalories())
+                            .sum();
+                    return calories * cd.getQuantity();
+                })
+                .sum();
+    }
 }

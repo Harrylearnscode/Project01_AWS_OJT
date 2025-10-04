@@ -11,4 +11,5 @@ public class IngredientRequest {
     private Double price;
     private String unit;
     private Integer stock;
+    private Double calories;
 }

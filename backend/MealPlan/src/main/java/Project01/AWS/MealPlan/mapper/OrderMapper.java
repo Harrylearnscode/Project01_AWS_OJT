@@ -14,6 +14,7 @@ public class OrderMapper {
                 .deliveryPrice(entity.getDeliveryPrice())
                 .ingredientsPrice(entity.getIngredientsPrice())
                 .totalPrice(entity.getTotalPrice())
+                .totalCalories(entity.getTotalCalories())
                 .status(entity.getStatus())
                 .userId(entity.getUser().getUserId())
                 .userName(entity.getUser().getName())

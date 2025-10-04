@@ -12,6 +12,7 @@ public class IngredientMapper {
                 .price(entity.getPrice())
                 .unit(entity.getUnit())
                 .stock(entity.getStock())
+                .calories(entity.getCalories())
                 .build();
     }
 }
