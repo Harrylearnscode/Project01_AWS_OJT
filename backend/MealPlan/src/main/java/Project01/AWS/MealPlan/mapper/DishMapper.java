@@ -20,6 +20,7 @@ public class DishMapper {
         // Ingredients mapping
         List<DishIngredientSimpleResponse> ingredients = dish.getDishIngredients().stream()
                 .map(di -> DishIngredientSimpleResponse.builder()
+                        .ingredientId(di.getIngredient().getIngredientId())
                         .ingredient(di.getIngredient().getName())
                         .quantity(di.getQuantity())
                         .unit(di.getUnit())

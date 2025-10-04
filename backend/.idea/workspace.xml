@@ -6,9 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="73a4ab3a-a5bb-48ff-982b-bc2ef81bfa29" name="Changes" comment="Sort, Paging, Search: User, Order(haven't test). Fix to summary response of getAllDish, getDishByTypeId, getDishByCountryId, getRelatedDish">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/Configs/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/JwtService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MealPlan/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/DishMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/DishMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/DishIngredientSimpleResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/DishIngredientSimpleResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MealPlan/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,27 +58,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.MealPlanApplication.executor": "Run",
-    "Application.Unnamed.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.MealPlanApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.MealPlanApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.MealPlanApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Project01.AWS.MealPlan.MealPlanApplication" />

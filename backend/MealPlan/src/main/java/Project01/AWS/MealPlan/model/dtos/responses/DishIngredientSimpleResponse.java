@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class DishIngredientSimpleResponse {
+    private Long ingredientId;;
     private String ingredient;
     private Integer quantity;
     private String unit;

@@ -12,7 +12,9 @@ const APIENDPOINTS = {
         GET_RELATED_DISHES: (id)=> `/dishes/${id}/related`,
     },
     ORDER: {},
-    SHOPPINGCART: {},
+    SHOPPINGCART: {
+        ADD_TO_CART: (id) => `/carts/${id}/add`,
+    },
 };
 
 export default APIENDPOINTS;
