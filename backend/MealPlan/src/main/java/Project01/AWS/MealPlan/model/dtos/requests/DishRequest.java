@@ -15,7 +15,6 @@ public class DishRequest {
     private Integer cookingTime;
     private Integer totalTime;
     private String imgUrl;
-    private Double price;
     private Long countryId;
     private Set<Long> typeIds;
 }

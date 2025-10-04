@@ -45,7 +45,6 @@ public class DishServiceImpl implements DishService {
                     .cookingTime(request.getCookingTime())
                     .totalTime(request.getTotalTime())
                     .imgUrl(request.getImgUrl())
-                    .price(request.getPrice())
                     .status(DishStatus.ACTIVE)
                     .country(country)
                     .build();
@@ -75,7 +74,6 @@ public class DishServiceImpl implements DishService {
         existing.setCookingTime(request.getCookingTime());
         existing.setTotalTime(request.getTotalTime());
         existing.setImgUrl(request.getImgUrl());
-        existing.setPrice(request.getPrice());
         existing.setCountry(country);
 
         if (request.getTypeIds() != null && !request.getTypeIds().isEmpty()) {
