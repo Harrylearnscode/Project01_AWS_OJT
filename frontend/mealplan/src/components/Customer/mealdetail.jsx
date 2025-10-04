@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Clock, ChefHat, Plus, Minus } from "lucide-react"
-import { fetchRelatedMeals } from "../../data/mockMeal.jsx"
-import DishService from "../../api/service/Dish.service.jsx"
-
+import CartService from "../../api/service/Cart.service"
+import DishService from "../../api/service/Dish.service"
 const MealDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -16,14 +15,28 @@ const MealDetail = () => {
   const [activeTab, setActiveTab] = useState("ingredients")
   const [relatedMeals, setRelatedMeals] = useState([])
   const [relatedLoading, setRelatedLoading] = useState(true)
-
+  const [ingredientQuantities, setIngredientQuantities] = useState({})
+  const user = JSON.parse(localStorage.getItem("currentUser"))
   useEffect(() => {
     const loadMeal = async () => {
       try {
         setLoading(true)
-        const response = await DishService.getDishDetail(id)
-        const mealData = response // Extract data from API response
+        const mealData = await DishService.getDishDetail(id)
         setMeal(mealData)
+
+        if (mealData.dishIngredients) {
+          const initialQuantities = {}
+          mealData.dishIngredients.forEach((ingredient, index) => {
+            const ingredientId = ingredient.ingredientId || index
+            initialQuantities[ingredientId] = {
+              quantity: ingredient.quantity,
+              defaultQuantity: ingredient.quantity,
+              unit: ingredient.unit,
+              name: ingredient.ingredient,
+            }
+          })
+          setIngredientQuantities(initialQuantities)
+        }
       } catch (err) {
         setError(err.message)
       } finally {
@@ -46,7 +59,6 @@ const MealDetail = () => {
     loadMeal()
     loadRelatedMeals()
 
-    // Scroll lên đầu mỗi khi id thay đổi
     window.scrollTo(0, 0)
   }, [id])
 
@@ -54,47 +66,63 @@ const MealDetail = () => {
     navigate("/customer/customerShop")
   }
 
-  const handleAddToCart = (product) => {
+const price = (ingredients, ingredientQuantities) => {
+  if (!ingredients) return 0;
+
+  return ingredients.reduce((total, ing, index) => {
+    const ingredientId = ing.ingredientId || index;
+    const currentData = ingredientQuantities[ingredientId];
+
+    const ingQuantity = currentData?.quantity || ing.quantity || 0;
+    const ingPrice = Number(ing.price || 0) * Number(ingQuantity)* quantity;
+
+    return total + ingPrice;
+  }, 0);
+};
+
+
+  const handleAddToCart = async (product) => {
     try {
-      // Get existing cart from localStorage
-      const existingCart = localStorage.getItem("mealplan-cart")
-      const cartItems = existingCart ? JSON.parse(existingCart) : []
+      const ingredientsForOrder = Object.entries(ingredientQuantities).map(([ingredientId, data]) => ({
+        ingredientId: Number.parseInt(ingredientId),
+        quantity: data.quantity,
+      }))
 
-      // Check if item already exists in cart
-      const existingItemIndex = cartItems.findIndex((item) => item.id === product.id)
-
-      if (existingItemIndex >= 0) {
-        // If item exists, increment quantity
-        cartItems[existingItemIndex].quantity += quantity
-      } else {
-        // If item doesn't exist, add new item with quantity
-        cartItems.push({
-          id: product.id,
-          quantity: quantity,
-        })
+      const orderData = {
+        dishId: product.id,
+        quantity: quantity,
+        ingredients: ingredientsForOrder,
       }
+      console.log("Order Data:", orderData)
 
-      // Save updated cart to localStorage
-      localStorage.setItem("mealplan-cart", JSON.stringify(cartItems))
-
-      // Show success feedback
-      console.log(`Added ${product.name} to cart`)
-
-      // Optional: Dispatch a custom event to notify other components about cart update
-      window.dispatchEvent(
-        new CustomEvent("cartUpdated", {
-          detail: { product, cartItems },
-        }),
-      )
+      const response = await  CartService.addToCart(user.id, orderData)
+      console.log("Add to Cart Response:", response)
     } catch (error) {
       console.error("Error adding item to cart:", error)
     }
   }
 
+  const handleIngredientQuantityChange = (ingredientId, change) => {
+    setIngredientQuantities((prev) => {
+      const current = prev[ingredientId]
+      const newQuantity = current.quantity + change
+
+      if (newQuantity < current.defaultQuantity) {
+        return prev
+      }
+      return {
+        ...prev,
+        [ingredientId]: {
+          ...current,
+          quantity: newQuantity,
+        },
+      }
+    })
+  }
+
   const calculateTotalKcal = () => {
     if (!meal?.dishIngredients) return 0
-    // Since the API doesn't provide kcal data, return a placeholder
-    return meal.dishIngredients.length * 50 // Rough estimate
+    return meal.dishIngredients.length * 50
   }
 
   const handleRelatedMealClick = (mealId) => {
@@ -140,7 +168,6 @@ const MealDetail = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Back Button */}
       <button
         onClick={handleBackClick}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -151,14 +178,11 @@ const MealDetail = () => {
       </button>
 
       <div className="bg-card rounded-lg shadow-card border border-border overflow-hidden">
-        {/* Hero Section */}
         <div className="grid md:grid-cols-2 gap-8 p-8">
-          {/* Image */}
           <div className="aspect-square rounded-lg overflow-hidden">
             <img src={meal.imgUrl || "/placeholder.svg"} alt={meal.name} className="w-full h-full object-cover" />
           </div>
 
-          {/* Basic Info */}
           <div className="space-y-6">
             <div>
               <h1
@@ -172,7 +196,6 @@ const MealDetail = () => {
               </p>
             </div>
 
-            {/* Meta Info */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
@@ -205,7 +228,6 @@ const MealDetail = () => {
               </div>
             )}
 
-            {/* Nutrition */}
             <div className="bg-muted/50 rounded-lg p-4">
               <h3
                 className="font-semibold text-card-foreground mb-2"
@@ -218,15 +240,13 @@ const MealDetail = () => {
               </p>
             </div>
 
-            {/* Price and Add to Cart */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <span className="text-3xl font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
-                  ${meal.price}
+                  ${price(meal.dishIngredients, ingredientQuantities)}
                 </span>
               </div>
 
-              {/* Quantity Selector */}
               <div className="flex items-center gap-4">
                 <span
                   className="text-sm font-medium text-card-foreground"
@@ -253,21 +273,18 @@ const MealDetail = () => {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
               <button
                 onClick={() => handleAddToCart(meal)}
                 className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 style={{ fontFamily: "Source Sans Pro, sans-serif" }}
               >
-                Add to Cart - ${(meal.price * quantity).toFixed(2)}
+                Add to Cart - ${price(meal.dishIngredients, ingredientQuantities).toFixed(2)}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Tabs Section */}
         <div className="border-t border-border">
-          {/* Tab Navigation */}
           <div className="flex border-b border-border">
             <button
               onClick={() => setActiveTab("ingredients")}
@@ -293,7 +310,6 @@ const MealDetail = () => {
             </button>
           </div>
 
-          {/* Tab Content */}
           <div className="p-8">
             {activeTab === "ingredients" && (
               <div className="space-y-4">
@@ -303,27 +319,65 @@ const MealDetail = () => {
                 >
                   Ingredients
                 </h3>
+                {/* <p className="text-sm text-muted-foreground mb-4" style={{ fontFamily: "Source Sans Pro, sans-serif" }}>
+                  Customize ingredient quantities for your order. Quantities cannot be reduced below the default amount.
+                </p> */}
                 <div className="grid gap-3">
-                  {meal.dishIngredients?.map((ingredient, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b border-border/50">
-                      <div>
-                        <span
-                          className="font-medium text-card-foreground"
-                          style={{ fontFamily: "Source Sans Pro, sans-serif" }}
-                        >
-                          {ingredient.ingredient}
-                        </span>
-                        {ingredient.quantity > 0 && (
+                  {meal.dishIngredients?.map((ingredient, index) => {
+                    const ingredientId = ingredient.ingredientId || index
+                    const currentData = ingredientQuantities[ingredientId]
+
+                    return (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center py-3 px-4 border border-border rounded-lg bg-muted/30"
+                      >
+                        <div className="flex-1">
                           <span
-                            className="text-muted-foreground ml-2"
+                            className="font-medium text-card-foreground block"
                             style={{ fontFamily: "Source Sans Pro, sans-serif" }}
                           >
-                            {ingredient.quantity} {ingredient.unit}
+                            {ingredient.ingredient}
                           </span>
-                        )}
+                          <span
+                            className="text-xs text-muted-foreground"
+                            style={{ fontFamily: "Source Sans Pro, sans-serif" }}
+                          >
+                            Default: {currentData?.defaultQuantity} {currentData?.unit}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleIngredientQuantityChange(ingredientId, -1)}
+                            disabled={currentData?.quantity <= currentData?.defaultQuantity}
+                            className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <div className="text-center min-w-[60px]">
+                            <span
+                              className="font-semibold text-card-foreground block"
+                              style={{ fontFamily: "Source Sans Pro, sans-serif" }}
+                            >
+                              {currentData?.quantity}
+                            </span>
+                            <span
+                              className="text-xs text-muted-foreground"
+                              style={{ fontFamily: "Source Sans Pro, sans-serif" }}
+                            >
+                              {currentData?.unit}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleIngredientQuantityChange(ingredientId, 1)}
+                            className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -414,7 +468,6 @@ const MealDetail = () => {
         </div>
       </div>
 
-      {/* Related Meals Section - UNCHANGED as requested */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-card-foreground mb-6" style={{ fontFamily: "Playfair Display, serif" }}>
           You Might Also Like
@@ -469,7 +522,7 @@ const MealDetail = () => {
                     </span>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
-                      <span style={{ fontFamily: "Source Sans Pro, sans-serif" }}>{relatedMeal.prepareTime}</span>
+                      <span style={{ fontFamily: "Source Sans Pro, sans-serif" }}>{relatedMeal.prepTime}</span>
                     </div>
                   </div>
                 </div>

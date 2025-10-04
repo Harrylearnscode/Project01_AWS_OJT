@@ -1,0 +1,45 @@
+Tiếng anh
+
+---
+title: "Simple AWS Architecture"
+date: 2025-10-02
+draft: false
+tags: ["aws", "architecture", "networking"]
+---
+
+# AWS Services Used
+- **Amazon VPC**: Isolated networking with public and private subnets.  
+- **Amazon EC2**: Application servers in public and private subnets.  
+- **Amazon S3**: Object storage for app data and files.  
+- **Amazon RDS**: Managed relational database for backend storage.  
+- **AWS IAM**: Access control and permissions management.
+
+# Component Design
+- **Networking**: VPC with a public subnet and private subnets in an Availability Zone.  
+- **Public Layer**: EC2 instances in the public subnet handle incoming internet traffic.  
+- **Application Layer**: EC2 instances in private subnets run backend services.  
+- **Data Layer**: S3 holds objects; RDS stores relational data.  
+- **Security**: IAM controls access; security groups restrict traffic between subnets.
+
+
+Tiếng Việt
+---
+title: "Kiến trúc AWS đơn giản"
+date: 2025-10-02
+draft: false
+tags: ["aws", "kiến trúc", "mạng"]
+---
+
+# Dịch vụ AWS sử dụng
+- **Amazon VPC**: Cung cấp mạng riêng biệt với subnet công khai và riêng tư.  
+- **Amazon EC2**: Máy chủ ứng dụng trong cả subnet công khai và riêng tư.  
+- **Amazon S3**: Lưu trữ đối tượng cho dữ liệu và tệp ứng dụng.  
+- **Amazon RDS**: Cơ sở dữ liệu quan hệ được quản lý cho lưu trữ backend.  
+- **AWS IAM**: Quản lý quyền truy cập và phân quyền người dùng.  
+
+# Thiết kế thành phần
+- **Mạng (Networking)**: VPC gồm một subnet công khai và nhiều subnet riêng tư trong một Availability Zone.  
+- **Lớp công khai**: EC2 trong subnet công khai xử lý lưu lượng từ Internet.  
+- **Lớp ứng dụng**: EC2 trong subnet riêng tư chạy dịch vụ backend.  
+- **Lớp dữ liệu**: S3 lưu trữ đối tượng; RDS lưu dữ liệu quan hệ.  
+- **Bảo mật**: IAM kiểm soát quyền truy cập; Security Group giới hạn luồng dữ liệu giữa các subnet.  
