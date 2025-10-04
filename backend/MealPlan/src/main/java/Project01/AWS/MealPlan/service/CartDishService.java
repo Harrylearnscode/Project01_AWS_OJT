@@ -9,7 +9,7 @@ public interface CartDishService {
     /*CartDishResponse addDishToCart(CartDishRequest request);*/
     CartDishResponse updateQuantity(Long id, Integer quantity);
     void removeDishFromCart(Long id);
-    List<CartDishResponse> getDishesByCart(Long cartId);
+    List<CartDishResponse> getDishesByCart(Long userID);
     Double getCartDishTotalPrice(Long cartDishId);
     Double getCartDishTotalCalories(Long cartDishId);
 }
