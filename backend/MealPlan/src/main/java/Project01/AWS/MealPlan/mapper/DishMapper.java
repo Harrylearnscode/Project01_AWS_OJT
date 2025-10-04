@@ -22,7 +22,7 @@ public class DishMapper {
                 .map(di -> DishIngredientSimpleResponse.builder()
                         .ingredient(di.getIngredient().getName())
                         .quantity(di.getQuantity())
-                        .unit(di.getUnit())
+                        .unit(di.getIngredient().getUnit())
                         .price(di.getIngredient().getPrice())
                         .calories(di.getIngredient().getCalories())
                         .build())

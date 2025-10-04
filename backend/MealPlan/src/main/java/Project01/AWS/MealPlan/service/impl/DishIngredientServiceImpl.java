@@ -37,7 +37,6 @@ public class DishIngredientServiceImpl implements DishIngredientService {
                 .dish(dish)
                 .ingredient(ingredient)
                 .quantity(request.getQuantity())
-                .unit(request.getUnit())
                 .build();
 
         double totalPrice = dish.getDishIngredients().stream()
@@ -79,7 +78,6 @@ public class DishIngredientServiceImpl implements DishIngredientService {
         dishIngredient.setDish(dish);
         dishIngredient.setIngredient(ingredient);
         dishIngredient.setQuantity(request.getQuantity());
-        dishIngredient.setUnit(request.getUnit());
 
         dishIngredientRepository.save(dishIngredient);
 
