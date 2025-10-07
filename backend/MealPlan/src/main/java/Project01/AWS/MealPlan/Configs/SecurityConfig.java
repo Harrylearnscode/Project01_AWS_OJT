@@ -52,11 +52,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .oauth2Login(oauth2 -> oauth2
-//                       .loginPage("/oauth2/authorization/google")
-//                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
-//                        .failureUrl("/api/auth/oauth2/failure")
-//                )
+                .oauth2Login(oauth2 -> oauth2
+                       .loginPage("/oauth2/authorization/google")
+                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
+                        .failureUrl("/api/auth/oauth2/failure")
+                )
 //                .oauth2Login(Customizer.withDefaults())
 //                .formLogin(Customizer.withDefaults())
                 .authenticationProvider(authenticationProvider)

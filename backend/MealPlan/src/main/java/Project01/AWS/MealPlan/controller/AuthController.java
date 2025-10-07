@@ -1,18 +1,21 @@
 package Project01.AWS.MealPlan.controller;
 
 import Project01.AWS.MealPlan.mapper.UserMapper;
+import Project01.AWS.MealPlan.model.dtos.requests.Oauth2TokenRequest;
 import Project01.AWS.MealPlan.model.dtos.user.*;
 import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.service.AuthService;
 import Project01.AWS.MealPlan.service.impl.AuthServiceImpl;
 import Project01.AWS.MealPlan.service.impl.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -103,40 +106,115 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
     }
+
+    @PutMapping("/me/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestParam String email,
+            @RequestBody UpdateProfileDto updateProfileDto
+    ) {
+        try {
+            User updatedUser = authService.updateUserProfile(email, updateProfileDto);
+            UserDto userDto = UserMapper.toUserDto(updatedUser);
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
     
-//    @GetMapping("/oauth2/success")
-//    public ResponseEntity<?> oauth2LoginSuccess(Authentication authentication) {
-//        try {
-//            OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) authentication;
-//            Map<String, Object> attributes = oauth2Token.getPrincipal().getAttributes();
-//
-//            String email = (String) attributes.get("email");
-//            String name = (String) attributes.get("name");
-//
-//            // Check if user exists, if not create new user
-//            User user = authService.findOrCreateOAuth2User(email, name);
-//
-//            // Generate JWT token
-//            String jwtToken = jwtService.generateToken(user);
-//
-//            LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), user);
-//            return ResponseEntity.ok(loginResponse);
-//
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed: " + e.getMessage()));
-//        }
-//    }
-//
-//    @GetMapping("/oauth2/failure")
-//    public ResponseEntity<?> oauth2LoginFailure() {
-//        return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed"));
-//    }
+    @GetMapping("/oauth2/success")
+    public ResponseEntity<?> oauth2LoginSuccess(Authentication authentication) {
+        try {
+            OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) authentication;
+            Map<String, Object> attributes = oauth2Token.getPrincipal().getAttributes();
 
+            String email = (String) attributes.get("email");
+            String name = (String) attributes.get("name");
 
+            // Check if user exists, if not create new user
+            User user = authService.findOrCreateOAuth2User(email, name);
 
+            UserDto userDto = UserMapper.toUserDto(user);
 
+            // Generate JWT token
+            String jwtToken = jwtService.generateToken(user);
 
+            LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), userDto);
+            return ResponseEntity.ok(loginResponse);
 
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed: " + e.getMessage()));
+        }
+    }
 
+    @GetMapping("/oauth2/failure")
+    public ResponseEntity<?> oauth2LoginFailure() {
+        return ResponseEntity.badRequest().body(Map.of("error", "OAuth2 login failed"));
+    }
+
+ //   https://accounts.google.com/o/oauth2/v2/auth?client_id=872552687649-vvqck5l0g4v92n6pr4hrq1sie0lqov3e.apps.googleusercontent.com&redirect_uri=http://localhost:8080/login/oauth2/code/google&response_type=code&scope=email%20profile
+ // decode %2F to  /
+    @PostMapping("/oauth2/token")
+    public ResponseEntity<?> exchangeOAuth2Token(@RequestBody Oauth2TokenRequest request) {
+        String code = request.getCode();
+
+        if (code == null || code.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Authorization code is required"));
+        }
+
+        // Log the received code for debugging
+        System.out.println("Received authorization code: " + code);
+        System.out.println("Code length: " + code.length());
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            // Use the code as-is without additional encoding
+            params.add("code", code.trim());
+            params.add("client_id", "872552687649-vvqck5l0g4v92n6pr4hrq1sie0lqov3e.apps.googleusercontent.com");
+            params.add("client_secret", "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");
+            params.add("redirect_uri", "http://localhost:8080/login/oauth2/code/google");
+            params.add("grant_type", "authorization_code");
+
+            HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    "https://oauth2.googleapis.com/token",
+                    tokenRequest,
+                    Map.class
+            );
+
+            String accessToken = (String) response.getBody().get("access_token");
+
+            HttpHeaders userHeaders = new HttpHeaders();
+            userHeaders.setBearerAuth(accessToken);
+            HttpEntity<String> userInfoRequest = new HttpEntity<>(userHeaders);
+
+            ResponseEntity<Map> userInfoResponse = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    HttpMethod.GET,
+                    userInfoRequest,
+                    Map.class
+            );
+
+            String email = (String) userInfoResponse.getBody().get("email");
+            String name = (String) userInfoResponse.getBody().get("name");
+
+            User user = authService.findOrCreateOAuth2User(email, name);
+            UserDto userDto = UserMapper.toUserDto(user);
+
+            String jwtToken = jwtService.generateToken(user);
+            LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), userDto);
+
+            return ResponseEntity.ok(loginResponse);
+
+        } catch (Exception e) {
+            // Log the full error for debugging
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
 }

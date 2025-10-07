@@ -228,31 +228,49 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-//    public User findOrCreateOAuth2User(String email, String name) {
-//        Optional<User> existingUser = userRepository.findByEmail(email);
-//
-//        if (existingUser.isPresent()) {
-//            User user = existingUser.get();
-//            // Activate the user if they login via OAuth2
-//            if (!user.isActive()) {
-//                user.setActive(true);
-//                user.setVerificationCode(null);
-//                user.setVerificationExpiry(null);
-//                return userRepository.save(user);
-//            }
-//            return user;
-//        } else {
-//            // Create new user for OAuth2 login
-//            User newUser = User.builder()
-//                    .name(name)
-//                    .email(email)
-//                    .password(bCryptPasswordEncoder.encode("OAUTH2_USER")) // Placeholder password
-//                    .role("CUSTOMER")
-//                    .active(true) // OAuth2 users are automatically activated
-//                    .build();
-//
-//            return userRepository.save(newUser);
-//        }
-//    }
+    public User findOrCreateOAuth2User(String email, String name) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            // Activate the user if they login via OAuth2
+            if (!user.isActive()) {
+                user.setActive(true);
+                user.setVerificationCode(null);
+                user.setVerificationExpiry(null);
+                return userRepository.save(user);
+            }
+            return user;
+        } else {
+            // Create new user for OAuth2 login
+            User newUser = User.builder()
+                    .name(name)
+                    .email(email)
+                    .password(bCryptPasswordEncoder.encode("OAUTH2_USER" +  + System.currentTimeMillis())) // Placeholder password
+                    .role("CUSTOMER")
+                    .address(null) //no address from OAuth2
+                    .phone(null) //no phone from OAuth2
+                    .active(true) // OAuth2 users are automatically activated
+                    .build();
+
+            return userRepository.save(newUser);
+        }
+    }
+    public User updateUserProfile(String email, UpdateProfileDto updateProfileDto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updateProfileDto.getName() != null && !updateProfileDto.getName().trim().isEmpty()) {
+            user.setName(updateProfileDto.getName());
+        }
+        if (updateProfileDto.getPhone() != null) {
+            user.setPhone(updateProfileDto.getPhone());
+        }
+        if (updateProfileDto.getAddress() != null) {
+            user.setAddress(updateProfileDto.getAddress());
+        }
+
+        return userRepository.save(user);
+    }
 
 }
