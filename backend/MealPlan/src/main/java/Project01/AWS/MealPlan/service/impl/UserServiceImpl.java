@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.service.impl;
 
 
 import Project01.AWS.MealPlan.mapper.UserMapper;
+import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    public static final String CUSTOMER_ROLE = "CUSTOMER";
+    public static final String ADMIN_ROLE = "ADMIN";
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public UserResponse createUser(UserRequest request) {
@@ -40,7 +45,7 @@ public class UserServiceImpl implements UserService {
                     .phone(request.getPhone())
                     .address(request.getAddress())
                     .role(request.getRole())
-                    .password(request.getPassword())
+                    .password(bCryptPasswordEncoder.encode(request.getPassword()))
                     .active(true)
                     .email(request.getEmail())
                     .build();
@@ -61,7 +66,7 @@ public class UserServiceImpl implements UserService {
         existing.setPhone(request.getPhone());
         existing.setAddress(request.getAddress());
         existing.setRole(request.getRole());
-        existing.setPassword(request.getPassword());
+        existing.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         existing.setEmail(request.getEmail());
         try {
             User updated = userRepository.save(existing);
@@ -135,5 +140,28 @@ public class UserServiceImpl implements UserService {
             throw new ActionFailedException(String.format("Failed to get user with ID: %s", id));
         }
 
+    }
+
+    @Override
+    public UserResponse createAdmin(AdminUserRequest request) {
+        try {
+            User existing = userRepository.findByEmail(request.getEmail()).orElse(null);
+            if(existing != null) {
+                throw new ActionFailedException("Email already in use");
+            }
+            User entity = User.builder()
+                    .name(request.getName())
+                    .phone(request.getPhone())
+                    .address(request.getAddress())
+                    .role(ADMIN_ROLE)
+                    .password(bCryptPasswordEncoder.encode(request.getPassword()))
+                    .active(true)
+                    .email(request.getEmail())
+                    .build();
+            User saved = userRepository.save(entity);
+            return UserMapper.toResponse(saved);
+        } catch (Exception e) {
+            throw new ActionFailedException("Failed to create user");
+        }
     }
 }

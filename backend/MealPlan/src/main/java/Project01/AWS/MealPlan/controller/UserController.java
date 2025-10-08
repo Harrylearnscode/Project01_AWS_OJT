@@ -1,6 +1,7 @@
 package Project01.AWS.MealPlan.controller;
 
 
+import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
@@ -100,6 +101,21 @@ public class UserController {
                 ResponseObject.builder()
                         .code("GET_SUCCESS")
                         .message("Get user successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Tạo user role Admin", description = "Khởi tạo một user Admin (only Seller should be able to do this).")
+    @PostMapping("/createUserAdmin")
+    public ResponseEntity<ResponseObject> createUserAdmin(@RequestBody AdminUserRequest request) {
+        UserResponse response = userService.createAdmin(request);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("CREATE_SUCCESS")
+                        .message("User created successfully")
                         .status(HttpStatus.OK)
                         .isSuccess(true)
                         .data(response)

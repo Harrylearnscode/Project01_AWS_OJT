@@ -1,6 +1,7 @@
 package Project01.AWS.MealPlan.service;
 
 
+import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
 import Project01.AWS.MealPlan.model.entities.User;
@@ -17,4 +18,5 @@ public interface UserService {
     void deleteUser(Long id); // safe delete
     PaginatedUserResponse getAllUsers(String search, Pageable pageable);
     UserResponse getUserById(Long id);
+    UserResponse createAdmin(AdminUserRequest request);
 }
