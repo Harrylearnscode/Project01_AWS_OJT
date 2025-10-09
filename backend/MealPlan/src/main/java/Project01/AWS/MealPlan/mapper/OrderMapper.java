@@ -12,7 +12,6 @@ public class OrderMapper {
                 .orderTime(entity.getOrderTime())
                 .endTime(entity.getEndTime())
                 .deliveryPrice(entity.getDeliveryPrice())
-                .ingredientsPrice(entity.getIngredientsPrice())
                 .totalPrice(entity.getTotalPrice())
                 .totalCalories(entity.getTotalCalories())
                 .status(entity.getStatus())

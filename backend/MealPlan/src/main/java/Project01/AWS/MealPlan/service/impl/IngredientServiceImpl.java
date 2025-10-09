@@ -3,16 +3,20 @@ package Project01.AWS.MealPlan.service.impl;
 import Project01.AWS.MealPlan.mapper.IngredientMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.IngredientRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.IngredientResponse;
-import Project01.AWS.MealPlan.model.entities.Ingredient;
+import Project01.AWS.MealPlan.model.entities.*;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.IngredientRepository;
 import Project01.AWS.MealPlan.service.IngredientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,5 +95,55 @@ public class IngredientServiceImpl implements IngredientService {
         } catch (Exception e) {
             throw new ActionFailedException("Failed to get ingredient");
         }
+    }
+
+    @Transactional
+    @Override
+    public void checkAndDeductStock(Set<CartDish> cartDishes) {
+        for (CartDish cd : cartDishes) {
+            for (CartIngredient ci : cd.getIngredients()) {
+
+                Ingredient ingredient = ingredientRepository.findById(ci.getIngredient().getIngredientId())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Ingredient not found: " + ci.getIngredient().getName()));
+
+                int totalRequired = ci.getQuantity() * cd.getQuantity();
+
+                if (ingredient.getStock() < totalRequired) {
+                    throw new RuntimeException("Out of stock: " + ingredient.getName());
+                }
+
+                ingredient.setStock(ingredient.getStock() - totalRequired);
+                ingredientRepository.save(ingredient);
+            }
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Override
+    public void restoreStockFromOrder(Order order) {
+        // Tính tổng số lượng cần trả về cho mỗi ingredient id
+        Map<Long, Integer> restoreMap = new HashMap<>();
+        for (OrderDish od : order.getOrderDishes()) {
+            for (OrderIngredient oi : od.getIngredients()) {
+                Long ingId = oi.getIngredient().getIngredientId();
+                restoreMap.merge(ingId, oi.getQuantity(), Integer::sum);
+            }
+        }
+
+        if (restoreMap.isEmpty()) return;
+
+        // Lấy tất cả ingredients 1 lần
+        List<Ingredient> ingredients = ingredientRepository.findAllById(restoreMap.keySet());
+
+        for (Ingredient ing : ingredients) {
+            Integer add = restoreMap.get(ing.getIngredientId());
+            if (add != null && add > 0) {
+                // Cẩn thận: kiểu stock có thể là int/long/BigDecimal tuỳ model
+                ing.setStock(ing.getStock() + add);
+            }
+        }
+
+        ingredientRepository.saveAll(ingredients);
     }
 }

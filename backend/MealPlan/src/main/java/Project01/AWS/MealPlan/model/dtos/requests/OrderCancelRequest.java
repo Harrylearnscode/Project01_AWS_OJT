@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderRequest {
-    private Long userId;
-    private String address;
-    private Double deliveryPrice;
-    private String phoneNumber;
+public class OrderCancelRequest {
+    String reason;
 }

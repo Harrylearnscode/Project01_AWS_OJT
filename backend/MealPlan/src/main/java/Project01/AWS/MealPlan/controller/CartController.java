@@ -162,23 +162,6 @@ public class CartController {
         );
     }
 
-    @Operation(summary = "Checkout giỏ hàng", description = "Tiến hành checkout giỏ hàng theo cartId và userId, tạo order và trừ kho.")
-    @PostMapping("/{userId}/checkout/{cartId}")
-    public ResponseEntity<ResponseObject> checkout(
-            @PathVariable Long userId,
-            @PathVariable Long cartId) {
-        cartService.checkout(cartId, userId);
-        return ResponseEntity.ok(
-                ResponseObject.builder()
-                        .code("CHECKOUT_SUCCESS")
-                        .message("Checkout successfully, order created")
-                        .status(HttpStatus.OK)
-                        .isSuccess(true)
-                        .data(null)
-                        .build()
-        );
-    }
-
     @Operation(summary = "Lấy tổng tiền của giỏ hàng")
     @GetMapping("/cart/{userId}/totalPrice")
     public ResponseEntity<ResponseObject> getCartTotalPrice(@PathVariable Long userId) {
