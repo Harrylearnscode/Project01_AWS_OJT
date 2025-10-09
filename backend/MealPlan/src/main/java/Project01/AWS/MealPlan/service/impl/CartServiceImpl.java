@@ -52,7 +52,7 @@ public class CartServiceImpl implements CartService {
             Cart saved = cartRepository.save(cart);
             return CartMapper.toResponse(saved);
         } catch (Exception e) {
-            throw new ActionFailedException("Failed to create cart");
+            throw new ActionFailedException("Failed to create cart" + e.getMessage());
         }
     }
 
@@ -283,110 +283,6 @@ public class CartServiceImpl implements CartService {
         CartDish cartDish = cartDishRepository.findById(cartDishId)
                 .orElseThrow(() -> new NotFoundException("Dish not found in cart"));
         cartDishRepository.delete(cartDish); // Hibernate cascade sẽ xóa nguyên liệu
-    }
-
-    public void checkout(Long cartId, Long userId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        Set<CartDish> cartDishes = cart.getCartDishes();
-
-        // 1. Check stock
-        for (CartDish cd : cartDishes) {
-            Dish dish = cd.getDish();
-
-            for (DishIngredient di : dish.getDishIngredients()) {
-                Ingredient ingredient = di.getIngredient();
-
-                int baseQty = di.getQuantity();
-                int delta = cd.getIngredients().stream()
-                        .filter(ci -> ci.getIngredient().equals(ingredient))
-                        .mapToInt(CartIngredient::getQuantity)
-                        .sum();
-
-                int requiredPerDish = baseQty + delta;
-                int totalRequired = requiredPerDish * cd.getQuantity();
-
-                if (ingredient.getStock() < totalRequired) {
-                    throw new RuntimeException("Out of stock: " + ingredient.getName());
-                }
-            }
-        }
-
-        // 2. Trừ stock
-        for (CartDish cd : cartDishes) {
-            Dish dish = cd.getDish();
-
-            for (DishIngredient di : dish.getDishIngredients()) {
-                Ingredient ingredient = di.getIngredient();
-
-                int baseQty = di.getQuantity();
-                int delta = cd.getIngredients().stream()
-                        .filter(ci -> ci.getIngredient().equals(ingredient))
-                        .mapToInt(CartIngredient::getQuantity)
-                        .sum();
-
-                int requiredPerDish = baseQty + delta;
-                int totalRequired = requiredPerDish * cd.getQuantity();
-
-                ingredient.setStock(ingredient.getStock() - totalRequired);
-                ingredientRepository.save(ingredient);
-            }
-        }
-
-        // 3. Tạo Order
-        Order order = Order.builder()
-                .user(cart.getUser())
-                .status(OrderStatus.PENDING)
-                .totalPrice(0.0)
-                .build();
-        orderRepository.save(order);
-
-        double totalPrice = 0.0;
-
-        // 4. Tạo OrderDish + OrderIngredient
-        for (CartDish cd : cartDishes) {
-            double adjustedDishPrice = cd.getDish().getPrice();
-
-            OrderDish od = OrderDish.builder()
-                    .order(order)
-                    .dish(cd.getDish())
-                    .quantity(cd.getQuantity())
-                    .build();
-            orderDishRepository.save(od);
-
-            for (DishIngredient di : cd.getDish().getDishIngredients()) {
-                Ingredient ingredient = di.getIngredient();
-
-                int baseQty = di.getQuantity();
-                int delta = cd.getIngredients().stream()
-                        .filter(ci -> ci.getIngredient().equals(ingredient))
-                        .mapToInt(CartIngredient::getQuantity)
-                        .sum();
-
-                int actualQty = baseQty + delta;
-
-                // Lưu OrderIngredient
-                OrderIngredient oi = OrderIngredient.builder()
-                        .orderDish(od)
-                        .ingredient(ingredient)
-                        .quantity(actualQty * cd.getQuantity())
-                        .build();
-                orderIngredientRepository.save(oi);
-
-                // tính tiền từ delta
-                adjustedDishPrice += delta * ingredient.getPrice();
-            }
-
-            totalPrice += adjustedDishPrice * cd.getQuantity();
-        }
-
-        order.setTotalPrice(totalPrice);
-        orderRepository.save(order);
-
-        // 5. Xóa cart
-        cart.getCartDishes().clear();
-        cartRepository.save(cart);
     }
 
     @Override

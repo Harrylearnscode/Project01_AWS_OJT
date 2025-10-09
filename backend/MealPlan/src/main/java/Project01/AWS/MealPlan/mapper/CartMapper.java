@@ -13,7 +13,7 @@ public class CartMapper {
         return CartResponse.builder()
                 .cartId(entity.getCartId())
                 .userId(entity.getUser().getUserId())
-                .dishes(entity.getDishes().stream()
+                .dishes(entity.getCartDishes().stream()
                         .map(CartDishMapper::toDTO)
                         .collect(Collectors.toSet()))
                 .build();

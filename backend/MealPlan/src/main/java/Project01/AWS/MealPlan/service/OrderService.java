@@ -10,7 +10,8 @@ import java.util.List;
 public interface OrderService {
     OrderResponse createOrder(OrderRequest request);
     OrderResponse updateStatus(Long orderId, String status);
-    void cancelOrder(Long orderId); // soft delete
     List<OrderResponse> getOrdersByUser(Long userId);
     PaginatedOrderResponse getAllOrders(String search, Pageable pageable);
+    OrderResponse checkout(OrderRequest request);
+    void cancelOrder(Long orderId, Long userId, String reason);
 }

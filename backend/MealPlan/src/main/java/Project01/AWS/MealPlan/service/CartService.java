@@ -17,7 +17,6 @@ public interface CartService {
     void addDishToCart(Long userId, AddDishToCartRequest request);
     void removeDishFromCart(Long cartDishId);
     void updateDishInCart(UpdateDishInCartRequest request);
-    void checkout(Long cartId, Long userId);
     Double getCartTotalPrice(Long userId);
     Double getCartTotalCalories(Long userId);
 }

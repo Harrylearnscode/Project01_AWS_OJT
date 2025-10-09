@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "customer_orders")
+@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,17 +23,21 @@ public class Order {
 
     private String address;
 
+    private String phoneNumber;
+
+    private String canceledReason;
+
     @Column(name = "order_time")
     private LocalDateTime orderTime;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
 
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @Column(name = "delivery_price")
     private Double deliveryPrice;
-
-    @Column(name = "ingredients_price")
-    private Double ingredientsPrice;
 
     @Column(name = "total_price")
     private Double totalPrice;

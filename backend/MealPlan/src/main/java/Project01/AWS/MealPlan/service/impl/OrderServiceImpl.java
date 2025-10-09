@@ -4,21 +4,27 @@ import Project01.AWS.MealPlan.mapper.OrderMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
-import Project01.AWS.MealPlan.model.entities.Order;
-import Project01.AWS.MealPlan.model.entities.User;
+import Project01.AWS.MealPlan.model.entities.*;
 import Project01.AWS.MealPlan.model.enums.OrderStatus;
-import Project01.AWS.MealPlan.repository.OrderRepository;
-import Project01.AWS.MealPlan.repository.UserRepository;
+import Project01.AWS.MealPlan.model.exception.NotFoundException;
+import Project01.AWS.MealPlan.repository.*;
+import Project01.AWS.MealPlan.service.IngredientService;
 import Project01.AWS.MealPlan.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +33,11 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
+    private final IngredientRepository ingredientRepository;
+    private final OrderDishRepository orderDishRepository;
+    private final OrderIngredientRepository orderIngredientRepository;
+    private final IngredientService ingredientService;
 
     @Override
     public OrderResponse createOrder(OrderRequest request) {
@@ -39,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderTime(LocalDateTime.now())
                 .status(OrderStatus.PENDING)
                 .deliveryPrice(request.getDeliveryPrice())
-                .ingredientsPrice(0.0) // sẽ tính sau
+                .phoneNumber(request.getPhoneNumber())
                 .totalPrice(request.getDeliveryPrice()) // = ingredientPrice + deliveryPrice
                 .build();
 
@@ -59,15 +70,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return OrderMapper.toDTO(orderRepository.save(order));
-    }
-
-    @Override
-    public void cancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
     }
 
     @Override
@@ -113,5 +115,130 @@ public class OrderServiceImpl implements OrderService {
                 .totalPages(orderPage.getTotalPages())
                 .currentPage(orderPage.getNumber())
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public OrderResponse checkout(OrderRequest request) {
+        Cart cart = cartRepository.findByUser_UserId(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        Set<CartDish> cartDishes = cart.getCartDishes();
+
+        ingredientService.checkAndDeductStock(cartDishes);
+
+        User user = cart.getUser();
+        String address = request.getAddress();
+        double deliveryPrice = request.getDeliveryPrice();
+
+        Order order = Order.builder()
+                .user(user)
+                .status(OrderStatus.PENDING)
+                .orderTime(LocalDateTime.now())
+                .address(address)
+                .deliveryPrice(deliveryPrice)
+                .totalPrice(0.0)
+                .totalCalories(0.0)
+                .phoneNumber(request.getPhoneNumber())
+                .build();
+        orderRepository.save(order);
+
+        for (CartDish cd : cartDishes) {
+            OrderDish od = OrderDish.builder()
+                    .order(order)
+                    .dish(cd.getDish())
+                    .quantity(cd.getQuantity())
+                    .build();
+            orderDishRepository.save(od);
+
+            for (CartIngredient ci : cd.getIngredients()) {
+                OrderIngredient oi = OrderIngredient.builder()
+                        .orderDish(od)
+                        .ingredient(ci.getIngredient())
+                        .quantity(ci.getQuantity() * cd.getQuantity())
+                        .build();
+                orderIngredientRepository.save(oi);
+            }
+        }
+
+        double subtotal = cartDishes.stream()
+                .mapToDouble(cd -> cd.getIngredients().stream()
+                        .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getPrice())
+                        .sum() * cd.getQuantity())
+                .sum();
+
+        double totalCalories = cartDishes.stream()
+                .mapToDouble(cd -> cd.getIngredients().stream()
+                        .mapToDouble(ci -> ci.getQuantity() * ci.getIngredient().getCalories())
+                        .sum() * cd.getQuantity())
+                .sum();
+
+        double finalTotal = subtotal + deliveryPrice;
+
+        order.setTotalPrice(finalTotal);
+        order.setTotalCalories(totalCalories);
+        orderRepository.save(order);
+
+        cart.getCartDishes().clear();
+        cartRepository.save(cart);
+
+        return OrderMapper.toDTO(orderRepository.save(order));
+    }
+
+    @Transactional
+    @Override
+    public void cancelOrder(Long orderId, Long userId, String reason) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if (!order.getUser().getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"You are not allowed to cancel this order.");
+        }
+
+        // tránh cancel lại nhiều lần
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order already cancelled.");
+        }
+
+        validateOrderCancelable(order);
+        validateUserCancelLimit(userId);
+
+        // 1) phục hồi stock cho các ingredient liên quan
+        ingredientService.restoreStockFromOrder(order);
+
+        // 2) cập nhật trạng thái order
+        order.setCanceledReason(reason);
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCanceledAt(LocalDateTime.now());
+        orderRepository.save(order);
+    }
+
+
+    private void validateUserCancelLimit(Long userId) {
+        long cancelCount = orderRepository.countByUser_UserIdAndStatusAndCanceledAtAfter(
+                userId, OrderStatus.CANCELLED, LocalDateTime.now().minusDays(1)
+        );
+        if (cancelCount >= 3) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only cancel up to 3 orders per day.");
+        }
+    }
+
+    @Scheduled(fixedRate = 60000) // 1 phút kiểm tra 1 lần
+    @Transactional
+    public void autoCancelUnpaidOrders() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
+        List<Order> unpaidOrders = orderRepository.findAllByStatusAndOrderTimeBefore(
+                OrderStatus.PENDING, threshold
+        );
+        for (Order order : unpaidOrders) {
+            order.setStatus(OrderStatus.CANCELLED);
+            order.setCanceledReason("Payment timeout");
+            orderRepository.save(order);
+        }
+    }
+
+    private void validateOrderCancelable(Order order) {
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Order cannot be canceled at this stage.");
+        }
     }
 }

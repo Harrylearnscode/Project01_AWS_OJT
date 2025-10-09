@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.controller;
 
+import Project01.AWS.MealPlan.model.dtos.requests.OrderCancelRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
@@ -54,17 +55,22 @@ public class OrderController {
     }
 
     @Operation(summary = "Hủy đơn hàng (soft delete)")
-    @DeleteMapping("/cancel/{orderId}")
-    public ResponseEntity<ResponseObject> cancelOrder(@PathVariable Long orderId) {
-        orderService.cancelOrder(orderId);
+    @PutMapping("/cancel/{orderId}")
+    public ResponseEntity<ResponseObject> cancelOrder(
+            @PathVariable Long orderId,
+            @RequestParam Long userId,
+            @RequestBody OrderCancelRequest cancelRequest) {
+
+        orderService.cancelOrder(orderId, userId, cancelRequest.getReason());
+
         return ResponseEntity.ok(ResponseObject.builder()
                 .code("CANCEL_SUCCESS")
                 .message("Order cancelled successfully")
                 .status(HttpStatus.OK)
                 .isSuccess(true)
-                .data(null)
                 .build());
     }
+
 
     @Operation(summary = "Lấy danh sách đơn hàng theo user")
     @GetMapping("/by-user/{userId}")
@@ -96,6 +102,20 @@ public class OrderController {
                 .status(HttpStatus.OK)
                 .isSuccess(true)
                 .data(orderResponse)
+                .build());
+    }
+
+    @Operation(summary = "Checkout giỏ hàng", description = "Tiến hành checkout giỏ hàng theo cartId và userId, tạo order và trừ kho.")
+    @PostMapping("/{userId}/checkout/{cartId}")
+    public ResponseEntity<ResponseObject> checkout(
+            @RequestBody OrderRequest request) {
+        OrderResponse response = orderService.checkout(request);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .code("CHECKOUT_SUCCESS")
+                .message("Order created successfully")
+                .status(HttpStatus.OK)
+                .isSuccess(true)
+                .data(response)
                 .build());
     }
 }

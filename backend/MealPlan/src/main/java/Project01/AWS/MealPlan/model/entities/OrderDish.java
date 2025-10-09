@@ -3,6 +3,9 @@ package Project01.AWS.MealPlan.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "orders_dishes",
         uniqueConstraints = {
@@ -27,4 +30,8 @@ public class OrderDish {
     private Dish dish;
 
     private Integer quantity;
+
+    @OneToMany(mappedBy = "orderDish", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<OrderIngredient> ingredients = new HashSet<>();
 }
