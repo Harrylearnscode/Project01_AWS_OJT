@@ -3,9 +3,12 @@ package Project01.AWS.MealPlan.controller;
 import Project01.AWS.MealPlan.constants.MomoParameter;
 import Project01.AWS.MealPlan.model.dtos.requests.CreateMomoRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CreateMomoResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.MomoIpnResponse;
 import Project01.AWS.MealPlan.service.MomoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -28,10 +31,10 @@ public CreateMomoResponse createQR(@RequestBody CreateMomoRequest createMomoRequ
     public CreateMomoResponse createForOrder(@PathVariable Long orderId) {
         return momoService.createQR(orderId);
     }
-/*
-    @GetMapping("ipn-handler")
-    public String ipnHandler(@RequestParam Map<String, String> request) {
-        Integer resultCode = Integer.valueOf(request.get(MomoParameter.RESULT_CODE));
-        return resultCode == 0 ? "Success" : "Failed" ;
-    }*/
+    @PostMapping("/ipn-handler")
+    public ResponseEntity<Void> ipnHandler(@RequestBody MomoIpnResponse ipnResponse) {
+        momoService.processIpn(ipnResponse);
+        // Acknowledge receipt to Momo. Do not include a body.
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

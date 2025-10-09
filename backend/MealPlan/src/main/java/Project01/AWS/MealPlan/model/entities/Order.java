@@ -41,6 +41,9 @@ public class Order {
     @Column(name = "total_calories")
     private Double totalCalories;
 
+    @Column(name = "paid_time")
+    private LocalDateTime paidTime;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;

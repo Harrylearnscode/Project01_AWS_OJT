@@ -1,10 +1,13 @@
 package Project01.AWS.MealPlan.service.impl;
 
+import Project01.AWS.MealPlan.Configs.MomoConfig;
 import Project01.AWS.MealPlan.client.MomoAPI;
 import Project01.AWS.MealPlan.controller.MomoController;
 import Project01.AWS.MealPlan.model.dtos.requests.CreateMomoRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CreateMomoResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.MomoIpnResponse;
 import Project01.AWS.MealPlan.model.entities.Order;
+import Project01.AWS.MealPlan.model.enums.OrderStatus;
 import Project01.AWS.MealPlan.repository.OrderRepository;
 import Project01.AWS.MealPlan.service.MomoService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -45,6 +49,7 @@ public class MomoServiceImpl implements MomoService {
 
     private final MomoAPI momoAPI;
     private final OrderRepository orderRepository;
+    private final MomoConfig momoConfig;
 
     private String signHmacSHA256(String data, String key) throws Exception {
         Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
@@ -80,6 +85,10 @@ public class MomoServiceImpl implements MomoService {
                 .encodeToString(("orderId=" + order.getOrderId()).getBytes(StandardCharsets.UTF_8));
 
         long amount = Math.max(0, Math.round(order.getTotalPrice() == null ? 0.0 : order.getTotalPrice()));
+
+//        order.setStatus(OrderStatus.PAID);
+//
+//        order.setPaidTime(LocalDateTime.now());
 
         String rawSignature = String.format(
                 "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
@@ -118,5 +127,56 @@ public class MomoServiceImpl implements MomoService {
                 .lang("vi")
                 .build();
         return momoAPI.createMomoQr(request);
+    }
+
+    @Override
+    public void processIpn(MomoIpnResponse ipnResponse) {
+        // 1. Validate Signature
+        String rawSignature = String.format(
+                "accessKey=%s&amount=%s&extraData=%s&message=%s&orderId=%s&orderInfo=%s&orderType=%s&partnerCode=%s&payType=%s&requestId=%s&responseTime=%s&resultCode=%s&transId=%s",
+                momoConfig.getAccessKey(), ipnResponse.getAmount(), ipnResponse.getExtraData(), ipnResponse.getMessage(),
+                ipnResponse.getOrderId(), ipnResponse.getOrderInfo(), ipnResponse.getOrderType(), ipnResponse.getPartnerCode(),
+                ipnResponse.getPayType(), ipnResponse.getRequestId(), ipnResponse.getResponseTime(), ipnResponse.getResultCode(),
+                ipnResponse.getTransId()
+        );
+
+        String signature;
+        try {
+            signature = signHmacSHA256(rawSignature, momoConfig.getSecretKey());
+        } catch (Exception e) {
+            log.error("Failed to generate signature for IPN validation", e);
+            return;
+        }
+
+        if (!signature.equals(ipnResponse.getSignature())) {
+            log.warn("IPN signature validation failed for orderId: {}", ipnResponse.getOrderId());
+            return;
+        }
+
+        // 2. Check Result Code
+        if (ipnResponse.getResultCode() == 0) {
+            // 3. Update Order Status
+            try {
+                String decodedExtraData = new String(Base64.getDecoder().decode(ipnResponse.getExtraData()), StandardCharsets.UTF_8);
+                String[] parts = decodedExtraData.split("=");
+                if (parts.length == 2 && "orderId".equals(parts[0])) {
+                    Long orderId = Long.parseLong(parts[1]);
+                    Order order = orderRepository.findById(orderId)
+                            .orElseThrow(() -> new IllegalArgumentException("Order not found from IPN: " + orderId));
+
+                    if (order.getStatus() != OrderStatus.PAID) {
+                        order.setStatus(OrderStatus.PAID);
+                        order.setPaidTime(LocalDateTime.now());
+                        orderRepository.save(order);
+                        log.info("Order {} has been paid successfully.", orderId);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error processing successful IPN for Momo orderId: {}", ipnResponse.getOrderId(), e);
+            }
+        } else {
+            log.warn("Received failed IPN for Momo orderId: {}. ResultCode: {}", ipnResponse.getOrderId(), ipnResponse.getResultCode());
+            // Optionally, handle failed payments (e.g., set order status to FAILED)
+        }
     }
 }
