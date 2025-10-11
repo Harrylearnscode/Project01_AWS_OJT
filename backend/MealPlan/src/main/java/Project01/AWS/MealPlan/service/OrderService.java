@@ -1,6 +1,8 @@
 package Project01.AWS.MealPlan.service;
 
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
+import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.OrderDetailResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +16,5 @@ public interface OrderService {
     PaginatedOrderResponse getAllOrders(String search, Pageable pageable);
     OrderResponse checkout(OrderRequest request);
     void cancelOrder(Long orderId, Long userId, String reason);
+    OrderDetailResponse getOrderByOrderId(Long orderId);
 }

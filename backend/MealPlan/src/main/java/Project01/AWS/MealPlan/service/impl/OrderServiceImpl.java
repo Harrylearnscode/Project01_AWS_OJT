@@ -1,12 +1,12 @@
 package Project01.AWS.MealPlan.service.impl;
 
+import Project01.AWS.MealPlan.mapper.CartMapper;
 import Project01.AWS.MealPlan.mapper.OrderMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
-import Project01.AWS.MealPlan.model.dtos.responses.CreateMomoResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.*;
 import Project01.AWS.MealPlan.model.entities.*;
 import Project01.AWS.MealPlan.model.enums.OrderStatus;
+import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.*;
 import Project01.AWS.MealPlan.service.IngredientService;
@@ -249,6 +249,17 @@ public class OrderServiceImpl implements OrderService {
     private void validateOrderCancelable(Order order) {
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Order cannot be canceled at this stage.");
+        }
+    }
+
+    @Override
+    public OrderDetailResponse getOrderByOrderId(Long orderId) {
+        try {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found"));
+            return OrderMapper.toResponse(order);
+        } catch (Exception e) {
+            throw new ActionFailedException(String.format("Failed to get order with ID: %s", orderId));
         }
     }
 }

@@ -2,10 +2,8 @@ package Project01.AWS.MealPlan.controller;
 
 import Project01.AWS.MealPlan.model.dtos.requests.OrderCancelRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
-import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.*;
 import Project01.AWS.MealPlan.service.OrderService;
-import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -117,5 +115,20 @@ public class OrderController {
                 .isSuccess(true)
                 .data(response)
                 .build());
+    }
+
+    @Operation(summary = "Lấy đơn hàng theo id", description = "Trả về thông tin đơn hàng theo id.")
+    @GetMapping("/getByOrderId/{orderId}")
+    public ResponseEntity<ResponseObject> getOrderById(@PathVariable Long orderId) {
+        OrderDetailResponse response = orderService.getOrderByOrderId(orderId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_SUCCESS")
+                        .message("Get order successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(response)
+                        .build()
+        );
     }
 }
