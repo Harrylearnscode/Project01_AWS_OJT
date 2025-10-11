@@ -24,4 +24,5 @@ public class OrderResponse {
     private OrderStatus status;
     private Long userId;
     private String userName;
+    private String payUrl;
 }

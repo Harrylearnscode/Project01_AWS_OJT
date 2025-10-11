@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.OrderMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
+import Project01.AWS.MealPlan.model.dtos.responses.CreateMomoResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.entities.*;
@@ -9,6 +10,7 @@ import Project01.AWS.MealPlan.model.enums.OrderStatus;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.*;
 import Project01.AWS.MealPlan.service.IngredientService;
+import Project01.AWS.MealPlan.service.MomoService;
 import Project01.AWS.MealPlan.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -38,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDishRepository orderDishRepository;
     private final OrderIngredientRepository orderIngredientRepository;
     private final IngredientService ingredientService;
+    private final MomoService momoService;
 
     @Override
     public OrderResponse createOrder(OrderRequest request) {
@@ -178,10 +181,17 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalCalories(totalCalories);
         orderRepository.save(order);
 
+        CreateMomoResponse momoResponse = momoService.createQR(order.getOrderId());
+        String payUrl = momoResponse.getPayUrl();
+
+        OrderResponse orderResponse = OrderMapper.toDTO(order);
+        orderResponse.setPayUrl(payUrl);
+
         cart.getCartDishes().clear();
         cartRepository.save(cart);
 
-        return OrderMapper.toDTO(orderRepository.save(order));
+//        return OrderMapper.toDTO(orderRepository.save(order));
+        return orderResponse;
     }
 
     @Transactional
