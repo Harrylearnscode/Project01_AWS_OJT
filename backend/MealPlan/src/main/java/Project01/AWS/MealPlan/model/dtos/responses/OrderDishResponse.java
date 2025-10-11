@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class OrderDishResponse {
     private Long dishId;
     private String dishName;
     private Integer quantity;
+    private Set<OrderIngredientResponse> ingredients;
 }
