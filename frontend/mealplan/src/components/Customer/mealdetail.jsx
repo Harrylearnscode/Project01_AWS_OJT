@@ -120,10 +120,20 @@ const price = (ingredients, ingredientQuantities) => {
     })
   }
 
-  const calculateTotalKcal = () => {
-    if (!meal?.dishIngredients) return 0
-    return meal.dishIngredients.length * 50
+  const calculateTotalKcal = (ingredients, ingredientQuantities) => {
+    if (!ingredients) return 0;
+    return ingredients.reduce((total, ing, index) => {
+    const ingredientId = ing.ingredientId || index;
+    const currentData = ingredientQuantities[ingredientId];
+
+    const ingQuantity = currentData?.quantity || ing.quantity || 0;
+    const ingPrice = Number(ing.calories || 0) * Number(ingQuantity);
+
+    return total + ingPrice;
+  }, 0);
   }
+
+
 
   const handleRelatedMealClick = (mealId) => {
     navigate(`/customer/mealdetail/${mealId}`)
@@ -236,7 +246,7 @@ const price = (ingredients, ingredientQuantities) => {
                 Estimated Nutrition
               </h3>
               <p className="text-2xl font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
-                {calculateTotalKcal()} kcal
+                {calculateTotalKcal(meal.dishIngredients, ingredientQuantities)} kcal
               </p>
             </div>
 

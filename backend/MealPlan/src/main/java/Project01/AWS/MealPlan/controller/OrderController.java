@@ -106,7 +106,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Checkout giỏ hàng", description = "Tiến hành checkout giỏ hàng theo cartId và userId, tạo order và trừ kho.")
-    @PostMapping("/{userId}/checkout/{cartId}")
+    @PostMapping("/checkout")
     public ResponseEntity<ResponseObject> checkout(
             @RequestBody OrderRequest request) {
         OrderResponse response = orderService.checkout(request);
