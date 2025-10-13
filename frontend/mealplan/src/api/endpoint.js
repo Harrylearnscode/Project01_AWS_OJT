@@ -13,6 +13,9 @@ const APIENDPOINTS = {
     },
     ORDER: {
         CREATE_ORDER: '/orders/checkout',
+        GET_ALL_CUSTOMER_ORDERS: (customerId) => `/orders/by-user/${customerId}`,
+        GET_ORDER_DETAIL: (orderId) => `/orders/getByOrderId/${orderId}`,
+        CANCEL_ORDER: (orderId) => `/api/orders/cancel/${orderId}`,
     },
     SHOPPINGCART: {
         ADD_TO_CART: (id) => `/carts/${id}/add`,

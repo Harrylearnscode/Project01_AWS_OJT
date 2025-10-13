@@ -60,6 +60,9 @@ export default function CustomerLayout() {
               >
                 Thực đơn
               </Link>
+              <Link to="odershistory" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                Đơn hàng
+              </Link>
               <Link
                 to="shoppingCart"
                 className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-2"
@@ -134,6 +137,9 @@ export default function CustomerLayout() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Thực đơn
+              </Link>
+              <Link to="orders" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                Đơn hàng
               </Link>
               <Link
                 to="shoppingCart"

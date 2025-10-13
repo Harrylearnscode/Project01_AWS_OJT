@@ -13,6 +13,8 @@ import CustomerMealDetail from "./components/Customer/mealdetail.jsx";
 import Checkout from "./components/Customer/Checkout.jsx"; 
 import Register from "./components/auth/registerpage.jsx";
 import Verify from "./components/auth/verify.jsx";
+import OrderDetail from "./components/Customer/OrderDetail.jsx";
+import OrderHistory from "./components/Customer/OrdersHistory.jsx";
 
 
 export function PrivateRoute({ children }) {
@@ -42,6 +44,8 @@ function App() {
           <Route path="shoppingCart" element={<ShoppingCart />} />
           <Route path="mealdetail/:id" element={<CustomerMealDetail />} />
           <Route path="checkout" element={<CustomerMealDetail />} />
+          <Route path="odershistory" element={<OrderHistory />} />
+          <Route path="odersdetail/:orderId" element={<OrderDetail/>} />
         </Route>
 
         {/* Seller Routes */}
