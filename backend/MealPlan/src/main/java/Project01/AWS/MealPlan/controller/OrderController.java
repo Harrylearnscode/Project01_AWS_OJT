@@ -131,4 +131,19 @@ public class OrderController {
                         .build()
         );
     }
+
+    @Operation(summary = "Lấy status đơn hàng theo id", description = "Trả về status đơn hàng theo id.")
+    @GetMapping("/getOrderStatusByOrderId/{orderId}")
+    public ResponseEntity<ResponseObject> getOrderStatusById(@PathVariable Long orderId) {
+        OrderStatusResponse response = orderService.getOrderStatusByOrderId(orderId);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_SUCCESS")
+                        .message("Get order successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(response)
+                        .build()
+        );
+    }
 }

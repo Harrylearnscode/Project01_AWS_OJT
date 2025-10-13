@@ -262,4 +262,12 @@ public class OrderServiceImpl implements OrderService {
             throw new ActionFailedException(String.format("Failed to get order with ID: %s", orderId));
         }
     }
+
+    @Override
+    public OrderStatusResponse getOrderStatusByOrderId(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        return OrderMapper.toStatusResponse(order);
+    }
 }
