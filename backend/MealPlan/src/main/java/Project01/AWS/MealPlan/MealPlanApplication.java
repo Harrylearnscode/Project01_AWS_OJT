@@ -13,9 +13,5 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableFeignClients
 @EnableScheduling
 public class MealPlanApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(MealPlanApplication.class, args);
-	}
-
+	public static void main(String[] args) {SpringApplication.run(MealPlanApplication.class, args);}
 }
