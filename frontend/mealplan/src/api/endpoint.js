@@ -11,7 +11,9 @@ const APIENDPOINTS = {
         GET_DISH_DETAIL: (id)=> `/dishes/getById/${id}`,
         GET_RELATED_DISHES: (id)=> `/dishes/${id}/related`,
     },
-    ORDER: {},
+    ORDER: {
+        CREATE_ORDER: '/orders/checkout',
+    },
     SHOPPINGCART: {
         ADD_TO_CART: (id) => `/carts/${id}/add`,
         GET_ALL_CART_ITEMS: (userID) => `/cart-dish/getByCart/${userID}`,
