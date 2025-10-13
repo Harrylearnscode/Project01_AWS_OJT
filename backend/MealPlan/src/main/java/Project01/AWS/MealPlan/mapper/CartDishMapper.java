@@ -12,6 +12,7 @@ public class CartDishMapper {
                 .dishId(entity.getDish().getDishId())
                 .dishName(entity.getDish().getName())
                 .quantity(entity.getQuantity())
+                .imgUrl(entity.getDish().getImgUrl())
                 .build();
     }
 }

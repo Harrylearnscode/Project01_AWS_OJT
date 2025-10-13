@@ -4,6 +4,7 @@ import Project01.AWS.MealPlan.model.dtos.responses.OrderDetailResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderDishResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderIngredientResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.OrderStatusResponse;
 import Project01.AWS.MealPlan.model.entities.Order;
 
 import java.util.stream.Collectors;
@@ -22,6 +23,14 @@ public class OrderMapper {
                 .status(entity.getStatus())
                 .userId(entity.getUser().getUserId())
                 .userName(entity.getUser().getName())
+                .build();
+    }
+
+    public static OrderStatusResponse toStatusResponse(Order order) {
+        if (order == null) return null;
+        return OrderStatusResponse.builder()
+                .orderId(order.getOrderId())
+                .status(order.getStatus())
                 .build();
     }
 
@@ -48,6 +57,7 @@ public class OrderMapper {
                                 .dishId(od.getDish().getDishId())
                                 .dishName(od.getDish().getName())
                                 .quantity(od.getQuantity())
+                                .imgUrl(od.getDish().getImgUrl())
                                 .ingredients(od.getIngredients().stream()
                                         .map(oi -> OrderIngredientResponse.builder()
                                                 .id(oi.getId())

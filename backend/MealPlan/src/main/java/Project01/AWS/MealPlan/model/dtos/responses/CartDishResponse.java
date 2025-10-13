@@ -15,4 +15,5 @@ public class CartDishResponse {
     private Long dishId;
     private String dishName;
     private Integer quantity;
+    private String imgUrl;
 }

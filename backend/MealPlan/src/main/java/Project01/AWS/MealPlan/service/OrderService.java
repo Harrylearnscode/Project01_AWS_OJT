@@ -1,10 +1,7 @@
 package Project01.AWS.MealPlan.service;
 
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
-import Project01.AWS.MealPlan.model.dtos.responses.CartResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.OrderDetailResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.OrderResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
+import Project01.AWS.MealPlan.model.dtos.responses.*;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -17,4 +14,5 @@ public interface OrderService {
     OrderResponse checkout(OrderRequest request);
     void cancelOrder(Long orderId, Long userId, String reason);
     OrderDetailResponse getOrderByOrderId(Long orderId);
+    OrderStatusResponse getOrderStatusByOrderId(Long orderId);
 }
