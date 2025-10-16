@@ -9,6 +9,7 @@ import Project01.AWS.MealPlan.model.enums.OrderStatus;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.*;
+import Project01.AWS.MealPlan.service.CartService;
 import Project01.AWS.MealPlan.service.IngredientService;
 import Project01.AWS.MealPlan.service.MomoService;
 import Project01.AWS.MealPlan.service.OrderService;
@@ -41,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderIngredientRepository orderIngredientRepository;
     private final IngredientService ingredientService;
     private final MomoService momoService;
+    private final CartService cartService;
 
     @Override
     public OrderResponse createOrder(OrderRequest request) {
@@ -186,6 +188,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderResponse orderResponse = OrderMapper.toDTO(order);
         orderResponse.setPayUrl(payUrl);
+//xoa giỏ hàng
+//        cart.getCartDishes().clear();
+//        cartRepository.save(cart);
 
 //        return OrderMapper.toDTO(orderRepository.save(order));
         return orderResponse;

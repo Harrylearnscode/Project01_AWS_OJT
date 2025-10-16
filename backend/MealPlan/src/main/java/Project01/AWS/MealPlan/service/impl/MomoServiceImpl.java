@@ -6,8 +6,10 @@ import Project01.AWS.MealPlan.controller.MomoController;
 import Project01.AWS.MealPlan.model.dtos.requests.CreateMomoRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.CreateMomoResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.MomoIpnResponse;
+import Project01.AWS.MealPlan.model.entities.Cart;
 import Project01.AWS.MealPlan.model.entities.Order;
 import Project01.AWS.MealPlan.model.enums.OrderStatus;
+import Project01.AWS.MealPlan.repository.CartRepository;
 import Project01.AWS.MealPlan.repository.OrderRepository;
 import Project01.AWS.MealPlan.service.MomoService;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ public class MomoServiceImpl implements MomoService {
     private final MomoAPI momoAPI;
     private final OrderRepository orderRepository;
     private final MomoConfig momoConfig;
+    private final CartRepository cartRepository;
 
     private String signHmacSHA256(String data, String key) throws Exception {
         Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
@@ -169,6 +172,14 @@ public class MomoServiceImpl implements MomoService {
                         order.setPaidTime(LocalDateTime.now());
                         orderRepository.save(order);
                         log.info("Order {} has been paid successfully.", orderId);
+                    }
+                    // Clear the user's cart
+                    Cart cart = cartRepository.findByUser_UserId(order.getUser().getUserId())
+                            .orElse(null);
+                    if (cart != null) {
+                        cart.getCartDishes().clear();
+                        cartRepository.save(cart);
+                        log.info("Cart cleared for user {}", order.getUser().getUserId());
                     }
                 }
             } catch (Exception e) {
