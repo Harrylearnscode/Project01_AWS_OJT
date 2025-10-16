@@ -187,9 +187,6 @@ public class OrderServiceImpl implements OrderService {
         OrderResponse orderResponse = OrderMapper.toDTO(order);
         orderResponse.setPayUrl(payUrl);
 
-        cart.getCartDishes().clear();
-        cartRepository.save(cart);
-
 //        return OrderMapper.toDTO(orderRepository.save(order));
         return orderResponse;
     }
