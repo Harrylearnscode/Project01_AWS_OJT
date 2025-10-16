@@ -237,8 +237,12 @@ public class OrderServiceImpl implements OrderService {
                 OrderStatus.PENDING, threshold
         );
         for (Order order : unpaidOrders) {
+            ingredientService.restoreStockFromOrder(order);
+
             order.setStatus(OrderStatus.CANCELLED);
             order.setCanceledReason("Payment timeout");
+            order.setCanceledAt(LocalDateTime.now());
+
             orderRepository.save(order);
         }
     }
