@@ -23,7 +23,7 @@ const CartService = {
         console.log("CartService -> getMealPrice -> response", response.data)
         return response.data.data
     },
-    updateCartItem: async (cartDishId, quantity) => {
+    updateCartItemQuantity: async (cartDishId, quantity) => {
         const response = await axiosInstance.put(APIENDPOINTS.SHOPPINGCART.UPDATE_CART_ITEM(cartDishId, quantity))
         console.log("CartService -> updateCartItem -> response", response.data.data)
         return response.data.data

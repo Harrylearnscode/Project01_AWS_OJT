@@ -127,9 +127,9 @@ const price = (ingredients, ingredientQuantities) => {
     const currentData = ingredientQuantities[ingredientId];
 
     const ingQuantity = currentData?.quantity || ing.quantity || 0;
-    const ingPrice = Number(ing.calories || 0) * Number(ingQuantity);
+    const ingCalories = Number(ing.calories || 0) * Number(ingQuantity);
 
-    return total + ingPrice;
+    return total + ingCalories;
   }, 0);
   }
 

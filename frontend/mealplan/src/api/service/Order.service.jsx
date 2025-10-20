@@ -6,7 +6,7 @@ const OrderService = {
     createOrder: async (orderData) => {
         const response = await axiosInstance.post(APIENDPOINTS.ORDER.CREATE_ORDER, orderData)
         console.log("OrderService -> createOrder -> response", response.data)
-        return response.data
+        return response.data.data
     },
     getUserOrders: async () => {
         const currentUser = JSON.parse(localStorage.getItem("currentUser"))
@@ -26,12 +26,20 @@ const OrderService = {
         console.log("OrderService -> getOrderDetail -> response", response.data)
         return response.data.data
     },
-    cancelOrder: async (orderId, reason) => {
+    cancelOrder: async (orderId, userid, reason) => {
         if (!orderId) {
             throw new Error("Order ID is required")
         }
-        const response = await axiosInstance.post(APIENDPOINTS.ORDER.CANCEL_ORDER(orderId), { reason })
+        const response = await axiosInstance.put(APIENDPOINTS.ORDER.CANCEL_ORDER(orderId,userid), { reason })
         console.log("OrderService -> cancelOrder -> response", response.data)
+        return response.data.data
+    },
+    getOrderStatus: async (orderId) => {
+        if (!orderId) {
+            throw new Error("Order ID is required")
+        }
+        const response = await axiosInstance.get(APIENDPOINTS.ORDER.GET_ORDER_STATUS(orderId))
+        console.log("OrderService -> getOrderStatus -> response", response.data)
         return response.data.data
     }
 }
