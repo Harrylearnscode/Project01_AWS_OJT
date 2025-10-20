@@ -104,9 +104,13 @@ public class OrderServiceImpl implements OrderService {
                 validatedSort
         );
 
-        Page<Order> orderPage = (search != null && !search.isBlank())
-                ? orderRepository.searchOrders(search, validatedPageable)
-                : orderRepository.findAll(validatedPageable);
+        Page<Order> orderPage;
+
+        if (search != null && !search.isBlank()) {
+            orderPage = orderRepository.searchOrdersByStatus(search, OrderStatus.PAID, validatedPageable);
+        } else {
+            orderPage = orderRepository.findByStatus(OrderStatus.PAID, validatedPageable);
+        }
 
         List<OrderResponse> orderDTOs = orderPage.stream()
                 .map(OrderMapper::toDTO)

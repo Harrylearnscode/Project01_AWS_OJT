@@ -14,8 +14,18 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUser_UserId(Long userId);
-    @Query("SELECT c FROM Order c WHERE LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Order> searchOrders(@Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+    SELECT c FROM Order c
+    WHERE c.status = :status
+      AND CAST(c.orderId AS string) LIKE CONCAT('%', :keyword, '%')
+""")
+    Page<Order> searchOrdersByStatus(
+            @Param("keyword") String keyword,
+            @Param("status") OrderStatus status,
+            Pageable pageable
+    );
+
+    Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
     // 🧮 Đếm số đơn hủy gần đây của user
     long countByUser_UserIdAndStatusAndCanceledAtAfter(Long userId, OrderStatus status, LocalDateTime after);
