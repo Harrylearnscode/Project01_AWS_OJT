@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.model.dtos.requests;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,7 +15,9 @@ public class DishRequest {
     private Integer prepareTime;
     private Integer cookingTime;
     private Integer totalTime;
-    private String imgUrl;
     private Long countryId;
     private Set<Long> typeIds;
+
+    private List<DishIngredientRequest> dishIngredients;
+    private List<RecipeRequest> recipes;
 }

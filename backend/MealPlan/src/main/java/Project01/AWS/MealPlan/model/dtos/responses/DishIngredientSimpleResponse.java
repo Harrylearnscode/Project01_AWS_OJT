@@ -14,7 +14,4 @@ public class DishIngredientSimpleResponse {
     private Long ingredientId;;
     private String ingredient;
     private Integer quantity;
-    private String unit;
-    private Double price;
-    private Double calories;
 }

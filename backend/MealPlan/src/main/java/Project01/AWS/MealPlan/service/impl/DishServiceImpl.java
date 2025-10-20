@@ -1,18 +1,16 @@
 package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.DishMapper;
+import Project01.AWS.MealPlan.model.dtos.requests.DishIngredientRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.DishRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.RecipeRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
-import Project01.AWS.MealPlan.model.entities.Country;
-import Project01.AWS.MealPlan.model.entities.Dish;
-import Project01.AWS.MealPlan.model.entities.Type;
+import Project01.AWS.MealPlan.model.entities.*;
 import Project01.AWS.MealPlan.model.enums.DishStatus;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
-import Project01.AWS.MealPlan.repository.CountryRepository;
-import Project01.AWS.MealPlan.repository.DishRepository;
-import Project01.AWS.MealPlan.repository.TypeRepository;
+import Project01.AWS.MealPlan.repository.*;
 import Project01.AWS.MealPlan.service.DishService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,61 +29,131 @@ public class DishServiceImpl implements DishService {
     private final DishRepository dishRepository;
     private final CountryRepository countryRepository;
     private final TypeRepository typeRepository;
+    private final IngredientRepository ingredientRepository;
 
+    @Transactional
     @Override
     public DishResponse createDish(DishRequest request) {
-        try {
-            Country country = countryRepository.findById(request.getCountryId())
-                    .orElseThrow(() -> new NotFoundException("Country not found"));
+        Country country = countryRepository.findById(request.getCountryId())
+                .orElseThrow(() -> new NotFoundException("Country not found"));
 
-            Dish dish = Dish.builder()
-                    .name(request.getName())
-                    .description(request.getDescription())
-                    .prepareTime(request.getPrepareTime())
-                    .cookingTime(request.getCookingTime())
-                    .totalTime(request.getTotalTime())
-                    .imgUrl(request.getImgUrl())
-                    .status(DishStatus.ACTIVE)
-                    .country(country)
-                    .build();
+        Dish dish = Dish.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .prepareTime(request.getPrepareTime())
+                .cookingTime(request.getCookingTime())
+                .totalTime(request.getTotalTime())
+                .status(DishStatus.ACTIVE)
+                .country(country)
+                .build();
 
-            if (request.getTypeIds() != null && !request.getTypeIds().isEmpty()) {
-                dish.setDishTypes(new HashSet<>(typeRepository.findAllById(request.getTypeIds())));
-            }
-
-            Dish saved = dishRepository.save(dish);
-            return DishMapper.toResponse(saved);
-        } catch (Exception e) {
-            throw new ActionFailedException("Failed to create dish");
+        if (request.getTypeIds() != null && !request.getTypeIds().isEmpty()) {
+            dish.setDishTypes(new HashSet<>(typeRepository.findAllById(request.getTypeIds())));
         }
+
+        if (request.getDishIngredients() != null) {
+            for (DishIngredientRequest diReq : request.getDishIngredients()) {
+                Ingredient ingredient = ingredientRepository.findById(diReq.getIngredientId())
+                        .orElseThrow(() -> new NotFoundException("Ingredient not found"));
+
+                dish.getDishIngredients().add(
+                        DishIngredient.builder()
+                                .dish(dish)
+                                .ingredient(ingredient)
+                                .quantity(diReq.getQuantity())
+                                .build()
+                );
+            }
+        }
+
+        if (request.getRecipes() != null) {
+            for (RecipeRequest rReq : request.getRecipes()) {
+                dish.getRecipes().add(
+                        Recipe.builder()
+                                .dish(dish)
+                                .type(rReq.getType())
+                                .step(rReq.getStep())
+                                .content(rReq.getContent())
+                                .build()
+                );
+            }
+        }
+
+        Dish savedDish = dishRepository.save(dish);
+
+        return DishMapper.toResponse(savedDish);
     }
 
+    @Transactional
     @Override
     public DishResponse updateDish(Long id, DishRequest request) {
+        // ===== 1. Lấy dish hiện có =====
         Dish existing = dishRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Dish not found"));
 
         Country country = countryRepository.findById(request.getCountryId())
                 .orElseThrow(() -> new NotFoundException("Country not found"));
 
+        // ===== 2. Cập nhật thông tin cơ bản =====
         existing.setName(request.getName());
         existing.setDescription(request.getDescription());
         existing.setPrepareTime(request.getPrepareTime());
         existing.setCookingTime(request.getCookingTime());
         existing.setTotalTime(request.getTotalTime());
-        existing.setImgUrl(request.getImgUrl());
         existing.setCountry(country);
 
+        // ===== 3. Cập nhật type =====
         if (request.getTypeIds() != null && !request.getTypeIds().isEmpty()) {
             existing.setDishTypes(new HashSet<>(typeRepository.findAllById(request.getTypeIds())));
+        } else {
+            existing.getDishTypes().clear();
         }
 
-        try {
-            Dish updated = dishRepository.save(existing);
-            return DishMapper.toResponse(updated);
-        } catch (Exception e) {
-            throw new ActionFailedException("Failed to update dish");
+        // ===== 4. Cập nhật DishIngredients =====
+        existing.getDishIngredients().clear();
+
+        if (request.getDishIngredients() != null && !request.getDishIngredients().isEmpty()) {
+            for (DishIngredientRequest diReq : request.getDishIngredients()) {
+                Ingredient ingredient = ingredientRepository.findById(diReq.getIngredientId())
+                        .orElseThrow(() -> new NotFoundException("Ingredient not found"));
+
+                existing.getDishIngredients().add(
+                        DishIngredient.builder()
+                                .dish(existing)
+                                .ingredient(ingredient)
+                                .quantity(diReq.getQuantity())
+                                .build()
+                );
+            }
+
+            double totalPrice = existing.getDishIngredients().stream()
+                    .mapToDouble(di -> di.getQuantity() * di.getIngredient().getPrice())
+                    .sum();
+            existing.setPrice(totalPrice);
+        } else {
+            existing.setPrice(0.0);
         }
+
+        // ===== 5. Cập nhật Recipes =====
+        existing.getRecipes().clear();
+
+        if (request.getRecipes() != null && !request.getRecipes().isEmpty()) {
+            for (RecipeRequest rReq : request.getRecipes()) {
+                existing.getRecipes().add(
+                        Recipe.builder()
+                                .dish(existing)
+                                .type(rReq.getType())
+                                .step(rReq.getStep())
+                                .content(rReq.getContent())
+                                .build()
+                );
+            }
+        }
+
+        // ===== 6. Lưu lại toàn bộ =====
+        Dish updated = dishRepository.save(existing);
+
+        return DishMapper.toResponse(updated);
     }
 
     @Override
