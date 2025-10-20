@@ -10,6 +10,7 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true)
   const [cancelingOrderId, setCancelingOrderId] = useState(null)
   const navigate = useNavigate()
+  const user = JSON.parse(localStorage.getItem("currentUser"))
 
   useEffect(() => {
     loadOrders()
@@ -38,7 +39,7 @@ const OrderHistory = () => {
 
     try {
       setCancelingOrderId(orderId)
-      await OrderService.cancelOrder(orderId, reason.trim())
+      await OrderService.cancelOrder(orderId, user.id, reason.trim())
 
       setOrders((prevOrders) =>
         prevOrders.map((order) => (order.orderId === orderId ? { ...order, status: "CANCELLED" } : order)),

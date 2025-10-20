@@ -163,7 +163,7 @@ const ShoppingCart = () => {
 
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await CartService.checkOrderStatus(id)
+        const res = await OrderService.getOrderStatus(id)
         // Expecting { status: "pending" | "paid" | ... }
         const status = res?.status || "pending"
         setOrderStatus(status)
@@ -210,7 +210,7 @@ const ShoppingCart = () => {
       // Call backend checkout API - expecting { qrImage: string, orderId: number }
       const res = await OrderService.createOrder(formData)
 
-      const returnedQr = res?.qrImage || ""
+      const returnedQr = res?.payUrl || ""
       const returnedOrderId = res?.orderId ?? null
 
       if (!returnedQr || !returnedOrderId) {
@@ -222,7 +222,7 @@ const ShoppingCart = () => {
 
       setQrImage(returnedQr)
       setOrderId(returnedOrderId)
-      setOrderStatus("pending")
+      setOrderStatus(res.status)
       setShowCheckoutModal(false)
       setShowQRModal(true)
 
