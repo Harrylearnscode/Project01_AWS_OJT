@@ -10,7 +10,7 @@ public interface OrderService {
     OrderResponse createOrder(OrderRequest request);
     OrderResponse updateStatus(Long orderId, String status);
     List<OrderResponse> getOrdersByUser(Long userId);
-    PaginatedOrderResponse getAllOrders(String search, Pageable pageable);
+    List<OrderResponse> getAllOrders();
     OrderResponse checkout(OrderRequest request);
     void cancelOrder(Long orderId, Long userId, String reason);
     OrderDetailResponse getOrderByOrderId(Long orderId);
