@@ -83,15 +83,15 @@ public class OrderController {
                 .build());
     }
 
-    @Operation(summary = "Lấy tất cả đơn hàng", description = "Trả về danh sách order search là address. Sort mặc định là orderId." +
-            " Sort(cần nhập đúng) bao gồm orderId, address, orderTime, endTime, status, deliveryPrice, ingredientsPrice, totalPrice, user.userId.")
+    @Operation(summary = "Lấy tất cả đơn hàng có status là PAID", description = "Trả về danh sách order search là address. Sort mặc định là orderId." +
+            " Sort(cần nhập đúng, mặc định là orderId) bao gồm orderId, address, orderTime, endTime, status, deliveryPrice, ingredientsPrice, totalPrice, user.userId.")
     @GetMapping("/all")
     public ResponseEntity<ResponseObject> getAllOrders(
         @RequestParam(value = "search", required = false) String search,
         @ParameterObject
         @PageableDefault(page = 0, size = 10)
         @SortDefault.SortDefaults({
-                @SortDefault(sort = "orderId", direction = Sort.Direction.ASC)
+                @SortDefault(sort = "orderTime", direction = Sort.Direction.ASC)
                 }) Pageable pageable) {
             PaginatedOrderResponse orderResponse = orderService.getAllOrders(search, pageable);
         return ResponseEntity.ok(ResponseObject.builder()
