@@ -1,6 +1,7 @@
 package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.CartMapper;
+import Project01.AWS.MealPlan.mapper.IngredientMapper;
 import Project01.AWS.MealPlan.mapper.OrderMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.OrderRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.*;
@@ -85,45 +86,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PaginatedOrderResponse getAllOrders(String search, Pageable pageable) {
-        Sort validatedSort = pageable.getSort().stream()
-                .filter(order -> {
-                    String p = order.getProperty();
-                    return p.equals("orderId") || p.equals("address")
-                            || "orderTime".equals(p)
-                            || "endTime".equals(p)
-                            || "status".equals(p)
-                            || "deliveryPrice".equals(p)
-                            || "ingredientsPrice".equals(p)
-                            || "totalPrice".equals(p)
-                            || "user.userId".equals(p);
-                })
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Sort::by));
-
-        Pageable validatedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                validatedSort
-        );
-
-        Page<Order> orderPage;
-
-        if (search != null && !search.isBlank()) {
-            orderPage = orderRepository.searchOrdersByStatus(search, OrderStatus.PAID, validatedPageable);
-        } else {
-            orderPage = orderRepository.findByStatus(OrderStatus.PAID, validatedPageable);
+    public List<OrderResponse> getAllOrders() {
+        try {
+            return orderRepository.findAll()
+                    .stream()
+                    .map(OrderMapper::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new ActionFailedException("Failed to get orders");
         }
-
-        List<OrderResponse> orderDTOs = orderPage.stream()
-                .map(OrderMapper::toDTO)
-                .toList();
-
-        return PaginatedOrderResponse.builder()
-                .orders(orderDTOs)
-                .totalElements(orderPage.getTotalElements())
-                .totalPages(orderPage.getTotalPages())
-                .currentPage(orderPage.getNumber())
-                .build();
     }
 
     @Transactional
