@@ -19,11 +19,12 @@ export default function SellerLayout() {
   };
 
   return (
+    // toàn bộ trang cao đúng chiều cao viewport
     <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col p-4">
+      {/* Sidebar: sticky để luôn hiển thị khi cuộn */}
+      <aside className="w-64 bg-gray-900 text-white flex flex-col p-4 sticky top-0 h-screen">
         <h2 className="font-bold mb-6">Seller Panel</h2>
-        <nav className="flex-1 space-y-3">
+        <nav className="flex-1 space-y-3 overflow-y-auto">
           <Link to="dashboard" className="block hover:text-sky-400">
             Dashboard
           </Link>
@@ -57,8 +58,8 @@ export default function SellerLayout() {
         </div>
       </aside>
 
-      {/* Content */}
-      <main className="flex-1 p-6 bg-gray-50">
+      {/* Content: cuộn độc lập nếu nội dung dài */}
+      <main className="flex-1 p-6 bg-gray-50 overflow-auto">
         <Outlet />
       </main>
     </div>

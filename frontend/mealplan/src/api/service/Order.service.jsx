@@ -41,6 +41,20 @@ const OrderService = {
         const response = await axiosInstance.get(APIENDPOINTS.ORDER.GET_ORDER_STATUS(orderId))
         console.log("OrderService -> getOrderStatus -> response", response.data)
         return response.data.data
+    },
+    
+    getAllOrders: async () => {
+        const response = await axiosInstance.get(APIENDPOINTS.ORDER.GET_ALL_ORDER)
+        console.log("OrderService -> getAllOrders -> response", response.data.data)
+        return response.data.data
+    },
+    updateOrderStatus: async (orderId, status) => {
+        if (!orderId) {
+            throw new Error("Order ID is required")
+        }
+        const response = await axiosInstance.put(APIENDPOINTS.ORDER.UPDATE_ORDER_STATUS(orderId, status))
+        console.log("OrderService -> updateOrderStatus -> response", response.data.data)
+        return response.data.data
     }
 }
 export default OrderService

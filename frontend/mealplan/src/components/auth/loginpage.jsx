@@ -10,7 +10,7 @@ export default function Login({ onSuccess }) {
     e.preventDefault();
     try {
       const response = await AuthService.login({ email, password });
-
+      console.log("Login successful:", response);
       // lưu user vào localStorage
       localStorage.setItem("currentUser", JSON.stringify(response.user));
       localStorage.setItem("token", response.token);
