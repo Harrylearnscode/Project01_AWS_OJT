@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -13,7 +13,11 @@ import {
   Tag,
   MoreHorizontal,
   ChevronDown,
+  Utensils
 } from "lucide-react";
+import DishService from "../../api/service/Dish.service.jsx";
+import DishIngredientService from "../../api/service/DishIngredient.service.jsx";
+import RecipeIngredientEditor from "./RecipeIngredientEditor.jsx";
 
 // Product categories
 const CATEGORIES = [
@@ -31,64 +35,6 @@ const STATUS_OPTIONS = [
   { key: "out_of_stock", label: "Hết hàng", color: "bg-amber-500" },
 ];
 
-// Mock data for products
-const mockProducts = [
-  {
-    id: "P-001",
-    name: "Cơm gà nướng",
-    description: "Cơm gà nướng với sốt đặc biệt, rau xà lách và cà chua bi",
-    price: 120000,
-    inventory: 25,
-    category: "Món chính",
-    imageUrl: "https://example.com/images/com-ga-nuong.jpg",
-    status: "active",
-    createdAt: "2025-09-10",
-  },
-  {
-    id: "P-002",
-    name: "Salad cá ngừ",
-    description: "Salad tươi với cá ngừ đại dương, sốt mè rang và rau thơm",
-    price: 90000,
-    inventory: 18,
-    category: "Khai vị",
-    imageUrl: "https://example.com/images/salad-ca-ngu.jpg",
-    status: "active",
-    createdAt: "2025-09-12",
-  },
-  {
-    id: "P-003",
-    name: "Nước ép cam",
-    description: "Nước ép cam tươi 100%, không đường, giàu vitamin C",
-    price: 60000,
-    inventory: 30,
-    category: "Đồ uống",
-    imageUrl: "https://example.com/images/nuoc-ep-cam.jpg",
-    status: "active",
-    createdAt: "2025-09-15",
-  },
-  {
-    id: "P-004",
-    name: "Bún thịt nướng",
-    description: "Bún với thịt nướng, chả giò, rau sống và nước mắm",
-    price: 75000,
-    inventory: 10,
-    category: "Món chính",
-    imageUrl: "https://example.com/images/bun-thit-nuong.jpg",
-    status: "active",
-    createdAt: "2025-09-18",
-  },
-  {
-    id: "P-005",
-    name: "Phở bò",
-    description: "Phở bò với nước dùng đậm đà, thịt bò tái và các loại gia vị",
-    price: 100000,
-    inventory: 5,
-    category: "Món chính",
-    imageUrl: "https://example.com/images/pho-bo.jpg",
-    status: "inactive",
-    createdAt: "2025-09-20",
-  }
-];
 
 // Utility functions
 function currency(v) {
@@ -170,50 +116,25 @@ const FiltersBar = ({ search, setSearch, category, setCategory }) => {
 };
 
 // Products table component
-const ProductsTable = ({ data, onView, onEdit, onUpdateInventory, onToggleStatus }) => {
+const ProductsTable = ({ data, onView, onEdit, onToggleStatus }) => {
   return (
     <div className="mt-6 bg-white rounded-2xl shadow-sm ring-1 ring-blue-200 overflow-hidden">
       <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-blue-100 text-blue-900 text-sm font-medium">
-        <div className="col-span-3">Sản phẩm</div>
-        <div className="col-span-2">Danh mục</div>
-        <div className="col-span-2 text-right">Giá bán</div>
-        <div className="col-span-2 text-right">Tồn kho</div>
-        <div className="col-span-1">Trạng thái</div>
+        <div className="col-span-4">Sản phẩm</div>
+        <div className="col-span-3">Danh mục</div>
+        <div className="col-span-3 text-right">Giá bán</div>
         <div className="col-span-2 text-right">Hành động</div>
       </div>
       <ul className="divide-y divide-blue-100">
         {data.map((p) => (
           <li key={p.id} className="px-4 md:px-6 py-4 hover:bg-blue-50/40 transition">
             <div className="grid grid-cols-1 md:grid-cols-12 md:items-center gap-2 md:gap-4">
-              <div className="md:col-span-3">
+              <div className="md:col-span-4">
                 <div className="font-medium text-blue-900">{p.name}</div>
                 <div className="text-slate-500 text-sm truncate">{p.description}</div>
               </div>
-              <div className="md:col-span-2 text-slate-600">{p.category}</div>
-              <div className="md:col-span-2 text-right font-semibold text-slate-800">{currency(p.price)}</div>
-              <div className="md:col-span-2 text-right">
-                <div className={`font-medium ${p.inventory < 10 ? 'text-amber-600' : 'text-slate-700'}`}>
-                  {p.inventory} sản phẩm
-                </div>
-                <div className="flex justify-end gap-2 mt-1">
-                  <button 
-                    onClick={() => onUpdateInventory(p, -1)}
-                    disabled={p.inventory <= 0}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      p.inventory <= 0 
-                        ? 'bg-slate-100 text-slate-400' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
-                  >-</button>
-                  <button 
-                    onClick={() => onUpdateInventory(p, 1)}
-                    className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-100 text-blue-700 hover:bg-blue-200"
-                  >+</button>
-                </div>
-              </div>
-              <div className="md:col-span-1">
-                <StatusBadge status={p.status} />
-              </div>
+              <div className="md:col-span-3 text-slate-600">{p.category}</div>
+              <div className="md:col-span-3 text-right font-semibold text-slate-800">{currency(p.price)}</div>
               <div className="md:col-span-2 flex md:justify-end items-center gap-2">
                 <button
                   onClick={() => onView(p)}
@@ -227,28 +148,17 @@ const ProductsTable = ({ data, onView, onEdit, onUpdateInventory, onToggleStatus
                 >
                   <Edit size={16} />
                 </button>
-                <div className="relative group">
-                  <button className="inline-flex items-center gap-1 text-slate-700 hover:text-slate-900 text-sm font-medium px-2 py-1 rounded-full hover:bg-slate-100">
-                    <MoreHorizontal size={16} />
-                  </button>
-                  <div className="hidden group-hover:block absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg ring-1 ring-blue-200 overflow-hidden z-10">
-                    <button
-                      onClick={() => onToggleStatus(p)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2"
-                    >
-                      {p.status === "active" ? (
-                        <>Tạm ngừng bán</>
-                      ) : (
-                        <>Mở bán lại</>
-                      )}
-                    </button>
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 text-red-600"
-                    >
-                      <Trash size={16} /> Xóa sản phẩm
-                    </button>
-                  </div>
-                </div>
+                <button
+                  onClick={() => onToggleStatus(p)}
+                  className="inline-flex items-center gap-1 text-slate-700 hover:text-slate-900 text-sm font-medium px-2 py-1 rounded-full hover:bg-slate-100"
+                  title={p.status === "active" ? "Tạm ngừng bán" : "Mở bán lại"}
+                >
+                  {p.status === "active" ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <RefreshCw size={16} />
+                  )}
+                </button>
               </div>
             </div>
           </li>
@@ -294,16 +204,6 @@ const ProductDetail = ({ product, onClose }) => {
               <span className="font-semibold text-slate-900">{currency(product.price)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Tồn kho:</span>
-              <span className={`font-medium ${product.inventory < 10 ? 'text-amber-600' : 'text-slate-800'}`}>
-                {product.inventory} sản phẩm
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Trạng thái:</span>
-              <StatusBadge status={product.status} />
-            </div>
-            <div className="flex justify-between">
               <span className="text-slate-500">Ngày tạo:</span>
               <span className="text-slate-700">{product.createdAt}</span>
             </div>
@@ -331,35 +231,109 @@ const ProductDetail = ({ product, onClose }) => {
 };
 
 // Product edit form component
-const ProductEditForm = ({ product, onSave, onCancel }) => {
+const ProductEditForm = ({ product, onSave, onDelete, onCancel }) => {
   const emptyProduct = {
-    id: "P-" + (Math.floor(Math.random() * 900) + 100),
     name: "",
     description: "",
     price: 0,
-    inventory: 0,
     category: CATEGORIES[1].key,
     imageUrl: "",
-    status: "active",
-    createdAt: new Date().toISOString().split("T")[0],
+    status: "active", // Kept for backend compatibility
   };
   
   const [form, setForm] = useState(product || emptyProduct);
+  const [showIngredientEditor, setShowIngredientEditor] = useState(false);
+  const [ingredients, setIngredients] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Fetch ingredients when editing an existing product
+  useEffect(() => {
+    if (product && product.id) {
+      const fetchExistingIngredients = async () => {
+        try {
+          console.log("Fetching ingredients for product:", product.id);
+          const response = await DishIngredientService.getDishIngredientsByDishId(product.id);
+          console.log("Got ingredient response:", response);
+          if (response && response.data) {
+            console.log("Setting ingredients from fetched data");
+            setIngredients(response.data);
+          }
+        } catch (error) {
+          console.error("Error loading ingredients:", error);
+        }
+      };
+      
+      fetchExistingIngredients();
+    }
+  }, [product]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Convert price and inventory to numbers
-    if (name === "price" || name === "inventory") {
+    // Convert price to number
+    if (name === "price") {
       setForm(prev => ({ ...prev, [name]: Number(value) }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
+    console.log("Form submission started");
+    
+    setIsSaving(true);
+    try {
+      // First save the product
+      const savedProduct = await onSave(form);
+      console.log("Product saved successfully:", savedProduct);
+      
+      // Then, if we have ingredients, save them
+      if (ingredients.length > 0 && savedProduct && savedProduct.id) {
+        try {
+          // Delete existing ingredients
+          console.log("Handling ingredients for saved product:", savedProduct.id);
+          const existingIngredients = await DishIngredientService.getDishIngredientsByDishId(savedProduct.id);
+          console.log("Existing ingredients:", existingIngredients);
+          
+          if (existingIngredients && existingIngredients.data) {
+            console.log("Deleting existing ingredients before saving new ones");
+            for (const ingredient of existingIngredients.data) {
+              await DishIngredientService.deleteDishIngredient(ingredient.id);
+            }
+          }
+          
+          // Save new ingredients
+          console.log("Saving new ingredients:", ingredients);
+          for (const ingredient of ingredients) {
+            const ingredientData = {
+              name: ingredient.name || ingredient.ingredient?.name,
+              quantity: ingredient.quantity,
+              unit: ingredient.unit,
+              dishId: savedProduct.id
+            };
+            
+            console.log("Saving ingredient:", ingredientData);
+            await DishIngredientService.createDishIngredient(ingredientData);
+          }
+          console.log("All ingredients saved successfully");
+        } catch (error) {
+          console.error("Error saving ingredients:", error);
+          alert("Sản phẩm đã được lưu nhưng có lỗi khi lưu nguyên liệu");
+        }
+      }
+      
+      // Display success message
+      alert("Sản phẩm đã được lưu thành công!");
+      
+      // Close the form
+      onCancel();
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      alert("Không thể lưu sản phẩm. Vui lòng thử lại sau.");
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   return (
@@ -405,75 +379,38 @@ const ProductEditForm = ({ product, onSave, onCancel }) => {
             ></textarea>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Danh mục <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
-              >
-                {CATEGORIES.filter(c => c.key !== "all").map((c) => (
-                  <option key={c.key} value={c.key}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Trạng thái <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s.key} value={s.key}>{s.label}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Danh mục <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+            >
+              {CATEGORIES.filter(c => c.key !== "all").map((c) => (
+                <option key={c.key} value={c.key}>{c.label}</option>
+              ))}
+            </select>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Giá bán (VNĐ) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="1000"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
-                placeholder="Nhập giá bán"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Tồn kho <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="inventory"
-                value={form.inventory}
-                onChange={handleChange}
-                required
-                min="0"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
-                placeholder="Nhập số lượng tồn kho"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Giá bán (VNĐ) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              required
+              min="0"
+              step="1000"
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+              placeholder="Nhập giá bán"
+            />
           </div>
           
           <div>
@@ -490,21 +427,73 @@ const ProductEditForm = ({ product, onSave, onCancel }) => {
             />
           </div>
           
-          <div className="pt-4 flex gap-3">
-            <button 
+          <div>
+            <button
               type="button"
-              onClick={onCancel}
-              className="flex-1 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium hover:bg-slate-50"
+              onClick={() => setShowIngredientEditor(prev => !prev)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border border-blue-500 text-blue-700 rounded-xl hover:bg-blue-50"
             >
-              Hủy
+              <Utensils size={16} />
+              {showIngredientEditor ? "Ẩn công thức" : "Chỉnh sửa công thức món ăn"}
             </button>
-            <button 
-              type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-blue-700 text-white font-medium hover:bg-blue-800 flex items-center justify-center gap-2"
-            >
-              <Save size={18} />
-              Lưu sản phẩm
-            </button>
+          </div>
+          
+          {showIngredientEditor && (
+            <RecipeIngredientEditor
+              dishId={form.id}
+              onSave={(ingredientData) => {
+                setIngredients(ingredientData);
+                setShowIngredientEditor(false);
+              }}
+              onCancel={() => setShowIngredientEditor(false)}
+            />
+          )}
+          
+          {/* Actions */}
+          <div className="pt-4">
+            {/* Delete option for existing products */}
+            {product && onDelete && (
+              <div className="mb-4">
+                <button 
+                  type="button"
+                  onClick={onDelete}
+                  disabled={isSaving}
+                  className={`w-full py-2.5 rounded-xl bg-white border border-red-300 text-red-600 font-medium flex items-center justify-center gap-2 ${isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50'}`}
+                >
+                  <Trash size={18} />
+                  Xóa sản phẩm
+                </button>
+              </div>
+            )}
+            
+            {/* Save/Cancel buttons */}
+            <div className="flex gap-3">
+              <button 
+                type="button"
+                onClick={onCancel}
+                disabled={isSaving}
+                className={`flex-1 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium ${isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+              >
+                Hủy
+              </button>
+              <button 
+                type="submit"
+                disabled={isSaving}
+                className={`flex-1 py-2.5 rounded-xl text-white font-medium flex items-center justify-center gap-2 ${isSaving ? 'bg-blue-500' : 'bg-blue-700 hover:bg-blue-800'}`}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Lưu sản phẩm
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -513,12 +502,54 @@ const ProductEditForm = ({ product, onSave, onCancel }) => {
 };
 
 const Product = () => {
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [viewing, setViewing] = useState(null);
   const [editing, setEditing] = useState(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // Fetch products from API
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await DishService.getAllActiveDishes();
+      console.log("Fetch products response:", response);
+      
+      // DishService returns response.data, which should be an array
+      if (response && response.data && Array.isArray(response.data)) {
+        const formattedProducts = response.data.map(dish => ({
+          id: dish.dishId?.toString() || dish.id?.toString(),
+          name: dish.name,
+          description: dish.description,
+          price: dish.price,
+          category: dish.category || dish.countryName || "Món chính",
+          imageUrl: dish.imageUrl || dish.imgUrl,
+          status: dish.status || "active",
+          createdAt: dish.createdAt || new Date().toISOString().split("T")[0]
+        }));
+        setProducts(formattedProducts);
+        console.log("Products formatted and ready for display:", formattedProducts.length);
+      } else {
+        console.warn("No valid data in response:", response);
+        setProducts([]);
+      }
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter products based on search term and category
   const filtered = useMemo(() => {
@@ -535,7 +566,7 @@ const Product = () => {
 
   // Handlers
   const handleRefresh = () => {
-    setProducts([...mockProducts]);
+    fetchProducts();
   };
 
   const handleAddNew = () => {
@@ -544,39 +575,170 @@ const Product = () => {
     setViewing(null);
   };
 
-  const handleUpdateInventory = (product, change) => {
-    setProducts(prev => 
-      prev.map(p => 
-        p.id === product.id 
-          ? {...p, inventory: Math.max(0, p.inventory + change)} 
-          : p
-      )
-    );
-  };
+  // handleUpdateInventory function removed as per requirements
 
-  const handleToggleStatus = (product) => {
-    setProducts(prev => 
-      prev.map(p => 
-        p.id === product.id 
-          ? {...p, status: p.status === "active" ? "inactive" : "active"} 
-          : p
-      )
-    );
+  const handleToggleStatus = async (product) => {
+    try {
+      const newStatus = product.status === "active" ? "inactive" : "active";
+      console.log(`Toggling status for product ID ${product.id} from ${product.status} to ${newStatus}`);
+      
+      // Convert product to backend format
+      const dishData = {
+        ...product,
+        dishId: Number(product.id),
+        imgUrl: product.imageUrl,
+        countryName: product.category,
+        typeNames: [product.category],
+        status: newStatus
+      };
+      
+      console.log("Sending toggle status data:", dishData);
+      
+      // Send update to backend
+      const response = await DishService.updateDish(product.id, dishData);
+      console.log("Toggle status API response:", response);
+      
+      if (response) {
+        console.log("Successfully toggled status, received:", response);
+        
+        // Update local state if API call succeeded
+        setProducts(prev => 
+          prev.map(p => 
+            p.id === product.id 
+              ? {...p, status: newStatus} 
+              : p
+          )
+        );
+      } else {
+        console.error("Toggle status API returned empty response");
+        alert("API returned empty response when updating product status");
+      }
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      alert("Không thể cập nhật trạng thái sản phẩm. Vui lòng thử lại sau.");
+    }
   };
   
-  const handleSaveProduct = (formData) => {
-    // If editing an existing product
-    if (editing) {
-      setProducts(prev => prev.map(p => p.id === formData.id ? formData : p));
-    } 
-    // If adding a new product
-    else {
-      setProducts(prev => [...prev, formData]);
+  const handleDeleteProduct = async (product) => {
+    try {
+      console.log(`Deleting product with ID: ${product.id}`);
+      
+      const response = await DishService.deleteDish(product.id);
+      console.log("Delete API response:", response);
+      
+      // Response will be the data directly since we modified the service
+      console.log("Successfully deleted product");
+      
+      // Update local state if API call succeeded
+      setProducts(prev => prev.filter(p => p.id !== product.id));
+      
+      // Clear confirm state
+      setConfirmDelete(null);
+      
+      // Close edit form if open
+      setEditing(null);
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Không thể xóa sản phẩm. Vui lòng thử lại sau.");
+      return false;
     }
-    
-    // Close the form
-    setEditing(null);
-    setIsAddingNew(false);
+  };
+
+  const handleSaveProduct = async (formData) => {
+    try {
+      let savedProduct = null;
+      
+      // If editing an existing product
+      if (editing) {
+        console.log("Updating existing product with ID:", formData.id);
+        
+        // Convert formData to backend format
+        const dishData = {
+          ...formData,
+          dishId: Number(formData.id),
+          imgUrl: formData.imageUrl,
+          countryName: formData.category,
+          typeNames: [formData.category]
+        };
+        
+        console.log("Sending update data:", dishData);
+        const response = await DishService.updateDish(formData.id, dishData);
+        console.log("Update API response:", response);
+        
+        if (response) {
+          console.log("Successfully updated product, received:", response);
+          // Format the updated product for the UI
+          const updatedProduct = {
+            id: formData.id,
+            name: formData.name,
+            description: formData.description,
+            price: formData.price,
+            category: formData.category,
+            imageUrl: formData.imageUrl,
+            status: formData.status || "active",
+            createdAt: formData.createdAt
+          };
+          
+          // Update local state with updated product
+          setProducts(prev => prev.map(p => p.id === formData.id ? updatedProduct : p));
+          savedProduct = updatedProduct;
+        } else {
+          console.error("Update API returned empty response");
+          alert("API returned empty response when updating product");
+          return null;
+        }
+      } 
+      // If adding a new product
+      else {
+        console.log("Creating new product:", formData.name);
+        
+        // Convert formData to backend format
+        const dishData = {
+          ...formData,
+          imgUrl: formData.imageUrl,
+          countryName: formData.category,
+          typeNames: [formData.category]
+        };
+        
+        console.log("Sending create data:", dishData);
+        const response = await DishService.createDish(dishData);
+        console.log("Create API response:", response);
+        
+        if (response) {
+          console.log("Successfully created product, received:", response);
+          // Format the new product for the UI
+          const newProduct = {
+            id: response.dishId?.toString() || response.id?.toString(),
+            name: response.name,
+            description: response.description,
+            price: response.price,
+            category: response.category || response.countryName || "Món chính",
+            imageUrl: response.imageUrl || response.imgUrl,
+            status: response.status || "active",
+            createdAt: response.createdAt || new Date().toISOString().split("T")[0]
+          };
+          setProducts(prev => [...prev, newProduct]);
+          savedProduct = newProduct;
+        } else {
+          console.error("Create API returned empty response");
+          alert("API returned empty response when creating product");
+          return null;
+        }
+      }
+      
+      // Close the form
+      setEditing(null);
+      setIsAddingNew(false);
+      
+      // Return the saved product for the ingredient save operation
+      return savedProduct;
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Không thể lưu sản phẩm. Vui lòng thử lại sau.");
+      return null;
+    }
   };
   
   return (
@@ -594,21 +756,42 @@ const Product = () => {
         setCategory={setCategory} 
       />
 
-      <ProductsTable 
-        data={filtered}
-        onView={(p) => {
-          setViewing(p);
-          setEditing(null);
-          setIsAddingNew(false);
-        }}
-        onEdit={(p) => {
-          setEditing(p);
-          setViewing(null);
-          setIsAddingNew(false);
-        }}
-        onUpdateInventory={handleUpdateInventory}
-        onToggleStatus={handleToggleStatus}
-      />
+      {error && (
+        <div className="mt-4 p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-200">
+          <p className="flex items-center">
+            <span className="mr-2">⚠️</span>
+            {error}
+          </p>
+          <button 
+            className="mt-2 text-sm font-medium text-rose-600 hover:text-rose-800"
+            onClick={handleRefresh}
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="mt-6 bg-white rounded-2xl shadow-sm ring-1 ring-blue-200 p-8 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-slate-600">Đang tải dữ liệu sản phẩm...</p>
+        </div>
+      ) : (
+        <ProductsTable 
+          data={filtered}
+          onView={(p) => {
+            setViewing(p);
+            setEditing(null);
+            setIsAddingNew(false);
+          }}
+          onEdit={(p) => {
+            setEditing(p);
+            setViewing(null);
+            setIsAddingNew(false);
+          }}
+          onToggleStatus={handleToggleStatus}
+        />
+      )}
       
       {viewing && (
         <ProductDetail 
@@ -621,11 +804,41 @@ const Product = () => {
         <ProductEditForm 
           product={editing}
           onSave={handleSaveProduct}
+          onDelete={editing ? () => setConfirmDelete(editing) : null}
           onCancel={() => {
             setEditing(null);
             setIsAddingNew(false);
           }}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-30">
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setConfirmDelete(null)}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Xác nhận xóa</h3>
+            <p className="text-slate-700">
+              Bạn có chắc chắn muốn xóa sản phẩm <span className="font-semibold">{confirmDelete.name}</span>? 
+              Hành động này không thể hoàn tác.
+            </p>
+            
+            <div className="mt-6 flex gap-3 justify-end">
+              <button 
+                onClick={() => setConfirmDelete(null)} 
+                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={() => handleDeleteProduct(confirmDelete)} 
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              >
+                <Trash size={16} /> Xóa sản phẩm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

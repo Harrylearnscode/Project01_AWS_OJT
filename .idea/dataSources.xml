@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="mealplan.czqcw8wwg8a6.ap-southeast-1.rds.amazonaws.com@mealplan.czqcw8wwg8a6.ap-southeast-1.rds.amazonaws.com" uuid="b718910c-8d1f-4190-8d62-cd11331f2fef">
+      <driver-ref>postgresql.aws_wrapper</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>software.amazon.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:aws-wrapper:postgresql://mealplan.czqcw8wwg8a6.ap-southeast-1.rds.amazonaws.com:5432/mealplan.czqcw8wwg8a6.ap-southeast-1.rds.amazonaws.com</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="OJT Projects" uuid="e7d3b1be-c37b-4a31-adea-bef1e5b28d57">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/MealPlan</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

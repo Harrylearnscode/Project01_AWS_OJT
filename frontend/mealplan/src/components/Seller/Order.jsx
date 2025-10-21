@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -11,6 +11,7 @@ import {
   Download,
   RefreshCw,
 } from "lucide-react";
+import OrderService from "../../api/service/Order.service.jsx";
 
 const STATUS_OPTIONS = [
   { key: "all", label: "Tất cả", color: "bg-blue-500" },
@@ -21,78 +22,6 @@ const STATUS_OPTIONS = [
   { key: "cancelled", label: "Đã hủy", color: "bg-rose-500" },
 ];
 
-const mockOrders = [
-  {
-    id: "MP-24001",
-    customer: "Nguyễn Văn A",
-    phone: "0901 234 567",
-    address: "12 Lý Thường Kiệt, Q.10, TP.HCM",
-    date: "2025-09-22 10:21",
-    itemsCount: 3,
-    total: 420000,
-    status: "pending",
-    items: [
-      { name: "Cơm gà nướng", qty: 1, price: 120000 },
-      { name: "Salad cá ngừ", qty: 1, price: 90000 },
-      { name: "Nước ép cam", qty: 1, price: 60000 },
-    ],
-    note: "Giao trước 12h trưa",
-  },
-  {
-    id: "MP-24002",
-    customer: "Trần Thị B",
-    phone: "0908 222 111",
-    address: "35 Nguyễn Huệ, Q.1, TP.HCM",
-    date: "2025-09-22 08:35",
-    itemsCount: 2,
-    total: 310000,
-    status: "processing",
-    items: [
-      { name: "Bún thịt nướng", qty: 2, price: 150000 },
-    ],
-  },
-  {
-    id: "MP-24003",
-    customer: "Phạm Minh C",
-    phone: "0912 888 333",
-    address: "22 Võ Văn Tần, Q.3, TP.HCM",
-    date: "2025-09-21 14:00",
-    itemsCount: 4,
-    total: 550000,
-    status: "shipped",
-    items: [
-      { name: "Phở bò", qty: 2, price: 200000 },
-      { name: "Trà chanh", qty: 2, price: 50000 },
-    ],
-  },
-  {
-    id: "MP-24004",
-    customer: "Đỗ Hải D",
-    phone: "0935 666 777",
-    address: "5 Phan Xích Long, Phú Nhuận",
-    date: "2025-09-20 17:12",
-    itemsCount: 1,
-    total: 180000,
-    status: "delivered",
-    items: [
-      { name: "Cơm tấm sườn bì chả", qty: 1, price: 180000 },
-    ],
-  },
-  {
-    id: "MP-24005",
-    customer: "Lê Thu E",
-    phone: "0967 456 222",
-    address: "88 Duy Tân, Cầu Giấy, Hà Nội",
-    date: "2025-09-18 09:40",
-    itemsCount: 2,
-    total: 240000,
-    status: "cancelled",
-    items: [
-      { name: "Bánh mì thịt", qty: 2, price: 120000 },
-    ],
-    note: "Khách hủy do đổi lịch",
-  },
-];
 
 function currency(v) {
   return v.toLocaleString("vi-VN") + " đ";
@@ -360,11 +289,50 @@ const OrderDetail = ({ order, onClose }) => {
 };
 
 const Order = () => {
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [active, setActive] = useState("all");
   const [viewing, setViewing] = useState(null);
+
+  // Fetch orders from API
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await OrderService.getAllOrders();
+      if (response && response.data) {
+        const formattedOrders = response.data.map(order => ({
+          id: order.id.toString(),
+          customer: order.customerName || "Khách hàng",
+          phone: order.phone || "Không có SĐT",
+          address: order.address || "Không có địa chỉ",
+          date: order.createdAt || new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+          itemsCount: order.items ? order.items.length : 0,
+          total: order.totalAmount || 0,
+          status: order.status || "pending",
+          items: order.items || [],
+          note: order.note || ""
+        }));
+        setOrders(formattedOrders);
+      } else {
+        setOrders([]);
+      }
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError("Không thể tải dữ liệu đơn hàng. Vui lòng thử lại sau.");
+      // Don't use mock data anymore
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     return orders.filter((o) => {
@@ -383,13 +351,19 @@ const Order = () => {
     return map;
   }, [orders]);
 
-  const handleUpdateStatus = (order, newStatus) => {
-    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o)));
+  const handleUpdateStatus = async (order, newStatus) => {
+    try {
+      await OrderService.updateOrderStatus(order.id, newStatus);
+      // Update local state if API call succeeded
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o)));
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      alert("Không thể cập nhật trạng thái đơn hàng. Vui lòng thử lại sau.");
+    }
   };
 
   const handleRefresh = () => {
-    // Placeholder for future API refresh. For now, just a gentle pulse effect by triggering state.
-    setOrders((prev) => [...prev]);
+    fetchOrders();
   };
 
   return (
@@ -398,9 +372,33 @@ const Order = () => {
       <FiltersBar search={search} setSearch={setSearch} status={status} setStatus={setStatus} />
       <StatusTabs active={active} setActive={setActive} counts={counts} />
 
-      <OrdersTable data={filtered} onView={(o) => setViewing(o)} onUpdateStatus={handleUpdateStatus} />
+      {error && (
+        <div className="mt-4 p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-200">
+          <p className="flex items-center">
+            <span className="mr-2">⚠️</span>
+            {error}
+          </p>
+          <button 
+            className="mt-2 text-sm font-medium text-rose-600 hover:text-rose-800"
+            onClick={handleRefresh}
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
 
-      <OrderDetail order={viewing} onClose={() => setViewing(null)} />
+      {loading ? (
+        <div className="mt-6 bg-white rounded-2xl shadow-sm ring-1 ring-blue-200 p-8 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-slate-600">Đang tải dữ liệu đơn hàng...</p>
+        </div>
+      ) : (
+        <OrdersTable data={filtered} onView={(o) => setViewing(o)} onUpdateStatus={handleUpdateStatus} />
+      )}
+
+      {viewing && (
+        <OrderDetail order={viewing} onClose={() => setViewing(null)} />
+      )}
     </div>
   );
 };

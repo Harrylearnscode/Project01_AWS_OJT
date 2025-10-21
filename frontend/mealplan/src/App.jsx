@@ -6,7 +6,7 @@ import HomePage from "./components/Customer/homepage.jsx";
 import Login from "./components/auth/loginpage.jsx";
 import {useAuth} from "./context/AuthContext.jsx";
 import ShoppingCart from "./components/Customer/ShoppingCart.jsx";
-import Dashboard from "./components/Seller/DashBoard.jsx";
+import Dashboard from "./components/Seller/Dashboard.jsx";
 import Orders from "./components/Seller/Order.jsx";
 import Products from "./components/Seller/Product.jsx";
 import CustomerMealDetail from "./components/Customer/mealdetail.jsx";
