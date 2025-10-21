@@ -72,7 +72,7 @@ const ShoppingCart = () => {
     setUpdatingItemId(cartDishId)
 
     try {
-      await CartService.updateCartItem(cartDishId, newQuantity)
+      await CartService.updateCartItemQuantity(cartDishId, newQuantity)
       await loadCartItems()
     } catch (error) {
       console.error("Failed to update quantity:", error)

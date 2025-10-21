@@ -17,6 +17,8 @@ const APIENDPOINTS = {
         GET_ORDER_DETAIL: (orderId) => `/orders/getByOrderId/${orderId}`,
         GET_ORDER_STATUS: (orderId) => `/orders/getOrderStatusByOrderId/${orderId}`,
         CANCEL_ORDER: (orderId, userId) => `/orders/cancel/${orderId}?userId=${userId}`,
+        GET_ALL_ORDER: `/orders/all`,
+        UPDATE_ORDER_STATUS: (orderId, status) => `/orders/update-status/${orderId}?status=${status}`,
     },
     SHOPPINGCART: {
         ADD_TO_CART: (id) => `/carts/${id}/add`,
