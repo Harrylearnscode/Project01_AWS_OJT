@@ -1,5 +1,6 @@
 package Project01.AWS.MealPlan.Configs;
 
+import Project01.AWS.MealPlan.security.CognitoLogoutHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -37,6 +38,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -51,19 +53,36 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2Login(oauth2 -> oauth2
-                       .loginPage("/oauth2/authorization/google")
-                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
-                        .failureUrl("/api/auth/oauth2/failure")
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+//                .oauth2Login(oauth2 -> oauth2
+////                       .loginPage("https://ap-southeast-1msytfkhfw.auth.ap-southeast-1.amazoncognito.com/")
+//                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
+//                        .failureUrl("/api/auth/oauth2/failure")
+//                )
+                .oauth2Login(Customizer.withDefaults())
+                .logout(logout -> logout
+                        .logoutSuccessHandler(cognitoLogoutHandler)
                 )
-//                .oauth2Login(Customizer.withDefaults())
 //                .formLogin(Customizer.withDefaults())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
+//@Bean
+//public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//    CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
+//
+//    http.csrf(Customizer.withDefaults())
+//            .authorizeHttpRequests(authz -> authz
+//                    .requestMatchers("/").permitAll()
+//                    .anyRequest()
+//                    .authenticated())
+//            .oauth2Login(Customizer.withDefaults())
+//            .logout(logout -> logout.logoutSuccessHandler(cognitoLogoutHandler));
+//    return http.build();
+//}
 
 //    @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {

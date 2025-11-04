@@ -12,10 +12,13 @@ import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.*;
 import Project01.AWS.MealPlan.service.DishService;
+import Project01.AWS.MealPlan.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +33,7 @@ public class DishServiceImpl implements DishService {
     private final CountryRepository countryRepository;
     private final TypeRepository typeRepository;
     private final IngredientRepository ingredientRepository;
+    private final S3Service s3Service;
 
     @Transactional
     @Override
@@ -219,5 +223,20 @@ public class DishServiceImpl implements DishService {
                 .limit(limit)
                 .map(DishMapper::toSummary)
                 .toList();
+    }
+
+    @Override
+    public String uploadDishImage(Long dishId, MultipartFile file) throws IOException {
+        try {
+            Dish dish = dishRepository.findByDishIdAndStatus(dishId, DishStatus.ACTIVE)
+                    .orElseThrow(() -> new NotFoundException("Dish not found or deleted"));
+            String imageUrl = s3Service.uploadFile(file);
+            dish.setImgUrl(imageUrl);
+            dishRepository.save(dish);
+            return imageUrl;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ActionFailedException("Failed to get dish");
+        }
     }
 }
