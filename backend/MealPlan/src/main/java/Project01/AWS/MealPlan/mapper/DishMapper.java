@@ -73,6 +73,7 @@ public class DishMapper {
                 .totalTime(dish.getTotalTime())
                 .imgUrl(dish.getImgUrl())
                 .price(dish.getPrice())
+                .status(dish.getStatus())
                 .country(dish.getCountry() != null ? dish.getCountry().getName() : null)
                 .types(types)
                 .build();
