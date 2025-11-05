@@ -15,7 +15,7 @@ import Register from "./components/auth/registerpage.jsx";
 import Verify from "./components/auth/verify.jsx";
 import OrderDetail from "./components/Customer/OrderDetail.jsx";
 import OrderHistory from "./components/Customer/OrdersHistory.jsx";
-
+import Ingredient from "./components/Seller/Ingredient.jsx";
 
 export function PrivateRoute({ children }) {
   // const token = localStorage.getItem("token"); // token sau khi login
@@ -52,7 +52,8 @@ function App() {
         <Route path="/seller" element={<SellerLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="order" element={<Orders />} />
-          <Route path="product" element={<Products />} />
+          <Route path="dishes" element={<Products />} />
+          <Route path="ingredients" element={<Ingredient />} />
         </Route>
 
         {/* Mặc định */}
