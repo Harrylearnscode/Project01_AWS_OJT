@@ -28,6 +28,12 @@ const APIENDPOINTS = {
         UPDATE_CART_ITEM: (cartDishId, quantity) => `/cart-dish/update/${cartDishId}?quantity=${quantity}`,
         GET_INGREDIENTS: (cartDishId) => `cart-ingredient/getByCartDish/${cartDishId}`,
     },
+    INGREDIENTS:{
+        GET_ALL_INGREDIENTS: '/ingredients/getAll',
+        UPDATE_INGREDIENT: (ingredientId) => `/ingredients/update/${ingredientId}`,
+        CREATE_INGREDIENT: '/ingredients/create',
+        DELETE_INGREDIENT: (ingredientId) => `/ingredients/delete/${ingredientId}`,
+    }
 };
 
 export default APIENDPOINTS;

@@ -7,6 +7,7 @@ import Modal from "../ui/Modal";
 import Login from "../auth/loginpage";
 import Register from "../auth/registerpage";
 import Verify from "../auth/verify";
+import { useNavigate } from "react-router-dom";
 
 export default function CustomerLayout() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -15,6 +16,7 @@ export default function CustomerLayout() {
   // Modal control
   const [modalType, setModalType] = useState(null); // "login" | "register" | "verify"
   const [verifyEmail, setVerifyEmail] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("currentUser"));
@@ -27,6 +29,7 @@ export default function CustomerLayout() {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
     setCurrentUser(null);
+    navigate("/customer/homePage");
   };
 
   const openModal = (type) => setModalType(type);
