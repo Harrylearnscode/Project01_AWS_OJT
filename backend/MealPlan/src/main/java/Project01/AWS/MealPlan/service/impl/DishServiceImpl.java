@@ -173,11 +173,23 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public List<DishSummaryResponse> getAllDishes() {
+    public List<DishSummaryResponse> getAllActiveDishes() {
         try {
             return dishRepository.findAll()
                     .stream()
                     .filter(d -> d.getStatus() == DishStatus.ACTIVE) // chỉ lấy active
+                    .map(DishMapper::toSummary)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new ActionFailedException("Failed to get dishes");
+        }
+    }
+
+    @Override
+    public List<DishSummaryResponse> getAllDishes() {
+        try {
+            return dishRepository.findAll()
+                    .stream()
                     .map(DishMapper::toSummary)
                     .collect(Collectors.toList());
         } catch (Exception e) {

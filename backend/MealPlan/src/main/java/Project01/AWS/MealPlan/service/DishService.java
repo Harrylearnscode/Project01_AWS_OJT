@@ -13,10 +13,11 @@ public interface DishService {
     DishResponse createDish(DishRequest request);
     DishResponse updateDish(Long id, DishRequest request);
     void deleteDish(Long id);
-    List<DishSummaryResponse> getAllDishes();
+    List<DishSummaryResponse> getAllActiveDishes();
     DishResponse getDishById(Long id);
     List<DishSummaryResponse> getDishByCountryId(Long countryId);
     List<DishSummaryResponse> getDishByTypeId(Long typeId);
     List<DishSummaryResponse> getRelatedDishes(Long currentDishId, int limit);
     String uploadDishImage(Long dishId, MultipartFile file) throws IOException;
+    List<DishSummaryResponse> getAllDishes();
 }

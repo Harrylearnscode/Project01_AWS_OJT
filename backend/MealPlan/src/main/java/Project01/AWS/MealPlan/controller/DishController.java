@@ -75,7 +75,23 @@ public class DishController {
     }
 
     @Operation(summary = "Lấy tất cả dish ACTIVE", description = "Trả về danh sách dish đang ACTIVE.")
-    @GetMapping("/getAll")
+    @GetMapping("/getAllActiveDishes")
+    public ResponseEntity<ResponseObject> getAllActiveDishes(
+    ) {
+        List<DishSummaryResponse> responses = dishService.getAllActiveDishes();
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("GET_LIST_SUCCESS")
+                        .message("Get all dishes successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(responses)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Lấy tất cả dish", description = "Trả về danh sách dish.")
+    @GetMapping("/getAllDishes")
     public ResponseEntity<ResponseObject> getAllDishes(
     ) {
         List<DishSummaryResponse> responses = dishService.getAllDishes();
