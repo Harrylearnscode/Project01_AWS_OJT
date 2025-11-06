@@ -31,6 +31,7 @@ public class DishController {
     private final DishService dishService;
 
     @Operation(summary = "Tạo dish", description = "Khởi tạo một dish mới.")
+    @PostMapping("/create")
     public ResponseEntity<ResponseObject> createDish(@RequestBody DishRequest request) {
         DishResponse response = dishService.createDish(request);
         return ResponseEntity.ok(
