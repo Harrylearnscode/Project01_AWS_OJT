@@ -25,7 +25,7 @@ export default function SellerMeals() {
     setError(null)
     try {
       const data = await DishService.getAllDishes()
-      setMeals(data || [])
+      setMeals(data.data || [])
     } catch (err) {
       setError(err.message || "Failed to fetch meals")
     } finally {

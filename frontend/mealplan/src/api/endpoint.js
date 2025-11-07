@@ -12,7 +12,7 @@ const APIENDPOINTS = {
         UPDATE_DISH_STATUS: (id, status) => `/dishes/update-status/${id}?status=${status}`,
         GET_ALL_DISHES: '/dishes/getAllDishes',
         UPLOAD_DISH_IMAGE: (dishId)=> `/dishes/${dishId}/uploadImage`,
-        GET_ACTIVE_DISHES: '/dishes/getAll',
+        GET_ACTIVE_DISHES: '/dishes/getAllActiveDishes',
         GET_DISH_DETAIL: (id)=> `/dishes/getById/${id}`,
         GET_RELATED_DISHES: (id)=> `/dishes/${id}/related`,
     },
