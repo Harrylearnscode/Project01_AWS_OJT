@@ -161,11 +161,15 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public void deleteDish(Long id) {
+    public void changeStatusDish(Long id) {
         Dish dish = dishRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Dish not found"));
         try {
-            dish.setStatus(DishStatus.INACTIVE); // soft delete
+            if (dish.getStatus() == DishStatus.ACTIVE) {
+                dish.setStatus(DishStatus.INACTIVE);
+            } else {
+                dish.setStatus(DishStatus.ACTIVE);
+            }
             dishRepository.save(dish);
         } catch (Exception e) {
             throw new ActionFailedException("Failed to delete dish");

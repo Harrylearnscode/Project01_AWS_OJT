@@ -60,14 +60,14 @@ public class DishController {
         );
     }
 
-    @Operation(summary = "Xóa dish (soft delete)", description = "Đánh dấu dish INACTIVE thay vì xóa hẳn.")
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<ResponseObject> deleteDish(@PathVariable Long id) {
-        dishService.deleteDish(id);
+    @Operation(summary = "Đổi status(Active, InActive)")
+    @PutMapping("/changestatus/{id}")
+    public ResponseEntity<ResponseObject> changeStatusDish(@PathVariable Long id) {
+        dishService.changeStatusDish(id);
         return ResponseEntity.ok(
                 ResponseObject.builder()
-                        .code("DELETE_SUCCESS")
-                        .message("Dish deleted successfully (soft delete)")
+                        .code("CHANGE_STATUS_SUCCESS")
+                        .message("Change dish status successfully")
                         .status(HttpStatus.OK)
                         .isSuccess(true)
                         .data(null)
