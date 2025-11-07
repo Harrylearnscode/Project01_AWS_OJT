@@ -16,6 +16,7 @@ export default function SellerLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
     setCurrentUser(null);
     navigate("/customer/homePage"); // Quay về trang chủ khách hàng
   };
@@ -96,7 +97,7 @@ export default function SellerLayout() {
           {currentUser ? (
             <div className="flex flex-col space-y-2">
               <span className="text-sm">
-                Xin chào, <b>{currentUser.username}</b>
+                Xin chào, <b>{currentUser.name}</b>
               </span>
               <button
                 onClick={handleLogout}
