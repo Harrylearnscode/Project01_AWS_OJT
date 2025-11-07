@@ -21,6 +21,7 @@ public class DishResponse {
     private String imgUrl;
     private Double price;
     private String country;
+    private DishStatus status;
     private List<String> types;
     private List<DishIngredientSimpleResponse> dishIngredients;
     private Map<String, List<String>> recipes;

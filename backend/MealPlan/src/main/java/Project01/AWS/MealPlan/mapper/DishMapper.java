@@ -50,6 +50,7 @@ public class DishMapper {
                 .imgUrl(dish.getImgUrl())
                 .price(dish.getPrice())
                 .country(dish.getCountry().getName())
+                .status(dish.getStatus())
                 .types(types)
                 .dishIngredients(ingredients)
                 .recipes(recipes)
