@@ -12,7 +12,7 @@ import java.util.List;
 public interface DishService {
     DishResponse createDish(DishRequest request);
     DishResponse updateDish(Long id, DishRequest request);
-    void deleteDish(Long id);
+    void changeStatusDish(Long id);
     List<DishSummaryResponse> getAllActiveDishes();
     DishResponse getDishById(Long id);
     List<DishSummaryResponse> getDishByCountryId(Long countryId);
