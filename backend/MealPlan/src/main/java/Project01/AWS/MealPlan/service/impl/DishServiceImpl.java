@@ -1,9 +1,7 @@
 package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.DishMapper;
-import Project01.AWS.MealPlan.model.dtos.requests.DishIngredientRequest;
-import Project01.AWS.MealPlan.model.dtos.requests.DishRequest;
-import Project01.AWS.MealPlan.model.dtos.requests.RecipeRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.*;
 import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
 import Project01.AWS.MealPlan.model.entities.*;
@@ -56,7 +54,7 @@ public class DishServiceImpl implements DishService {
         }
 
         if (request.getDishIngredients() != null) {
-            for (DishIngredientRequest diReq : request.getDishIngredients()) {
+            for (DishIngredientCRUDDishRequest diReq : request.getDishIngredients()) {
                 Ingredient ingredient = ingredientRepository.findById(diReq.getIngredientId())
                         .orElseThrow(() -> new NotFoundException("Ingredient not found"));
 
@@ -71,7 +69,7 @@ public class DishServiceImpl implements DishService {
         }
 
         if (request.getRecipes() != null) {
-            for (RecipeRequest rReq : request.getRecipes()) {
+            for (RecipeCRUDDishRequest rReq : request.getRecipes()) {
                 dish.getRecipes().add(
                         Recipe.builder()
                                 .dish(dish)
@@ -117,7 +115,7 @@ public class DishServiceImpl implements DishService {
         existing.getDishIngredients().clear();
 
         if (request.getDishIngredients() != null && !request.getDishIngredients().isEmpty()) {
-            for (DishIngredientRequest diReq : request.getDishIngredients()) {
+            for (DishIngredientCRUDDishRequest diReq : request.getDishIngredients()) {
                 Ingredient ingredient = ingredientRepository.findById(diReq.getIngredientId())
                         .orElseThrow(() -> new NotFoundException("Ingredient not found"));
 
@@ -142,7 +140,7 @@ public class DishServiceImpl implements DishService {
         existing.getRecipes().clear();
 
         if (request.getRecipes() != null && !request.getRecipes().isEmpty()) {
-            for (RecipeRequest rReq : request.getRecipes()) {
+            for (RecipeCRUDDishRequest rReq : request.getRecipes()) {
                 existing.getRecipes().add(
                         Recipe.builder()
                                 .dish(existing)

@@ -1,7 +1,6 @@
 package Project01.AWS.MealPlan.model.dtos.requests;
 
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -18,6 +17,6 @@ public class DishRequest {
     private Integer totalTime;
     private Long countryId;
     private Set<Long> typeIds;
-    private List<DishIngredientRequest> dishIngredients;
-    private List<RecipeRequest> recipes;
+    private List<DishIngredientCRUDDishRequest> dishIngredients;
+    private List<RecipeCRUDDishRequest> recipes;
 }
