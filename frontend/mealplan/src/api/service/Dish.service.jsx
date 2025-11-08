@@ -40,8 +40,8 @@ const DishService = {
     return response.data
   },
 
-  updateDishStatus: async (dishId, status) => {
-    const response = await axiosInstance.put(APIENDPOINTS.DISH.UPDATE_DISH_STATUS(dishId, status))
+  updateDishStatus: async (dishId) => {
+    const response = await axiosInstance.put(APIENDPOINTS.DISH.UPDATE_DISH_STATUS(dishId))
     console.log("DishService -> updateDishStatus -> response", response)
     return response.data.data
   },
