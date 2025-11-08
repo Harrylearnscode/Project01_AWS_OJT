@@ -204,7 +204,7 @@ public class DishServiceImpl implements DishService {
     @Override
     public DishResponse getDishById(Long id) {
         try {
-            Dish dish = dishRepository.findByDishIdAndStatus(id, DishStatus.ACTIVE)
+            Dish dish = dishRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Dish not found or deleted"));
             return DishMapper.toResponse(dish);
         } catch (Exception e) {
