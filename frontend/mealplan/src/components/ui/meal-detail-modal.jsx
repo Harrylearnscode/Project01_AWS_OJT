@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { X, ChevronDown, ChevronUp } from "lucide-react"
-// import { getDishById, updateDish } from "@/lib/api"
 import DishService from "../../api/service/Dish.service.jsx"
 
 export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated }) {
@@ -24,7 +23,7 @@ export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated
     try {
       const data = await DishService.getDishDetail(mealId)
       setMeal(data)
-      // Initialize expanded recipes
+      // Khởi tạo trạng thái expand cho recipe
       if (data.recipes) {
         const expanded = {}
         Object.keys(data.recipes).forEach((key) => {
@@ -39,14 +38,17 @@ export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated
     }
   }
 
-  const handleStatusChange = async (newStatus) => {
+  const handleStatusChange = async () => {
     setIsUpdating(true)
+    setError(null)
     try {
-      await DishService.updateDish(mealId, { status: newStatus })
-      setMeal({ ...meal, status: newStatus })
-      if (onMealUpdated) onMealUpdated()
+      await DishService.updateDishStatus(mealId)
+      // ✅ Chỉ reload lại dữ liệu trong modal
+      await fetchMealDetails()
+      // ❌ Không gọi onMealUpdated ở đây nếu bạn không muốn reload cha
+      // if (onMealUpdated) onMealUpdated()
     } catch (err) {
-      setError(err.message || "Failed to update meal")
+      setError(err.message || "Failed to update meal status")
     } finally {
       setIsUpdating(false)
     }
@@ -134,7 +136,7 @@ export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated
               </div>
 
               {/* Types */}
-              {meal.types && meal.types.length > 0 && (
+              {meal.types?.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-sm mb-2">Types:</h4>
                   <div className="flex flex-wrap gap-2">
@@ -147,7 +149,7 @@ export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated
                 </div>
               )}
 
-              {meal.dishIngredients && meal.dishIngredients.length > 0 && (
+              {meal.dishIngredients?.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-sm mb-2">Ingredients:</h4>
                   <div className="border border-border rounded-lg divide-y max-h-40 overflow-y-auto">
@@ -196,7 +198,7 @@ export default function MealDetailModal({ mealId, isOpen, onClose, onMealUpdated
 
               <div className="flex gap-2 pt-4 border-t border-border mt-6">
                 <button
-                  onClick={() => handleStatusChange(meal.status === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
+                  onClick={handleStatusChange}
                   disabled={isUpdating}
                   className={`flex-1 py-2 rounded font-medium text-sm transition-colors ${
                     meal.status === "ACTIVE"

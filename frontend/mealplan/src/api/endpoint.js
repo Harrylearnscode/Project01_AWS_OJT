@@ -9,7 +9,7 @@ const APIENDPOINTS = {
     DISH: {
         CREATE_DISH: '/dishes/create',
         UPDATE_DISH: (id) => `/dishes/update/${id}`,
-        UPDATE_DISH_STATUS: (id, status) => `/dishes/update-status/${id}?status=${status}`,
+        UPDATE_DISH_STATUS: (id) => `/dishes/changestatus/${id}`,
         GET_ALL_DISHES: '/dishes/getAllDishes',
         UPLOAD_DISH_IMAGE: (dishId)=> `/dishes/${dishId}/uploadImage`,
         GET_ACTIVE_DISHES: '/dishes/getAllActiveDishes',
@@ -38,6 +38,12 @@ const APIENDPOINTS = {
         UPDATE_INGREDIENT: (ingredientId) => `/ingredients/update/${ingredientId}`,
         CREATE_INGREDIENT: '/ingredients/create',
         DELETE_INGREDIENT: (ingredientId) => `/ingredients/delete/${ingredientId}`,
+    },
+    TYPE:{
+        GET_ALL_TYPES: '/type/getAll',
+    },
+    COUNTRY: {
+        GET_ALL_COUNTRIES: '/countries/getAll',
     }
 };
 
