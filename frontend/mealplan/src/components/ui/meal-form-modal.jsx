@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { X, Plus, Trash2 } from "lucide-react"
-// import { createDish, uploadDishImage, getDishById, updateDish, getIngredients, getAllTypes } from "@/lib/api"
 import DishService from "../../api/service/Dish.service"
 import TypeService from "../../api/service/Type.service"
 import IngredientService from "../../api/service/Ingredient.service"
 import CountryService from "../../api/service/Country.service"
+
 export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -14,6 +14,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
     prepareTime: 0,
     cookingTime: 0,
     totalTime: 0,
+    price: 0,
     countryId: 1,
     typeIds: [],
     dishIngredients: [],
@@ -44,27 +45,50 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
     }
   }, [isOpen, mealId])
 
-  const fetchIngredientsTypesCountries = async () => {
-  setIngredientsLoading(true)
-  setTypesLoading(true)
-  setCountriesLoading(true)
-  try {
-    const [ingredientsData, typesData, countriesData] = await Promise.all([
-      IngredientService.getAllIngredients(),
-      TypeService.getAllTypes(),
-      CountryService.getAllCountries(),
-    ])
-    setAvailableIngredients(ingredientsData || [])
-    setAvailableTypes(typesData.data || [])
-    setAvailableCountries(countriesData.data || countriesData || [])
-  } catch (err) {
-    console.error("Error fetching ingredients, types, or countries:", err)
-  } finally {
-    setIngredientsLoading(false)
-    setTypesLoading(false)
-    setCountriesLoading(false)
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      totalTime: (prev.prepareTime || 0) + (prev.cookingTime || 0),
+    }))
+  }, [formData.prepareTime, formData.cookingTime])
+
+  const fetchMealData = async () => {
+    try {
+      setIsLoading(true)
+      const meal = await DishService.getDishById(mealId)
+      if (meal) {
+        setFormData(meal)
+        if (meal.imageUrl) setImagePreview(meal.imageUrl)
+      }
+    } catch (err) {
+      console.error("Error fetching meal:", err)
+      setError("Failed to load meal data.")
+    } finally {
+      setIsLoading(false)
+    }
   }
-}
+
+  const fetchIngredientsTypesCountries = async () => {
+    setIngredientsLoading(true)
+    setTypesLoading(true)
+    setCountriesLoading(true)
+    try {
+      const [ingredientsData, typesData, countriesData] = await Promise.all([
+        IngredientService.getAllIngredients(),
+        TypeService.getAllTypes(),
+        CountryService.getAllCountries(),
+      ])
+      setAvailableIngredients(ingredientsData || [])
+      setAvailableTypes(typesData.data || [])
+      setAvailableCountries(countriesData.data || countriesData || [])
+    } catch (err) {
+      console.error("Error fetching ingredients, types, or countries:", err)
+    } finally {
+      setIngredientsLoading(false)
+      setTypesLoading(false)
+      setCountriesLoading(false)
+    }
+  }
 
   const resetForm = () => {
     setFormData({
@@ -73,6 +97,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
       prepareTime: 0,
       cookingTime: 0,
       totalTime: 0,
+      price: 0,
       countryId: 1,
       typeIds: [],
       dishIngredients: [],
@@ -87,7 +112,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name.includes("Time") || name.includes("Id") ? Number.parseInt(value) || 0 : value,
+      [name]: name.includes("Time") || name.includes("Id") || name === "price" ? Number(value) || 0 : value,
     }))
   }
 
@@ -96,9 +121,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
     if (file) {
       setImageFile(file)
       const reader = new FileReader()
-      reader.onload = (event) => {
-        setImagePreview(event.target?.result)
-      }
+      reader.onload = (event) => setImagePreview(event.target?.result)
       reader.readAsDataURL(file)
     }
   }
@@ -106,7 +129,9 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
   const handleTypeChange = (typeId) => {
     setFormData((prev) => ({
       ...prev,
-      typeIds: prev.typeIds.includes(typeId) ? prev.typeIds.filter((id) => id !== typeId) : [...prev.typeIds, typeId],
+      typeIds: prev.typeIds.includes(typeId)
+        ? prev.typeIds.filter((id) => id !== typeId)
+        : [...prev.typeIds, typeId],
     }))
   }
 
@@ -122,7 +147,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
       const updated = [...prev.dishIngredients]
       updated[index] = {
         ...updated[index],
-        [field]: field === "quantity" ? Number.parseFloat(value) || 0 : Number.parseInt(value) || 0,
+        [field]: field === "quantity" ? parseFloat(value) || 0 : parseInt(value) || 0,
       }
       return { ...prev, dishIngredients: updated }
     })
@@ -145,10 +170,7 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
   const updateRecipe = (index, field, value) => {
     setFormData((prev) => {
       const updated = [...prev.recipes]
-      updated[index] = {
-        ...updated[index],
-        [field]: field === "step" ? Number.parseInt(value) || 1 : value,
-      }
+      updated[index] = { ...updated[index], [field]: field === "step" ? parseInt(value) || 1 : value }
       return { ...prev, recipes: updated }
     })
   }
@@ -165,19 +187,15 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
     setIsSubmitting(true)
     try {
       let dishId = mealId
-
       if (mealId) {
-        // Update existing dish
         await DishService.updateDish(mealId, formData)
       } else {
         const response = await DishService.createDish(formData)
         dishId = response.dishId || response.id
       }
-
       if (imageFile && dishId) {
         await DishService.uploadDishImage(dishId, imageFile)
       }
-
       onMealUpdated()
       onClose()
     } catch (err) {
@@ -192,261 +210,247 @@ export default function MealFormModal({ mealId, isOpen, onClose, onMealUpdated }
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
-
-      <div className="fixed right-0 top-0 bottom-0 w-full md:w-96 bg-card z-50 shadow-lg overflow-y-auto">
+      <div className="fixed right-0 top-0 bottom-0 w-full md:w-[480px] bg-card z-50 shadow-2xl overflow-y-auto rounded-l-2xl border-l border-border">
         <div className="sticky top-0 bg-card flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-2xl font-bold text-card-foreground">{mealId ? "Update Meal" : "Add New Meal"}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-muted rounded transition-colors">
+          <h2 className="text-2xl font-bold text-card-foreground">
+            {mealId ? "Update Meal" : "Add New Meal"}
+          </h2>
+          <button onClick={onClose} className="p-1 hover:bg-muted rounded-lg transition-colors">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
             <div className="bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded text-sm">
               {error}
             </div>
           )}
 
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-sm text-muted-foreground">Loading meal data...</p>
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-semibold text-foreground mb-2">Meal Image</label>
+            <div className="relative border-2 border-gray-300 rounded-xl p-4 text-center hover:border-primary transition-colors cursor-pointer bg-white">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-40 object-cover rounded-lg border border-gray-300"
+                />
+              ) : (
+                <p className="text-sm text-gray-500">Click to upload image</p>
+              )}
             </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Meal Image</label>
-                <div className="relative border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview || "/placeholder.svg"}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded"
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Click to upload image</p>
-                  )}
-                </div>
-              </div>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Meal Name *</label>
+          {/* Basic Info */}
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-semibold mb-1">Meal Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1">Price (VND)</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Time Inputs */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Prepare (min)", name: "prepareTime", value: formData.prepareTime },
+              { label: "Cook (min)", name: "cookingTime", value: formData.cookingTime },
+              { label: "Total (min)", name: "totalTime", value: formData.totalTime, readOnly: true },
+            ].map((item, idx) => (
+              <div key={idx}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{item.label}</label>
                 <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
+                  type="number"
+                  name={item.name}
+                  value={item.value}
+                  readOnly={item.readOnly}
                   onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  className={`w-full px-2 py-1 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none ${
+                    item.readOnly ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+                  }`}
                 />
               </div>
+            ))}
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows="2"
-                  className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-              </div>
+          {/* Country */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Country</label>
+            <select
+              name="countryId"
+              value={formData.countryId}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm bg-white"
+            >
+              <option value={0}>Select country</option>
+              {availableCountries.map((country) => (
+                <option key={country.id} value={country.id}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Country</label>
-                {countriesLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading countries...</p>
-                ) : (
-                  <select
-                    name="countryId"
-                    value={formData.countryId}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  >
-                    <option value={0}>Select country</option>
-                    {availableCountries.map((country) => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+          {/* Meal Type */}
+          <div className="border-t border-border pt-4">
+            <h3 className="font-semibold mb-2">Meal Type</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {availableTypes.map((type) => (
+                <label key={type.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.typeIds.includes(type.id)}
+                    onChange={() => handleTypeChange(type.id)}
+                    className="w-4 h-4 border-2 border-gray-400 rounded"
+                  />
+                  <span className="text-sm">{type.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
+          {/* Ingredients */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-foreground">Ingredients</h3>
+              <button type="button" onClick={addIngredient} className="p-1 hover:bg-muted rounded transition-colors">
+                <Plus size={18} />
+              </button>
+            </div>
 
-              <div className="border-t border-border pt-4">
-                <label className="block text-sm font-medium text-foreground mb-3">Meal Type</label>
-                {typesLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading types...</p>
-                ) : (
-                  <div className="space-y-2">
-                    {availableTypes.map((type) => (
-                      <label key={type.id} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.typeIds.includes(type.id)}
-                          onChange={() => handleTypeChange(type.id)}
-                          className="w-4 h-4 rounded border-input"
-                        />
-                        <span className="text-sm text-foreground">{type.name}</span>
-                      </label>
-                    ))}
+            <div className="space-y-2">
+              {formData.dishIngredients.map((ingredient, index) => (
+                <div key={index} className="flex gap-2 items-end border border-gray-200 p-2 rounded-lg bg-gray-50">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-600">Ingredient</label>
+                    <select
+                      value={ingredient.ingredientId}
+                      onChange={(e) => updateIngredient(index, "ingredientId", e.target.value)}
+                      className="w-full px-2 py-1 border-2 border-gray-300 rounded text-sm bg-white"
+                    >
+                      <option value={0}>Select ingredient</option>
+                      {availableIngredients.map((ing) => (
+                        <option key={ing.id} value={ing.ingredientId}>
+                          {ing.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Prepare (min)</label>
-                  <input
-                    type="number"
-                    name="prepareTime"
-                    value={formData.prepareTime}
-                    onChange={handleChange}
-                    className="w-full px-2 py-1 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Cook (min)</label>
-                  <input
-                    type="number"
-                    name="cookingTime"
-                    value={formData.cookingTime}
-                    onChange={handleChange}
-                    className="w-full px-2 py-1 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Total (min)</label>
-                  <input
-                    type="number"
-                    name="totalTime"
-                    value={formData.totalTime}
-                    onChange={handleChange}
-                    className="w-full px-2 py-1 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-foreground">Ingredients</h3>
+                  <div className="w-24">
+                    <label className="text-xs text-gray-600">Quantity</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={ingredient.quantity}
+                      onChange={(e) => updateIngredient(index, "quantity", e.target.value)}
+                      className="w-full px-2 py-1 border-2 border-gray-300 rounded text-sm bg-white"
+                    />
+                  </div>
                   <button
                     type="button"
-                    onClick={addIngredient}
-                    className="p-1 hover:bg-muted rounded transition-colors"
+                    onClick={() => removeIngredient(index)}
+                    className="p-1 hover:bg-destructive/10 text-destructive rounded transition-colors"
                   >
-                    <Plus size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
-                {ingredientsLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading ingredients...</p>
-                ) : (
-                  <div className="space-y-2">
-                    {formData.dishIngredients.map((ingredient, index) => (
-                      <div key={index} className="flex gap-2 items-end">
-                        <div className="flex-1">
-                          <label className="text-xs text-muted-foreground">Ingredient</label>
-                          <select
-                            value={ingredient.ingredientId}
-                            onChange={(e) => updateIngredient(index, "ingredientId", e.target.value)}
-                            className="w-full px-2 py-1 border border-input rounded text-sm"
-                          >
-                            <option value={0}>Select ingredient</option>
-                            {availableIngredients.map((ing) => (
-                              <option key={ing.id} value={ing.ingredientId}>
-                                {ing.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="w-24">
-                          <label className="text-xs text-muted-foreground">Quantity</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={ingredient.quantity}
-                            onChange={(e) => updateIngredient(index, "quantity", e.target.value)}
-                            className="w-full px-2 py-1 border border-input rounded text-sm"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(index)}
-                          className="p-1 hover:bg-destructive/10 text-destructive rounded transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Recipes */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-foreground">Recipes</h3>
+              <button type="button" onClick={addRecipe} className="p-1 hover:bg-muted rounded transition-colors">
+                <Plus size={18} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              {formData.recipes.map((recipe, index) => (
+                <div key={index} className="p-3 border-2 border-gray-200 rounded-xl bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <select
+                      value={recipe.type}
+                      onChange={(e) => updateRecipe(index, "type", e.target.value)}
+                      className="px-2 py-1 border-2 border-gray-300 rounded text-sm bg-white"
+                    >
+                      <option value="preparation">Preparation</option>
+                      <option value="cooking">Cooking</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeRecipe(index)}
+                      className="p-1 hover:bg-destructive/10 text-destructive rounded transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                )}
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-foreground">Recipes</h3>
-                  <button type="button" onClick={addRecipe} className="p-1 hover:bg-muted rounded transition-colors">
-                    <Plus size={18} />
-                  </button>
+                  <textarea
+                    value={recipe.content}
+                    onChange={(e) => updateRecipe(index, "content", e.target.value)}
+                    placeholder="Recipe step content"
+                    rows="2"
+                    className="w-full px-2 py-1 border-2 border-gray-300 rounded text-sm bg-white"
+                  />
                 </div>
-                <div className="space-y-3">
-                  {formData.recipes.map((recipe, index) => (
-                    <div key={index} className="p-3 border border-border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <select
-                          value={recipe.type}
-                          onChange={(e) => updateRecipe(index, "type", e.target.value)}
-                          className="px-2 py-1 border border-input rounded text-sm"
-                        >
-                          <option value="preparation">Preparation</option>
-                          <option value="cooking">Cooking</option>
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeRecipe(index)}
-                          className="p-1 hover:bg-destructive/10 text-destructive rounded transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <textarea
-                        value={recipe.content}
-                        onChange={(e) => updateRecipe(index, "content", e.target.value)}
-                        placeholder="Recipe step content"
-                        rows="2"
-                        className="w-full px-2 py-1 border border-input rounded text-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              <div className="flex gap-2 pt-4 border-t border-border">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
-                >
-                  {isSubmitting ? "Saving..." : mealId ? "Update Meal" : "Create Meal"}
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors font-medium text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
+          {/* Buttons */}
+          <div className="flex gap-2 pt-4 border-t border-border">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
+            >
+              {isSubmitting ? "Saving..." : mealId ? "Update Meal" : "Create Meal"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors font-medium text-sm"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </>
