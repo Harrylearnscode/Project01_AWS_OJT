@@ -16,6 +16,7 @@ public class DishRequest {
     private Integer cookingTime;
     private Integer totalTime;
     private Long countryId;
+    private Double price;
     private Set<Long> typeIds;
     private List<DishIngredientCRUDDishRequest> dishIngredients;
     private List<RecipeCRUDDishRequest> recipes;
