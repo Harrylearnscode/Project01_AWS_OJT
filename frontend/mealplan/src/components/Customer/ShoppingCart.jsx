@@ -116,7 +116,6 @@ const ShoppingCart = () => {
     setShowCheckoutModal(false)
   }
 
-  // ✅ Checkout handler — navigate user to payUrl instead of showing QR modal
   const handleCheckout = async () => {
     if (!checkoutData.address || checkoutData.address.trim().length < 3) {
       alert("Vui lòng nhập địa chỉ giao hàng hợp lệ.")
