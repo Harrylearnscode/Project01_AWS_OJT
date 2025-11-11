@@ -1,30 +1,29 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import ProductCard from "../ui/ProductCard"
-import Pagination from "../ui/Pagination"
 import LoadingSkeleton from "../ui/LoadingSkeleton"
 import DishService from "../../api/service/Dish.service.jsx"
 
 const ShopPage = () => {
   const [allDishes, setAllDishes] = useState([])
-  const [products, setProducts] = useState([])
+  const [visibleDishes, setVisibleDishes] = useState([]) // dishes currently displayed
   const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState("name") // name, price, totalTime
-  const [sortOrder, setSortOrder] = useState("asc") // asc, desc
+  const [sortBy, setSortBy] = useState("name")
+  const [sortOrder, setSortOrder] = useState("asc")
   const [filterByCountry, setFilterByCountry] = useState("")
   const [filterByType, setFilterByType] = useState("")
+  const observerRef = useRef(null)
 
-  const itemsPerPage = 12
+  const itemsPerLoad = 12 // how many to load at a time
 
   useEffect(() => {
     const loadAllDishes = async () => {
       setLoading(true)
       try {
         const response = await DishService.getAllActiveDishes()
-        console.log("==> API data", response.data)
         const transformedDishes = response.data.map((dish) => ({
           id: dish.id,
           name: dish.name,
@@ -39,7 +38,6 @@ const ShopPage = () => {
           countryName: dish.country,
           typeNames: dish.types,
         }))
-
         setAllDishes(transformedDishes)
       } catch (error) {
         console.error("Error loading dishes:", error)
@@ -51,70 +49,86 @@ const ShopPage = () => {
     loadAllDishes()
   }, [])
 
+  // Get unique filter options
   const filterOptions = useMemo(() => {
     const countries = [...new Set(allDishes.map((dish) => dish.countryName))]
     const types = [...new Set(allDishes.flatMap((dish) => dish.typeNames))]
     return { countries, types }
   }, [allDishes])
 
+  // Apply search, filter, sort
   const filteredAndSortedDishes = useMemo(() => {
-  let filtered = [...allDishes] // copy để tránh mutate
+    let filtered = [...allDishes]
 
-  if (searchTerm) {
-    filtered = filtered.filter(
-      (dish) =>
-        dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dish.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dish.countryName.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }
-
-  if (filterByCountry) {
-    filtered = filtered.filter((dish) => dish.countryName === filterByCountry)
-  }
-
-  if (filterByType) {
-    filtered = filtered.filter((dish) => dish.typeNames.includes(filterByType))
-  }
-
-  filtered.sort((a, b) => {
-    switch (sortBy) {
-      case "price":
-        return sortOrder === "desc"
-          ? Number(b.price) - Number(a.price)
-          : Number(a.price) - Number(b.price)
-      case "totalTime":
-        return sortOrder === "desc"
-          ? Number(b.totalTime) - Number(a.totalTime)
-          : Number(a.totalTime) - Number(b.totalTime)
-      case "name":
-      default:
-        return sortOrder === "desc"
-          ? b.name.localeCompare(a.name)
-          : a.name.localeCompare(b.name)
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (dish) =>
+          dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dish.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dish.countryName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     }
-  })
 
-  return filtered
-}, [allDishes, searchTerm, filterByCountry, filterByType, sortBy, sortOrder])
+    if (filterByCountry) {
+      filtered = filtered.filter((dish) => dish.countryName === filterByCountry)
+    }
 
+    if (filterByType) {
+      filtered = filtered.filter((dish) => dish.typeNames.includes(filterByType))
+    }
 
-  const totalPages = Math.ceil(filteredAndSortedDishes.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentProducts = filteredAndSortedDishes.slice(startIndex, endIndex)
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "price":
+          return sortOrder === "desc"
+            ? Number(b.price) - Number(a.price)
+            : Number(a.price) - Number(b.price)
+        case "totalTime":
+          return sortOrder === "desc"
+            ? Number(b.totalTime) - Number(a.totalTime)
+            : Number(a.totalTime) - Number(b.totalTime)
+        case "name":
+        default:
+          return sortOrder === "desc"
+            ? b.name.localeCompare(a.name)
+            : a.name.localeCompare(b.name)
+      }
+    })
 
+    return filtered
+  }, [allDishes, searchTerm, filterByCountry, filterByType, sortBy, sortOrder])
+
+  // Reset visible dishes when filters change
   useEffect(() => {
-    setProducts(currentProducts)
-  }, [filteredAndSortedDishes, currentPage])
+    setVisibleDishes(filteredAndSortedDishes.slice(0, itemsPerLoad))
+  }, [filteredAndSortedDishes])
 
+  // Infinite scroll observer
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, filterByCountry, filterByType, sortBy, sortOrder])
+    if (loading || filteredAndSortedDishes.length === 0) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          loadMore()
+        }
+      },
+      { threshold: 1 }
+    )
+    if (observerRef.current) observer.observe(observerRef.current)
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current)
+    }
+  }, [filteredAndSortedDishes, visibleDishes, loadingMore])
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: "smooth" })
+  const loadMore = () => {
+    setLoadingMore(true)
+    setTimeout(() => {
+      setVisibleDishes((prev) => {
+        const nextItems = filteredAndSortedDishes.slice(prev.length, prev.length + itemsPerLoad)
+        return [...prev, ...nextItems]
+      })
+      setLoadingMore(false)
+    }, 500)
   }
 
   const clearFilters = () => {
@@ -129,65 +143,43 @@ const ShopPage = () => {
     try {
       const existingCart = localStorage.getItem("mealplan-cart")
       const cartItems = existingCart ? JSON.parse(existingCart) : []
-
       const existingItemIndex = cartItems.findIndex((item) => item.id === product.id)
 
       if (existingItemIndex >= 0) {
         cartItems[existingItemIndex].quantity += 1
       } else {
-        cartItems.push({
-          id: product.id,
-          quantity: 1,
-        })
+        cartItems.push({ id: product.id, quantity: 1 })
       }
 
       localStorage.setItem("mealplan-cart", JSON.stringify(cartItems))
-
-      console.log(`Added ${product.name} to cart`)
-
-      window.dispatchEvent(
-        new CustomEvent("cartUpdated", {
-          detail: { product, cartItems },
-        }),
-      )
+      window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { product, cartItems } }))
     } catch (error) {
       console.error("Error adding item to cart:", error)
     }
   }
 
-  if (loading) {
-    return <LoadingSkeleton />
-  }
+  if (loading) return <LoadingSkeleton />
 
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h1
-          className="text-4xl font-bold text-foreground text-balance"
-          style={{ fontFamily: "Playfair Display, serif" }}
-        >
+        <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "Playfair Display, serif" }}>
           Fresh Meal Plans
         </h1>
-        <p
-          className="text-lg text-muted-foreground max-w-2xl mx-auto"
-          style={{ fontFamily: "Source Sans Pro, sans-serif" }}
-        >
-          Discover delicious, healthy meals delivered fresh to your door. Choose from our curated selection of
-          chef-prepared dishes.
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto" style={{ fontFamily: "Source Sans Pro, sans-serif" }}>
+          Discover delicious, healthy meals delivered fresh to your door. Choose from our curated selection of chef-prepared dishes.
         </p>
       </div>
 
       <div className="bg-card rounded-lg p-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Tìm kiếm món ăn..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Tìm kiếm món ăn..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
           <button
             onClick={clearFilters}
             className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
@@ -244,17 +236,16 @@ const ShopPage = () => {
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Hiển thị {startIndex + 1}-{Math.min(endIndex, filteredAndSortedDishes.length)} trong tổng số{" "}
-          {filteredAndSortedDishes.length} món ăn
+          Hiển thị {visibleDishes.length} trong tổng số {filteredAndSortedDishes.length} món ăn
           {(searchTerm || filterByCountry || filterByType) && (
             <span className="ml-2 text-primary">(đã lọc từ {allDishes.length} món ăn)</span>
           )}
         </div>
       </div>
 
-      {products.length > 0 ? (
+      {visibleDishes.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {visibleDishes.map((product) => (
             <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
           ))}
         </div>
@@ -270,8 +261,11 @@ const ShopPage = () => {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+      {/* Lazy load trigger */}
+      {!loading && visibleDishes.length < filteredAndSortedDishes.length && (
+        <div ref={observerRef} className="py-10 text-center text-muted-foreground">
+          {loadingMore ? "Đang tải thêm..." : "Cuộn xuống để tải thêm món ăn..."}
+        </div>
       )}
     </div>
   )

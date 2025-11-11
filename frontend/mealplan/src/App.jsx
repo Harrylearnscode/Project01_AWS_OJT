@@ -16,7 +16,7 @@ import Verify from "./components/auth/verify.jsx";
 import OrderDetail from "./components/Customer/OrderDetail.jsx";
 import OrderHistory from "./components/Customer/OrdersHistory.jsx";
 import Ingredient from "./components/Seller/Ingredient.jsx";
-
+import {Toaster} from "./components/ui/toaster.jsx";
 export function PrivateRoute({ children }) {
   // const token = localStorage.getItem("token"); // token sau khi login
   const {user} = useAuth();   // 'customer' hoặc 'seller'
@@ -31,6 +31,7 @@ export function PrivateRoute({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <Toaster />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />

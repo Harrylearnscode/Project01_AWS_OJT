@@ -5,7 +5,11 @@ import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Clock, ChefHat, Plus, Minus } from "lucide-react"
 import CartService from "../../api/service/Cart.service"
 import DishService from "../../api/service/Dish.service"
+import { useToast } from '../ui/use-toast.jsx';
+
 const MealDetail = () => {
+  const { toast } = useToast();
+
   const { id } = useParams()
   const navigate = useNavigate()
   const [meal, setMeal] = useState(null)
@@ -82,25 +86,44 @@ const price = (ingredients, ingredientQuantities) => {
 
 
   const handleAddToCart = async (product) => {
-    try {
-      const ingredientsForOrder = Object.entries(ingredientQuantities).map(([ingredientId, data]) => ({
+  try {
+    const ingredientsForOrder = Object.entries(ingredientQuantities).map(
+      ([ingredientId, data]) => ({
         ingredientId: Number.parseInt(ingredientId),
         quantity: data.quantity,
-      }))
+      })
+    );
 
-      const orderData = {
-        dishId: product.id,
-        quantity: quantity,
-        ingredients: ingredientsForOrder,
-      }
-      console.log("Order Data:", orderData)
+    const orderData = {
+      dishId: product.id,
+      quantity: quantity,
+      ingredients: ingredientsForOrder,
+    };
 
-      const response = await  CartService.addToCart(user.id, orderData)
-      console.log("Add to Cart Response:", response)
-    } catch (error) {
-      console.error("Error adding item to cart:", error)
-    }
+    console.log("Order Data:", orderData);
+
+    const response = await CartService.addToCart(user.id, orderData);
+    console.log("Add to Cart Response:", response);
+
+    // ✅ Show toast success
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart.`,
+      duration: 3000, // hiển thị 3 giây
+    });
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+
+    // ✅ Show toast error
+    toast({
+      title: "Error",
+      description: "Failed to add item to cart.",
+      variant: "destructive", // nếu toast UI có variant destructive
+      duration: 3000,
+    });
   }
+};
+
 
   const handleIngredientQuantityChange = (ingredientId, change) => {
     setIngredientQuantities((prev) => {
