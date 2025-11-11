@@ -13,5 +13,7 @@ import lombok.NoArgsConstructor;
 public class DishIngredientSimpleResponse {
     private Long ingredientId;;
     private String ingredient;
+    private Double calories;
+    private Double price;
     private Integer quantity;
 }
