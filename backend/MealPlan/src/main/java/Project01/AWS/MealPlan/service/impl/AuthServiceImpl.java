@@ -9,6 +9,7 @@ import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.AuthService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -271,6 +275,58 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return userRepository.save(user);
+    }
+
+    public User syncCognitoUserToLocal(String email, String name, String phone, String address) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+
+            // Update user info from Cognito if they've changed
+            boolean updated = false;
+
+            if (name != null && !name.equals(user.getName())) {
+                user.setName(name);
+                updated = true;
+            }
+
+            if (phone != null && !phone.equals(user.getPhone())) {
+                user.setPhone(phone);
+                updated = true;
+            }
+
+            if (address != null && !address.equals(user.getAddress())) {
+                user.setAddress(address);
+                updated = true;
+            }
+
+            // Ensure user is activated for Cognito login
+            if (!user.isActive()) {
+                user.setActive(true);
+                user.setVerificationCode(null);
+                user.setVerificationExpiry(null);
+                updated = true;
+            }
+
+            return updated ? userRepository.save(user) : user;
+
+        } else {
+            // Create new user from Cognito attributes
+            User newUser = User.builder()
+                    .name(name != null ? name : email.split("@")[0])
+                    .email(email)
+                    .password(bCryptPasswordEncoder.encode("COGNITO_USER_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000000))) // Placeholder password for db
+                    .role("CUSTOMER")
+                    .address(address)
+                    .phone(phone)
+                    .active(true)
+                    .verificationCode(null)
+                    .verificationExpiry(null)
+                    .build();
+
+            return userRepository.save(newUser);
+        }
     }
 
 }
