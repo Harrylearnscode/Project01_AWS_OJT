@@ -9,11 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -43,6 +41,10 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
+    public String generateTokenWithCustomExpiration(UserDetails userDetails, long expirationMs) {
+        return buildToken(new HashMap<>(), userDetails, expirationMs);
+    }
+
     // Get expiration time
     public long getExpirationTime() {
         return jwtExpiration;
@@ -58,7 +60,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // adjust algorithm if needed
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -77,11 +79,11 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts
-                .parser()                // parserBuilder thay cho parser
-                .setSigningKey(getSignInKey())  // Key chứ không phải String
+                .parser()                          // Parser
+                .verifyWith((SecretKey) getSignInKey())        // <-- new method
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)          // <-- replaces parseClaimsJws
+                .getPayload();                     // <-- replaces getBody
     }
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);

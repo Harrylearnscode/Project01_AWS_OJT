@@ -36,7 +36,7 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        // 🔍 Log all attributes from Cognito
+        //Log all attributes from Cognito
         logger.info("Cognito OAuth2 attributes received: {}", attributes);
 
         String email = claimToString(attributes.get("email"));
@@ -60,12 +60,44 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         // Find or create user in local database
         User user = authService.syncCognitoUserToLocal(email, name, phone, address);
 
+        // Determine JWT expiration based on Cognito exp claim
+        long nowMs = System.currentTimeMillis();
+        Object expObj = attributes.get("exp");
+        long backendExpiresInMs = jwtService.getExpirationTime(); // fallback
+
+        if (expObj != null) {
+            try {
+                long cognitoExpMs;
+
+                if (expObj instanceof Number) {
+                    // exp as epoch seconds
+                    long expSeconds = ((Number) expObj).longValue();
+                    cognitoExpMs = expSeconds * 1000L;
+                } else {
+                    // exp as ISO-8601 string, e.g. 2025-11-14T15:16:20Z
+                    String expStr = expObj.toString();
+                    java.time.Instant instant = java.time.Instant.parse(expStr);
+                    cognitoExpMs = instant.toEpochMilli();
+                }
+
+                long remainingMs = cognitoExpMs - nowMs;
+
+                if (remainingMs > 0) {
+                    backendExpiresInMs = remainingMs;
+                } else {
+                    logger.warn("Cognito token already expired or exp in past, using default JWT expiration");
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to parse Cognito exp claim: {}", e.getMessage());
+            }
+        }
+
         // Generate JWT token
-        String jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateTokenWithCustomExpiration(user, backendExpiresInMs);
 
         UserDto userDto = UserMapper.toUserDto(user);
 
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime(), userDto);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, backendExpiresInMs, userDto);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -115,5 +147,4 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         // If it's neither a Map nor a String, just toString it
         return rawAddress.toString();
     }
-
 }
