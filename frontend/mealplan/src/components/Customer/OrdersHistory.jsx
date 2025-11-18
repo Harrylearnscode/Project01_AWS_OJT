@@ -54,6 +54,13 @@ const OrderHistory = () => {
     }
   }
 
+  const handlePayOrder = (orderId, e) => {
+    e.stopPropagation()
+    const payUrl = orders.find((order) => order.orderId === orderId).payUrl
+    window.open(payUrl, "_blank");
+    // navigate(orders.find((order) => order.orderId === orderId).payUrl)
+  }
+
   const getStatusInfo = (status) => {
     const statusMap = {
       PENDING: {
@@ -62,19 +69,13 @@ const OrderHistory = () => {
         color: "text-yellow-500",
         bgColor: "bg-yellow-500/10",
       },
-      CONFIRMED: {
-        label: "Đã xác nhận",
+      PAID: {
+        label: "Đã thanh toán",
         icon: CheckCircle,
         color: "text-blue-500",
         bgColor: "bg-blue-500/10",
       },
-      PREPARING: {
-        label: "Đang chuẩn bị",
-        icon: Package,
-        color: "text-orange-500",
-        bgColor: "bg-orange-500/10",
-      },
-      DELIVERING: {
+      SHIPPED: {
         label: "Đang giao hàng",
         icon: Package,
         color: "text-purple-500",
@@ -116,7 +117,11 @@ const OrderHistory = () => {
   }
 
   const canCancelOrder = (status) => {
-    return ["PENDING", "CONFIRMED"].includes(status)
+    return ["PENDING", "PAID"].includes(status)
+  }
+
+  const isPayed = (status) => {
+    return ["PENDING"].includes(status)
   }
 
   if (loading) {
@@ -163,7 +168,7 @@ const OrderHistory = () => {
         <p className="text-muted-foreground">Quản lý và theo dõi đơn hàng của bạn</p>
       </div>
 
-      <div className="space-y-4">
+      <div key={orders.length} className="space-y-4">
         {orders.map((order) => {
           const statusInfo = getStatusInfo(order.status)
           const StatusIcon = statusInfo.icon
@@ -192,10 +197,10 @@ const OrderHistory = () => {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="text-lg font-bold text-primary">${order.totalPrice.toFixed(2)}</div>
-                    {order.totalCalories > 0 && (
+                    <div className="text-lg font-bold text-primary">{order.totalPrice.toFixed(2)} VND</div>
+                    {/* {order.totalCalories > 0 && (
                       <div className="text-sm text-muted-foreground">{order.totalCalories.toFixed(0)} kcal</div>
-                    )}
+                    )} */}
                   </div>
                 </div>
 
@@ -217,6 +222,15 @@ const OrderHistory = () => {
                       className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {cancelingOrderId === order.orderId ? "Đang hủy..." : "Hủy đơn"}
+                    </button>
+                  )}
+
+                  {isPayed(order.status) && (
+                    <button
+                      onClick={(e) => handlePayOrder(order.orderId, e)}
+                      className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Thanh Toán
                     </button>
                   )}
                 </div>

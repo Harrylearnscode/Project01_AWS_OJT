@@ -103,11 +103,11 @@ const ProductCard = ({ product, onAddToCart }) => {
         <div className="flex items-center justify-between pt-2">
           <div className="space-y-1">
             <div className="text-2xl font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
-              ${product.price}
+              {product.price} VND
             </div>
           </div>
 
-          <button
+          {/* <button
             onClick={handleAddToCart}
             disabled={isAdding || justAdded}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
@@ -135,7 +135,7 @@ const ProductCard = ({ product, onAddToCart }) => {
                 Add to Cart
               </>
             )}
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

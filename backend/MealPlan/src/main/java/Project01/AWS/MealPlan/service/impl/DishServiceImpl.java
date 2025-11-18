@@ -44,6 +44,7 @@ public class DishServiceImpl implements DishService {
                 .description(request.getDescription())
                 .prepareTime(request.getPrepareTime())
                 .cookingTime(request.getCookingTime())
+                .price(request.getPrice())
                 .totalTime(request.getTotalTime())
                 .status(DishStatus.ACTIVE)
                 .country(country)

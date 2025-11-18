@@ -32,9 +32,8 @@ const OrderDetail = () => {
   const getStatusInfo = (status) => {
     const statusMap = {
       PENDING: { label: "Chờ xử lý", color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
-      CONFIRMED: { label: "Đã xác nhận", color: "text-blue-500", bgColor: "bg-blue-500/10" },
-      PREPARING: { label: "Đang chuẩn bị", color: "text-orange-500", bgColor: "bg-orange-500/10" },
-      DELIVERING: { label: "Đang giao hàng", color: "text-purple-500", bgColor: "bg-purple-500/10" },
+      PAID: { label: "Đã xác nhận", color: "text-blue-500", bgColor: "bg-blue-500/10" },
+      SHIPPED: { label: "Đang giao hàng", color: "text-purple-500", bgColor: "bg-purple-500/10" },
       DELIVERED: { label: "Đã giao hàng", color: "text-green-500", bgColor: "bg-green-500/10" },
       CANCELLED: { label: "Đã hủy", color: "text-red-500", bgColor: "bg-red-500/10" },
     }

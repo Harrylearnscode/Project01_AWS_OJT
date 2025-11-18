@@ -276,7 +276,7 @@ const price = (ingredients, ingredientQuantities) => {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <span className="text-3xl font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
-                  ${price(meal.dishIngredients, ingredientQuantities)}
+                  {price(meal.dishIngredients, ingredientQuantities)} VND
                 </span>
               </div>
 
@@ -311,7 +311,7 @@ const price = (ingredients, ingredientQuantities) => {
                 className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 style={{ fontFamily: "Source Sans Pro, sans-serif" }}
               >
-                Add to Cart - ${price(meal.dishIngredients, ingredientQuantities).toFixed(2)}
+                Add to Cart - {price(meal.dishIngredients, ingredientQuantities).toFixed(2)} VND
               </button>
             </div>
           </div>
@@ -551,7 +551,7 @@ const price = (ingredients, ingredientQuantities) => {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-primary" style={{ fontFamily: "Playfair Display, serif" }}>
-                      ${relatedMeal.price}
+                      {relatedMeal.price} VND
                     </span>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
