@@ -30,5 +30,6 @@ public class OrderDetailResponse {
     private LocalDateTime paidTime;
     private OrderStatus status;
     private String userName;
+    private String payUrl;
     private Set<OrderDishResponse> dishes;
 }

@@ -52,23 +52,33 @@ const ShoppingCart = () => {
   }
 
   const updateQuantity = async (cartDishId, newQuantity) => {
-    if (newQuantity < 1) return
-    setUpdatingItemId(cartDishId)
-    try {
-      await CartService.updateCartItemQuantity(cartDishId, newQuantity)
-      await loadCartItems()
-    } catch (error) {
-      console.error("Failed to update quantity:", error)
-    } finally {
-      setUpdatingItemId(null)
-    }
-  }
+  if (newQuantity < 1) return
 
-  const removeItem = async (dishId) => {
+  setUpdatingItemId(cartDishId)
+
+  try {
+    // Gửi yêu cầu cập nhật số lượng tới server
+    await CartService.updateCartItemQuantity(cartDishId, newQuantity)
+
+    // Cập nhật state cục bộ (không gọi loadCartItems)
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === cartDishId ? { ...item, quantity: newQuantity } : item
+      )
+    )
+  } catch (error) {
+    console.error("Failed to update quantity:", error)
+  } finally {
+    setUpdatingItemId(null)
+  }
+}
+
+
+  const removeItem = async (id, dishId) => {
     try {
       const updatedItems = cartItems.filter((item) => item.dishId !== dishId)
       setCartItems(updatedItems)
-      await CartService.removeCartItem(dishId)
+      await CartService.removeCartItem(id)
       const updatedPrices = { ...itemPrices }
       delete updatedPrices[dishId]
       setItemPrices(updatedPrices)
@@ -104,8 +114,8 @@ const ShoppingCart = () => {
     return sum + price * item.quantity
   }, 0)
 
-  const deliveryFee = subtotal > 50 ? 0 : 5.99
-  const total = subtotal + deliveryFee
+  // const deliveryFee = subtotal > 50 ? 0 : 5.99
+  const total = subtotal
 
   const openCheckoutModal = () => {
     setCheckoutData({ address: "", phoneNumber: "" })
@@ -222,7 +232,7 @@ const ShoppingCart = () => {
                           {item.dishName}
                         </button>
                         <button
-                          onClick={() => removeItem(item.dishId)}
+                          onClick={() => removeItem(item.id, item.dishId)}
                           className="text-muted-foreground hover:text-destructive transition-colors p-1"
                           title="Xóa khỏi giỏ hàng"
                         >
@@ -233,7 +243,7 @@ const ShoppingCart = () => {
                       <p className="text-sm text-muted-foreground mb-3">Nhấn vào tên món để xem nguyên liệu</p>
 
                       <div className="flex items-center justify-between">
-                        <div className="text-xl font-bold text-primary">${price.toFixed(2)}</div>
+                        <div className="text-xl font-bold text-primary">{price.toFixed(2)} VND</div>
 
                         <div className="flex items-center gap-3">
                           <button
@@ -257,7 +267,7 @@ const ShoppingCart = () => {
 
                       <div className="mt-3 text-sm text-muted-foreground">
                         Tổng:{" "}
-                        <span className="font-semibold text-foreground">${(price * item.quantity).toFixed(2)}</span>
+                        <span className="font-semibold text-foreground">{(price * item.quantity).toFixed(2)} VND</span>
                       </div>
                     </div>
                   </div>
@@ -272,26 +282,26 @@ const ShoppingCart = () => {
             <div className="space-y-4">
               <div className="flex justify-between text-muted-foreground">
                 <span>Tạm tính ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} món)</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{subtotal.toFixed(2)} VND</span>
               </div>
 
-              <div className="flex justify-between text-muted-foreground">
+              {/* <div className="flex justify-between text-muted-foreground">
                 <span>Phí giao hàng</span>
                 <span>
                   {deliveryFee === 0 ? <span className="text-green-500">Miễn phí</span> : `$${deliveryFee.toFixed(2)}`}
                 </span>
-              </div>
+              </div> */}
 
-              {subtotal < 50 && (
+              {/* {subtotal < 50 && (
                 <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
                   Thêm ${(50 - subtotal).toFixed(2)} để được miễn phí giao hàng
                 </div>
-              )}
+              )} */}
 
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between text-lg font-bold text-card-foreground">
                   <span>Tổng cộng</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{total.toFixed(2)} VND</span>
                 </div>
               </div>
 

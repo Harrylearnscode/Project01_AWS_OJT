@@ -161,6 +161,8 @@ public class OrderServiceImpl implements OrderService {
         CreateMomoResponse momoResponse = momoService.createQR(order.getOrderId());
         String payUrl = momoResponse.getPayUrl();
 
+        order.setPayUrl(payUrl);
+
         OrderResponse orderResponse = OrderMapper.toDTO(order);
         orderResponse.setPayUrl(payUrl);
 //xoa giỏ hàng

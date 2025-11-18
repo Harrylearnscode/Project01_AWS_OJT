@@ -27,6 +27,8 @@ public class Order {
 
     private String canceledReason;
 
+    private String payUrl;
+
     @Column(name = "order_time")
     private LocalDateTime orderTime;
 
