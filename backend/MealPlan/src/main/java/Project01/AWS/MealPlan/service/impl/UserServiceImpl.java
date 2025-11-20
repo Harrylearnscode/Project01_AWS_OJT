@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.UserMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.UserPhoneAndAddressRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
@@ -162,6 +163,22 @@ public class UserServiceImpl implements UserService {
             return UserMapper.toResponse(saved);
         } catch (Exception e) {
             throw new ActionFailedException("Failed to create user");
+        }
+    }
+
+    @Override
+    public UserResponse updatePhoneAndAddress(Long id, UserPhoneAndAddressRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Cannot find user with ID: %s", id)
+                ));
+        try {
+            user.setPhone(request.getPhone());
+            user.setAddress(request.getAddress());
+            User updated = userRepository.save(user);
+            return UserMapper.toResponse(updated);
+        } catch (Exception e) {
+            throw new ActionFailedException(String.format("Failed to update user with ID: %s", id));
         }
     }
 }

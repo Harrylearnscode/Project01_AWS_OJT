@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.service;
 
 
 import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.UserPhoneAndAddressRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
 import Project01.AWS.MealPlan.model.entities.User;
@@ -19,4 +20,5 @@ public interface UserService {
     PaginatedUserResponse getAllUsers(String search, Pageable pageable);
     UserResponse getUserById(Long id);
     UserResponse createAdmin(AdminUserRequest request);
+    UserResponse updatePhoneAndAddress(Long id, UserPhoneAndAddressRequest request);
 }
