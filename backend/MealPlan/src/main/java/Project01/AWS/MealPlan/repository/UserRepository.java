@@ -25,4 +25,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByVerificationCode(String verificationCode);
     @Query("SELECT c FROM User c WHERE LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
+    Optional<User> findBySub(String sub);
 }
