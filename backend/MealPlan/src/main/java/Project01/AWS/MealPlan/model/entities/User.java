@@ -55,6 +55,9 @@ public class User implements UserDetails {
     @Column(name = "verification_expiry")
     private LocalDateTime verificationExpiry; // thời gian hết hạn mã xác thực
 
+    @Column(name = "sub")
+    private String sub;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Order> orders = new HashSet<>();

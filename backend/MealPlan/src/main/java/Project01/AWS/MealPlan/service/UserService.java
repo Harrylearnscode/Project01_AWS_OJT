@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.service;
 
 
 import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.CognitoUserRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserPhoneAndAddressRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
@@ -21,4 +22,5 @@ public interface UserService {
     UserResponse getUserById(Long id);
     UserResponse createAdmin(AdminUserRequest request);
     UserResponse updatePhoneAndAddress(Long id, UserPhoneAndAddressRequest request);
+    UserResponse updateCognitoUser(String sub, CognitoUserRequest request);
 }

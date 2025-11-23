@@ -17,6 +17,7 @@ public class UserMapper {
                 .role(entity.getRole())
                 .active(entity.isActive())
                 .email(entity.getEmail())
+                .sub(entity.getSub())
                 .build();
     }
       public RegisterResponse userToRegisterResponse(User user) {
@@ -52,6 +53,7 @@ public class UserMapper {
         userDto.setPhone(user.getPhone());
         userDto.setAddress(user.getAddress());
         userDto.setRole(user.getRole());
+        userDto.setSub(user.getSub());
         return userDto;
     }
 }

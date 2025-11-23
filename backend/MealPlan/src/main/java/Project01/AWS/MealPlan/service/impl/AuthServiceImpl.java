@@ -277,31 +277,33 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.save(user);
     }
 
-    public User syncCognitoUserToLocal(String email, String name, String phone, String address) {
-        Optional<User> existingUser = userRepository.findByEmail(email);
+    public User syncCognitoUserToLocal(String sub, String email, String name) {
+        // 1. Try to find user by Cognito Sub first (Best practice: stable ID)
+        // You need to add 'Optional<User> findByCognitoSub(String sub);' to your UserRepository
+        Optional<User> existingUser = userRepository.findBySub(sub);
+
+        // 2. If not found by Sub, try finding by Email (Legacy/First-time link)
+        if (existingUser.isEmpty()) {
+            existingUser = userRepository.findByEmail(email);
+        }
 
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-
-            // Update user info from Cognito if they've changed
             boolean updated = false;
 
+            // Link the Cognito Sub if it's missing (Crucial for future logins if email changes)
+            if (user.getSub() == null || !user.getSub().equals(sub)) {
+                user.setSub(sub);
+                updated = true;
+            }
+
+            // Sync Name (Optional: You might prefer local DB name to persist, remove if so)
             if (name != null && !name.equals(user.getName())) {
                 user.setName(name);
                 updated = true;
             }
 
-            if (phone != null && !phone.equals(user.getPhone())) {
-                user.setPhone(phone);
-                updated = true;
-            }
-
-            if (address != null && !address.equals(user.getAddress())) {
-                user.setAddress(address);
-                updated = true;
-            }
-
-            // Ensure user is activated for Cognito login
+            // Ensure user is activated
             if (!user.isActive()) {
                 user.setActive(true);
                 user.setVerificationCode(null);
@@ -309,20 +311,24 @@ public class AuthServiceImpl implements AuthService {
                 updated = true;
             }
 
+            // Note: We DO NOT update Phone or Address here.
+            // Local DB is now the source of truth for profile data.
+
             return updated ? userRepository.save(user) : user;
 
         } else {
-            // Create new user from Cognito attributes
+            // Create new user
             User newUser = User.builder()
-                    .name(name != null ? name : email.split("@")[0])
+                    .sub(sub) // Save the immutable ID
                     .email(email)
-                    .password(bCryptPasswordEncoder.encode("COGNITO_USER_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000000))) // Placeholder password for db
+                    .name(name != null ? name : email.split("@")[0])
+                    // Placeholder password. User authenticates via Cognito, so this is never used.
+                    .password(bCryptPasswordEncoder.encode("COGNITO_USER_" + sub))
                     .role("CUSTOMER")
-                    .address(address)
-                    .phone(phone)
                     .active(true)
                     .verificationCode(null)
                     .verificationExpiry(null)
+                    // Phone and Address are left null/empty until user fills them in Profile
                     .build();
 
             return userRepository.save(newUser);

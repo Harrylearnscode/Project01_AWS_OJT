@@ -14,11 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 
 @Component
@@ -30,73 +34,59 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
     private final AuthServiceImpl authService;
     private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        //Log all attributes from Cognito
         logger.info("Cognito OAuth2 attributes received: {}", attributes);
 
+        //Extract claims
+        String sub = claimToString(attributes.get("sub"));
         String email = claimToString(attributes.get("email"));
-        String preferred = claimToString(attributes.get("preferred_username"));
-        String name = preferred;
+
+        // Name logic: try 'name', fallback to email parts
+        String name = claimToString(attributes.get("name"));
         if (name == null || name.isBlank()) {
-            name = claimToString(attributes.get("name"));
-        }
-        if (name == null || name.isBlank()) {
-            // final fallback to local part of email or literal email
             name = (email != null && email.contains("@")) ? email.split("@")[0] : email;
         }
-        String phone = claimToString(attributes.get("phone_number"));
 
-        Object rawAddress = attributes.get("address");
+        logger.info("Extracted -> sub: {}, email: {}, name: {}", sub, email, name);
 
-        String address = extractAddress(attributes.get("address"));
+        User user = authService.syncCognitoUserToLocal(sub, email, name);
 
-        logger.info("Extracted -> email: {}, name: {}, phone: {}, address: {}", email, name, phone, address);
+        String jwtToken = "";
+        long backendExpiresInMs = jwtService.getExpirationTime(); // Default fallback
 
-        // Find or create user in local database
-        User user = authService.syncCognitoUserToLocal(email, name, phone, address);
+        if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
+            // Load the client that holds the tokens (Access & Refresh)
+            OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+                    oauthToken.getAuthorizedClientRegistrationId(),
+                    oauthToken.getName());
 
-        // Determine JWT expiration based on Cognito exp claim
-        long nowMs = System.currentTimeMillis();
-        Object expObj = attributes.get("exp");
-        long backendExpiresInMs = jwtService.getExpirationTime(); // fallback
+            if (client != null && client.getAccessToken() != null) {
+                //Get the Real AWS Access Token
+                jwtToken = client.getAccessToken().getTokenValue();
 
-        if (expObj != null) {
-            try {
-                long cognitoExpMs;
-
-                if (expObj instanceof Number) {
-                    // exp as epoch seconds
-                    long expSeconds = ((Number) expObj).longValue();
-                    cognitoExpMs = expSeconds * 1000L;
-                } else {
-                    // exp as ISO-8601 string, e.g. 2025-11-14T15:16:20Z
-                    String expStr = expObj.toString();
-                    java.time.Instant instant = java.time.Instant.parse(expStr);
-                    cognitoExpMs = instant.toEpochMilli();
+                //Get the Real Expiration Time from AWS
+                Instant expiresAt = client.getAccessToken().getExpiresAt();
+                if (expiresAt != null) {
+                    backendExpiresInMs = expiresAt.toEpochMilli() - System.currentTimeMillis();
                 }
 
-                long remainingMs = cognitoExpMs - nowMs;
-
-                if (remainingMs > 0) {
-                    backendExpiresInMs = remainingMs;
-                } else {
-                    logger.warn("Cognito token already expired or exp in past, using default JWT expiration");
-                }
-            } catch (Exception e) {
-                logger.warn("Failed to parse Cognito exp claim: {}", e.getMessage());
+                logger.info("Successfully retrieved AWS Access Token. Expires in {} ms", backendExpiresInMs);
             }
         }
 
-        // Generate JWT token
-        String jwtToken = jwtService.generateTokenWithCustomExpiration(user, backendExpiresInMs);
+        // Fallback
+        if (jwtToken.isEmpty()) {
+            logger.error("Could not retrieve AWS Token from AuthorizedClient");
+            jwtToken = jwtService.generateTokenWithCustomExpiration(user, backendExpiresInMs);
+        }
 
         UserDto userDto = UserMapper.toUserDto(user);
-
         LoginResponse loginResponse = new LoginResponse(jwtToken, backendExpiresInMs, userDto);
 
         response.setContentType("application/json");
@@ -108,43 +98,9 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         if (claim == null) return null;
         if (claim instanceof String) return (String) claim;
         try {
-            // objectMapper is your existing Jackson ObjectMapper
             return objectMapper.writeValueAsString(claim);
         } catch (Exception e) {
             return claim.toString();
         }
-    }
-
-    private String extractAddress(Object rawAddress) {
-        if (rawAddress == null) return null;
-
-        if (rawAddress instanceof String) {
-            return (String) rawAddress;
-        }
-
-        if (rawAddress instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> addrMap = (Map<String, Object>) rawAddress;
-
-            // Pick a meaningful field if available
-            Object formatted = addrMap.getOrDefault("formatted",
-                    addrMap.getOrDefault("street_address",
-                            addrMap.getOrDefault("postal_code",
-                                    addrMap.getOrDefault("locality", null))));
-
-            if (formatted != null) {
-                return formatted.toString();
-            }
-
-            // Fallback: serialize the entire object
-            try {
-                return objectMapper.writeValueAsString(addrMap);
-            } catch (Exception e) {
-                return addrMap.toString();
-            }
-        }
-
-        // If it's neither a Map nor a String, just toString it
-        return rawAddress.toString();
     }
 }

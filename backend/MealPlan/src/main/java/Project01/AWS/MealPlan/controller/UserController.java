@@ -2,6 +2,7 @@ package Project01.AWS.MealPlan.controller;
 
 
 import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.CognitoUserRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserPhoneAndAddressRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
@@ -9,6 +10,7 @@ import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.service.UserService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +20,6 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -128,6 +128,21 @@ public class UserController {
     @PostMapping("/updatePhoneNumberAndAddress/{id}")
     public ResponseEntity<ResponseObject> updatePhoneNumberAndAddress(@RequestBody UserPhoneAndAddressRequest request, @PathVariable Long id) {
         UserResponse response = userService.updatePhoneAndAddress(id, request);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("UPDATE_SUCCESS")
+                        .message("User updated successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @Operation(summary = "Cập nhật info user", description = "Chỉnh sửa thông tin user Cognito.")
+    @PutMapping("/updateCognitoUser/{sub}")
+    public ResponseEntity<ResponseObject> updateCognitoUserLocalDB(@PathVariable String sub, @RequestBody CognitoUserRequest request) {
+        UserResponse response = userService.updateCognitoUser(sub, request);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code("UPDATE_SUCCESS")

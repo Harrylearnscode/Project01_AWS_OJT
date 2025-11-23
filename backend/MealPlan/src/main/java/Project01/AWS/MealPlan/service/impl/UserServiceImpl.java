@@ -3,20 +3,16 @@ package Project01.AWS.MealPlan.service.impl;
 
 import Project01.AWS.MealPlan.mapper.UserMapper;
 import Project01.AWS.MealPlan.model.dtos.requests.AdminUserRequest;
+import Project01.AWS.MealPlan.model.dtos.requests.CognitoUserRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserPhoneAndAddressRequest;
 import Project01.AWS.MealPlan.model.dtos.requests.UserRequest;
-import Project01.AWS.MealPlan.model.dtos.responses.PaginatedOrderResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.PaginatedUserResponse;
-import Project01.AWS.MealPlan.model.dtos.responses.UserResponse;
 import Project01.AWS.MealPlan.model.entities.User;
-import Project01.AWS.MealPlan.model.entities.User;
-import Project01.AWS.MealPlan.model.enums.UserStatus;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.UserRepository;
 import Project01.AWS.MealPlan.service.UserService;
-import Project01.AWS.MealPlan.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -179,6 +175,23 @@ public class UserServiceImpl implements UserService {
             return UserMapper.toResponse(updated);
         } catch (Exception e) {
             throw new ActionFailedException(String.format("Failed to update user with ID: %s", id));
+        }
+    }
+
+    @Override
+    public UserResponse updateCognitoUser(String sub, CognitoUserRequest request) {
+        User user = userRepository.findBySub(sub)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Cannot find user with Cognito Sub: %s", sub)
+                ));
+        try {
+            user.setName(request.getName());
+            user.setPhone(request.getPhone());
+            user.setAddress(request.getAddress());
+            User updated = userRepository.save(user);
+            return UserMapper.toResponse(updated);
+        } catch (Exception e) {
+            throw new ActionFailedException(String.format("Failed to update user with Cognito Sub: %s", sub));
         }
     }
 }
