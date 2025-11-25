@@ -7,15 +7,7 @@
     <list default="true" id="73a4ab3a-a5bb-48ff-982b-bc2ef81bfa29" name="Changes" comment="Sort, Paging, Search: User, Order(haven't test). Fix to summary response of getAllDish, getDishByTypeId, getDishByCountryId, getRelatedDish">
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/OrderMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/mapper/OrderMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/OrderDetailResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/dtos/responses/OrderDetailResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/model/entities/Order.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/DishServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/DishServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/OrderServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/MealPlan/src/main/java/Project01/AWS/MealPlan/service/impl/OrderServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/OrdersHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/OrdersHistory.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/ShoppingCart.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/ShoppingCart.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/mealdetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/Customer/mealdetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/mealplan/src/components/ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/mealplan/src/components/ui/ProductCard.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -6,8 +6,11 @@ import { ArrowLeft, Clock, ChefHat, Plus, Minus } from "lucide-react"
 import CartService from "../../api/service/Cart.service"
 import DishService from "../../api/service/Dish.service"
 import { useToast } from '../ui/use-toast.jsx';
+import AuthModalContext from "../../context/AuthModalContext.jsx"
+import { useContext } from "react";
 
 const MealDetail = () => {
+  const { openModal } = useContext(AuthModalContext);
   const { toast } = useToast();
 
   const { id } = useParams()
@@ -87,6 +90,12 @@ const price = (ingredients, ingredientQuantities) => {
 
   const handleAddToCart = async (product) => {
   try {
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!user) {
+      openModal("login");   // 🔥 opens your layout modal
+      return;
+    }
     const ingredientsForOrder = Object.entries(ingredientQuantities).map(
       ([ingredientId, data]) => ({
         ingredientId: Number.parseInt(ingredientId),
@@ -105,7 +114,7 @@ const price = (ingredients, ingredientQuantities) => {
     const response = await CartService.addToCart(user.id, orderData);
     console.log("Add to Cart Response:", response);
 
-    // ✅ Show toast success
+    // Show toast success
     toast({
       title: "Added to Cart",
       description: `${product.name} has been added to your cart.`,
@@ -114,7 +123,7 @@ const price = (ingredients, ingredientQuantities) => {
   } catch (error) {
     console.error("Error adding item to cart:", error);
 
-    // ✅ Show toast error
+    // Show toast error
     toast({
       title: "Error",
       description: "Failed to add item to cart.",
