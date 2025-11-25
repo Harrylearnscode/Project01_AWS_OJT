@@ -12,6 +12,7 @@ import Project01.AWS.MealPlan.model.entities.User;
 import Project01.AWS.MealPlan.model.exception.ActionFailedException;
 import Project01.AWS.MealPlan.model.exception.NotFoundException;
 import Project01.AWS.MealPlan.repository.UserRepository;
+import Project01.AWS.MealPlan.service.CognitoService;
 import Project01.AWS.MealPlan.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
     public static final String CUSTOMER_ROLE = "CUSTOMER";
     public static final String ADMIN_ROLE = "ADMIN";
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final CognitoService cognitoService;
 
     @Override
     public UserResponse createUser(UserRequest request) {
@@ -79,11 +81,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Cannot find user with ID: %s", id)
                 ));
+        if(user.getSub() == null || user.getSub().isBlank()) {
+            throw new ActionFailedException("User Cognito Sub is invalid");
+        }
         if (user.isActive() == false) {
             throw new ActionFailedException("User already deleted");
         }
         try {
             user.setActive(false);
+            cognitoService.disableUser(user.getSub());
             userRepository.save(user);
         } catch (Exception e) {
             throw new ActionFailedException(String.format("Failed to delete user with ID: %s", id));
@@ -192,6 +198,27 @@ public class UserServiceImpl implements UserService {
             return UserMapper.toResponse(updated);
         } catch (Exception e) {
             throw new ActionFailedException(String.format("Failed to update user with Cognito Sub: %s", sub));
+        }
+    }
+
+    @Override
+    public void enableUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Cannot find user with ID: %s", id)
+                ));
+        if(user.getSub() == null || user.getSub().isBlank()) {
+            throw new ActionFailedException("User Cognito Sub is invalid");
+        }
+        if (user.isActive() == true) {
+            throw new ActionFailedException("User already active");
+        }
+        try {
+            user.setActive(true);
+            cognitoService.enableUser(user.getSub());
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new ActionFailedException(String.format("Failed to activate user with ID: %s", id));
         }
     }
 }

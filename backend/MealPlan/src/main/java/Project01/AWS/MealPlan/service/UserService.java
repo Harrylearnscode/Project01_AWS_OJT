@@ -23,4 +23,5 @@ public interface UserService {
     UserResponse createAdmin(AdminUserRequest request);
     UserResponse updatePhoneAndAddress(Long id, UserPhoneAndAddressRequest request);
     UserResponse updateCognitoUser(String sub, CognitoUserRequest request);
+    void enableUser(Long id);
 }
