@@ -153,4 +153,19 @@ public class UserController {
                         .build()
         );
     }
+
+    @Operation(summary = "Enable user", description = "Enable user (chuyển status ACTIVE sang True).")
+    @PatchMapping("/enable/{id}")
+    public ResponseEntity<ResponseObject> enableUser(@PathVariable Long id) {
+        userService.enableUser(id);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code("ENABLE_SUCCESS")
+                        .message("User enabled successfully")
+                        .status(HttpStatus.OK)
+                        .isSuccess(true)
+                        .data(null)
+                        .build()
+        );
+    }
 }
