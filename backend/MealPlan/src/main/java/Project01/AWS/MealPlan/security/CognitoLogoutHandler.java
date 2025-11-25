@@ -1,11 +1,15 @@
 package Project01.AWS.MealPlan.security;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
@@ -14,33 +18,29 @@ import java.nio.charset.StandardCharsets;
  * See more information <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/logout-endpoint.html">here</a>.
  */
 
-public class CognitoLogoutHandler extends SimpleUrlLogoutSuccessHandler {
-    /**
-     * The domain of your user pool.
-     */
-    private String domain = "https://ap-southeast-1oedmi5xaa.auth.ap-southeast-1.amazoncognito.com";
+public class CognitoLogoutHandler implements LogoutSuccessHandler {
 
-    /**
-     * An allowed callback URL.
-     */
-    private String logoutRedirectUrl = "http://localhost:8080/home";
+    @Value("${aws.cognito.domain}")
+    private String cognitoDomain;
 
-    /**
-     * The ID of your User Pool Client.
-     */
-    private String userPoolClientId = "247omksroih1ailcma3uk180mk";
+    @Value("${spring.security.oauth2.client.registration.cognito.client-id}")
+    private String clientId;
 
-    /**
-     * Here, we must implement the new logout URL request. We define what URL to send our request to, and set out client_id and logout_uri parameters.
-     */
+    @Value("${aws.cognito.logout-url}")
+    private String logoutUrl;
+
+
     @Override
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        return UriComponentsBuilder
-                .fromUri(URI.create(domain + "/logout"))
-                .queryParam("client_id", userPoolClientId)
-                .queryParam("logout_uri", logoutRedirectUrl)
-                .encode(StandardCharsets.UTF_8)
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        String targetUrl = UriComponentsBuilder
+                .fromHttpUrl(cognitoDomain + "/logout")
+                .queryParam("client_id", clientId)
+                .queryParam("logout_uri", logoutUrl)
+                .encode() // Ensure special characters are encoded
                 .build()
                 .toUriString();
+
+        // Redirect the user to AWS Cognito
+        response.sendRedirect(targetUrl);
     }
 }

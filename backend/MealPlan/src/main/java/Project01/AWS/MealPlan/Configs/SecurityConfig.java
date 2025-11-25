@@ -26,19 +26,6 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable()) // tắt CSRF
-//                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().permitAll() // tất cả request đều cho phép
-//                )
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authenticationProvider(authenticationProvider);
-////                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CognitoAuthenticationSuccessHandler cognitoSuccessHandler,
@@ -69,6 +56,11 @@ public class SecurityConfig {
                 )
 //                .oauth2Login(Customizer.withDefaults())
                 .logout(logout -> logout
+                        .logoutUrl("/logout") // The endpoint you call from your frontend
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                        // Attach the custom handler here:
                         .logoutSuccessHandler(cognitoLogoutHandler)
                 )
 //                .formLogin(Customizer.withDefaults())
@@ -77,30 +69,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//@Bean
-//public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//    CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
-//
-//    http.csrf(Customizer.withDefaults())
-//            .authorizeHttpRequests(authz -> authz
-//                    .requestMatchers("/").permitAll()
-//                    .anyRequest()
-//                    .authenticated())
-//            .oauth2Login(Customizer.withDefaults())
-//            .logout(logout -> logout.logoutSuccessHandler(cognitoLogoutHandler));
-//    return http.build();
-//}
-
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-//        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
 }

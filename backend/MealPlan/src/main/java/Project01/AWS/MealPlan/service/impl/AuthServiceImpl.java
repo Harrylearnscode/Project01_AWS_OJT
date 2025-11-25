@@ -298,7 +298,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             // Sync Name (Optional: You might prefer local DB name to persist, remove if so)
-            if (name != null && !name.equals(user.getName())) {
+            if(user.getName() == null && user.getName().trim().isEmpty()) {
                 user.setName(name);
                 updated = true;
             }
@@ -321,7 +321,7 @@ public class AuthServiceImpl implements AuthService {
             User newUser = User.builder()
                     .sub(sub) // Save the immutable ID
                     .email(email)
-                    .name(name != null ? name : email.split("@")[0])
+                    .name(name)
                     // Placeholder password. User authenticates via Cognito, so this is never used.
                     .password(bCryptPasswordEncoder.encode("COGNITO_USER_" + sub))
                     .role("CUSTOMER")
