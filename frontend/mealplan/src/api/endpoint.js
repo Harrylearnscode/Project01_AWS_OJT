@@ -1,11 +1,15 @@
+import { User } from "lucide-react";
+
 const APIENDPOINTS = {
     AUTH: {
         LOGIN: '/auth/login',
         REGISTER: '/auth/register',
         VERIFY: '/auth/verify',
     },
-    CUSTOMER: {},
-    SELLER: {},
+    User: {
+        GET_USER_PROFILE: (userId) => `/users/getById/${userId}`,
+        UPDATE_USER_PROFILE: (userId) => `/users/${userId}/updateProfile`,
+    },
     DISH: {
         CREATE_DISH: '/dishes/create',
         UPDATE_DISH: (id) => `/dishes/update/${id}`,

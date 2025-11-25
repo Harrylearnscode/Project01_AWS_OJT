@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import AuthService from "../../api/service/Auth.service";
+import { useNavigate } from "react-router-dom";
 
 export default function Login({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -14,11 +15,10 @@ export default function Login({ onSuccess }) {
       // lưu user vào localStorage
       localStorage.setItem("currentUser", JSON.stringify(response.user));
       localStorage.setItem("token", response.token);
-
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Login error:", err);
-      setError("Sai email hoặc password!");
+      setError(err.customMessage||"Sai email hoặc password!");
     }
   };
 
