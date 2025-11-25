@@ -4,32 +4,48 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AWS Cognito Demo App</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .btn { padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
+        .btn-logout { background-color: #dc3545; }
+        .btn:hover { opacity: 0.8; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
 </head>
 <body>
-<div>
-    <div>
-        <h1>AWS Cognito Demo App</h1>
+<div class="container">
+    <h1>AWS Cognito Demo App</h1>
 
-        <div sec:authorize="isAuthenticated()">
-            <div>
-                Hello, <strong th:text="${#authentication.name}"></strong>!
-                <br>
-                <br>
-            </div>
-            <div>
-                Here are all the OIDC properties you can use: <div th:text="${#authentication.getPrincipal()}"/>
-                <br>
-                <br>
-            </div>
-            <div>
-                <a th:href="@{/logout}"><button>Log out</button></a>
-            </div>
+    <!-- SECTION: Shown only when Logged In -->
+    <div sec:authorize="isAuthenticated()">
+        <div class="card">
+            <h2>Welcome back!</h2>
+            <p>Hello, <strong th:text="${#authentication.name}">User</strong>!</p>
+
+            <h3>Your AWS Cognito Details:</h3>
+            <!-- This prints the raw attributes from the OIDC token -->
+            <pre th:text="${#authentication.principal.attributes}"></pre>
+
+            <br>
+
+            <!-- LOGOUT BUTTON -->
+            <!-- Because CSRF is disabled in your config, a simple link works -->
+            <a th:href="@{/logout}" class="btn btn-logout">Log out</a>
         </div>
+    </div>
 
-        <div sec:authorize="isAnonymous()">
-            <div>
-                <a th:href="@{/oauth2/authorization/cognito}"><button>Log in</button></a>
-            </div>
+    <!-- SECTION: Shown only when Logged Out (Anonymous) -->
+    <div sec:authorize="isAnonymous()">
+        <div class="card">
+            <h2>You are not logged in</h2>
+            <p>Please login with your AWS Cognito account to continue.</p>
+
+            <!-- LOGIN BUTTON -->
+            <!-- This links to the auto-generated OAuth2 authorization endpoint -->
+            <a th:href="@{/oauth2/authorization/cognito}" class="btn">Log in with AWS</a>
+            <a th:href="@{/logout}" class="btn btn-logout">Log out</a>
         </div>
     </div>
 </div>

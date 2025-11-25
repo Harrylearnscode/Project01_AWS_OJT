@@ -48,12 +48,7 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         String email = claimToString(attributes.get("email"));
 
         // Name logic: try 'name', fallback to email parts
-        String name = claimToString(attributes.get("name"));
-        if (name == null || name.isBlank()) {
-            name = (email != null && email.contains("@")) ? email.split("@")[0] : email;
-        }
-
-        logger.info("Extracted -> sub: {}, email: {}, name: {}", sub, email, name);
+        String name = "placeholder-name";
 
         User user = authService.syncCognitoUserToLocal(sub, email, name);
 
