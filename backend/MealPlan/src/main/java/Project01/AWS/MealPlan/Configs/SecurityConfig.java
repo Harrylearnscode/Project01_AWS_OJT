@@ -3,6 +3,7 @@ package Project01.AWS.MealPlan.Configs;
 import Project01.AWS.MealPlan.security.CognitoAuthenticationFailureHandler;
 import Project01.AWS.MealPlan.security.CognitoAuthenticationSuccessHandler;
 import Project01.AWS.MealPlan.security.CognitoLogoutHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,8 +30,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CognitoAuthenticationSuccessHandler cognitoSuccessHandler,
-                                                   CognitoAuthenticationFailureHandler cognitoFailureHandler) throws Exception {
-        CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
+                                                   CognitoAuthenticationFailureHandler cognitoFailureHandler,  CognitoLogoutHandler cognitoLogoutHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -52,6 +52,7 @@ public class SecurityConfig {
 //                )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(cognitoSuccessHandler)
+//                        .defaultSuccessUrl("/home", true)  // return to this url after success login
                         .failureHandler(cognitoFailureHandler)
                 )
 //                .oauth2Login(Customizer.withDefaults())
@@ -60,10 +61,8 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        // Attach the custom handler here:
                         .logoutSuccessHandler(cognitoLogoutHandler)
                 )
-//                .formLogin(Customizer.withDefaults())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
