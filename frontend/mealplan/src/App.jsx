@@ -20,6 +20,13 @@ import {Toaster} from "./components/ui/toaster.jsx";
 import UserProfile from "./components/Customer/UserProfile.jsx";
 
 function App() {
+  const { user, isAuthenticated, loading } = useAuth();
+
+  if (loading) return null; // prevents redirect BEFORE data loads
+
+  const userRole = user?.role;
+
+
   const ProtectedRoute = ({ isAuthenticated, allowedRoles, userRole, redirectPath = "/login" }) => {
   // If user is not logged in
   if (!isAuthenticated) {
@@ -31,10 +38,6 @@ function App() {
   }
     return <Outlet />;
   };
-
-  const isAuthenticated = !!localStorage.getItem("token");
-  const userRole = JSON.parse(localStorage.getItem("currentUser"))?.role;
-  console.log("User Role in App.jsx:", userRole);
 
   return (
     <BrowserRouter>

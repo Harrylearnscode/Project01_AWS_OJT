@@ -14,27 +14,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
-    const savedIsFirstLogin = localStorage.getItem('isFirstLogin');
+    const savedToken = localStorage.getItem('token');
+    console.log("AuthProvider loading token from localStorage:", savedToken);
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-    if (savedIsFirstLogin) {
-      setIsFirstLogin(JSON.parse(savedIsFirstLogin));
+    if (savedToken) {
+      setToken(savedToken);
+      setIsAuthenticated(true);
     }
     setLoading(false);
   }, []);
 
-  const login = (userData, token, firstLogin = false) => {
+  const login = (userData, token) => {
     setUser(userData);
     setToken(token);
-    setIsFirstLogin(firstLogin);
+    setIsAuthenticated(true);
     localStorage.setItem('currentUser', JSON.stringify(userData));
     localStorage.setItem('token', token);
-    localStorage.setItem('isFirstLogin', JSON.stringify(firstLogin));
   };
 
   const logout = () => {
@@ -42,7 +43,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
-    localStorage.removeItem('isFirstLogin');
     localStorage.clear();
     window.location.href = '/auth';
   };
@@ -52,10 +52,10 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
-    isFirstLogin,
     login,
     logout,
-   
+    isAuthenticated,
+
     loading
   };
 
