@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import AuthService from "../../api/service/Auth.service";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function Login({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await AuthService.login({ email, password });
-      console.log("Login successful:", response);
-      // lưu user vào localStorage
-      localStorage.setItem("currentUser", JSON.stringify(response.user));
-      localStorage.setItem("token", response.token);
+      // console.log("Login successful:", response);
+      // // lưu user vào localStorage
+      // localStorage.setItem("currentUser", JSON.stringify(response.user));
+      // localStorage.setItem("token", response.token);
+      login(response.user, response.token);
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Login error:", err);
