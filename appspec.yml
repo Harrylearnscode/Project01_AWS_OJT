@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+
+files:
+  # FIX: Match the folder structure inside deploy.zip
+  - source: /backend/target
+    destination: /home/ec2-user/app
+    # This will copy the JAR file to /home/ec2-user/app
+
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: scripts/server_stop.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/server_start.sh
+      timeout: 300
+      runas: root
