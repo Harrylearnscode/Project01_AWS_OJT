@@ -1,0 +1,73 @@
+stages:
+  - build-frontend
+  - build-backend
+  - deploy
+
+variables:
+  AWS_DEFAULT_REGION: "ap-southeast-1"
+  # Replace with your real bucket name
+  S3_BUCKET: "mealplan-artifacts-sg-12345"
+  CODEDEPLOY_APPLICATION_NAME: "MealPlan-App"
+  CODEDEPLOY_GROUP_NAME: "MealPlan-DG"
+
+# --- Job 1: Build React Frontend ---
+frontend-job:
+  stage: build-frontend
+  image: node:20
+  script:
+    - echo "Building React Frontend..."
+    # FIX: Navigate into the specific frontend subfolder
+    - cd frontend/mealplan
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      # FIX: Capture the build output from the nested folder
+      # Note: Vite builds to 'dist'. If using Create-React-App, change 'dist' to 'build'
+      - frontend/mealplan/dist/
+    expire_in: 1 hour
+
+# --- Job 2: Build Spring Boot Backend (Embeds Frontend) ---
+backend-job:
+  stage: build-backend
+  image: maven:3.9-amazoncorretto-21
+  script:
+    - echo "Preparing Static Folder..."
+    # FIX: Create the static directory inside the backend project
+    - mkdir -p backend/src/main/resources/static
+
+    - echo "Copying Frontend Build to Backend..."
+    # FIX: Copy files from the frontend artifact (Job 1) to the backend source
+    - cp -r frontend/mealplan/dist/* backend/src/main/resources/static/
+
+    - echo "Building JAR..."
+    # FIX: Enter the backend folder to run Maven
+    - cd backend
+    - mvn clean package -DskipTests
+  artifacts:
+    paths:
+      # FIX: The JAR is located inside backend/target
+      - backend/target/*.jar
+      - appspec.yml
+      - scripts/*.sh
+    expire_in: 1 hour
+
+# --- Job 3: Deploy to AWS ---
+deploy-job:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  script:
+    - echo "Zipping files..."
+    # FIX: Zip the specific folders. This preserves the 'backend/target' path structure in the zip.
+    - zip -r deploy.zip backend/target/*.jar appspec.yml scripts/
+
+    - echo "Uploading to S3..."
+    - aws s3 cp deploy.zip s3://$S3_BUCKET/deploy.zip
+
+    - echo "Triggering CodeDeploy..."
+    - aws deploy create-deployment \
+        --application-name $CODEDEPLOY_APPLICATION_NAME \
+        --deployment-group-name $CODEDEPLOY_GROUP_NAME \
+        --s3-location bucket=$S3_BUCKET,key=deploy.zip,bundleType=zip
+  only:
+    - main
