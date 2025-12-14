@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface DishService {
-    DishResponse createDish(DishRequest request);
+    DishResponse createDish(DishRequest request, MultipartFile file);
     DishResponse updateDish(Long id, DishRequest request);
     void changeStatusDish(Long id);
     List<DishSummaryResponse> getAllActiveDishes();

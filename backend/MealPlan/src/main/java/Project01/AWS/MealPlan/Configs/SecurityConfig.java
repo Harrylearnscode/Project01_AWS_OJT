@@ -32,6 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CognitoAuthenticationSuccessHandler cognitoSuccessHandler,
                                                    CognitoAuthenticationFailureHandler cognitoFailureHandler,  CognitoLogoutHandler cognitoLogoutHandler) throws Exception {
         http
+                    .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -45,11 +46,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .oauth2Login(oauth2 -> oauth2
-////                       .loginPage("https://ap-southeast-1msytfkhfw.auth.ap-southeast-1.amazoncognito.com/")
-//                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
-//                        .failureUrl("/api/auth/oauth2/failure")
-//                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(cognitoSuccessHandler)
 //                        .defaultSuccessUrl("/home", true)  // return to this url after success login

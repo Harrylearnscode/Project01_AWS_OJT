@@ -35,9 +35,20 @@ public class DishServiceImpl implements DishService {
 
     @Transactional
     @Override
-    public DishResponse createDish(DishRequest request) {
+    public DishResponse createDish(DishRequest request, MultipartFile file)  {
         Country country = countryRepository.findById(request.getCountryId())
                 .orElseThrow(() -> new NotFoundException("Country not found"));
+
+        String imageUrl = null;
+        if (file != null && !file.isEmpty()) {
+            try {
+                imageUrl = s3Service.uploadFile(file);
+            } catch (Exception e) {
+                // Decision: Do you want to stop the whole process if image fails?
+                // If yes, throw exception. If no, log it and continue with null image.
+                throw new ActionFailedException("Failed to upload image to S3: " + e.getMessage());
+            }
+        }
 
         Dish dish = Dish.builder()
                 .name(request.getName())
@@ -48,6 +59,7 @@ public class DishServiceImpl implements DishService {
                 .totalTime(request.getTotalTime())
                 .status(DishStatus.ACTIVE)
                 .country(country)
+                .imgUrl(imageUrl)
                 .build();
 
         if (request.getTypeIds() != null && !request.getTypeIds().isEmpty()) {
@@ -242,16 +254,21 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public String uploadDishImage(Long dishId, MultipartFile file) throws IOException {
+        Dish dish = dishRepository.findByDishIdAndStatus(dishId, DishStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException("Dish not found or deleted"));
+        String imageUrl;
         try {
-            Dish dish = dishRepository.findByDishIdAndStatus(dishId, DishStatus.ACTIVE)
-                    .orElseThrow(() -> new NotFoundException("Dish not found or deleted"));
-            String imageUrl = s3Service.uploadFile(file);
-            dish.setImgUrl(imageUrl);
-            dishRepository.save(dish);
-            return imageUrl;
+            imageUrl = s3Service.uploadFile(file);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ActionFailedException("Failed to get dish");
+            throw new ActionFailedException("Failed to upload image to S3: " + e.getMessage());
         }
+        dish.setImgUrl(imageUrl);
+        try {
+            dishRepository.save(dish);
+        } catch (Exception e) {
+            throw new ActionFailedException("Failed to save dish updates to database");
+        }
+
+        return imageUrl;
     }
 }

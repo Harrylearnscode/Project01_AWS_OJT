@@ -5,10 +5,13 @@ import Project01.AWS.MealPlan.model.dtos.responses.DishResponse;
 import Project01.AWS.MealPlan.model.dtos.responses.DishSummaryResponse;
 import Project01.AWS.MealPlan.service.DishService;
 import Project01.AWS.MealPlan.model.dtos.responses.ResponseObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
@@ -30,19 +33,16 @@ public class DishController {
 
     private final DishService dishService;
 
-    @Operation(summary = "Tạo dish", description = "Khởi tạo một dish mới.")
-    @PostMapping("/create")
-    public ResponseEntity<ResponseObject> createDish(@RequestBody DishRequest request) {
-        DishResponse response = dishService.createDish(request);
-        return ResponseEntity.ok(
-                ResponseObject.builder()
-                        .code("CREATE_SUCCESS")
-                        .message("Dish created successfully")
-                        .status(HttpStatus.OK)
-                        .isSuccess(true)
-                        .data(response)
-                        .build()
-        );
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DishResponse> createDish(
+            @RequestPart("dish") @Valid DishRequest dishRequest, // Receive JSON as String
+            @RequestPart(value = "image", required = false) MultipartFile file // Receive File
+    ) throws JsonProcessingException {
+
+
+
+        DishResponse newDish = dishService.createDish(dishRequest, file);
+        return ResponseEntity.ok(newDish);
     }
 
     @Operation(summary = "Cập nhật dish", description = "Chỉnh sửa thông tin dish.")

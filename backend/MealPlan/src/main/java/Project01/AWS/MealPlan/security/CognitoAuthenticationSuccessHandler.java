@@ -82,11 +82,20 @@ public class CognitoAuthenticationSuccessHandler implements AuthenticationSucces
         }
 
         UserDto userDto = UserMapper.toUserDto(user);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, backendExpiresInMs, userDto);
+//        LoginResponse loginResponse = new LoginResponse(jwtToken, backendExpiresInMs, userDto);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(loginResponse));
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//        response.getWriter().write(objectMapper.writeValueAsString(loginResponse));
+
+        // 1. Define where your frontend is running
+        String frontendUrl = "http://localhost:5173"; // Adjust to your React route
+
+        // 2. Append the token as a query parameter
+        String targetUrl = frontendUrl + "?token=" + jwtToken + "&expiresIn=" + backendExpiresInMs + "&sub=" + sub;
+
+        // 3. Redirect the browser back to the frontend
+        response.sendRedirect(targetUrl);
     }
 
     private String claimToString(Object claim) {

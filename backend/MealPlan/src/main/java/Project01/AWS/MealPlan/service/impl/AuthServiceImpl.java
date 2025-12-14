@@ -153,6 +153,11 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public User getUserBySub(String sub) {
+        return userRepository.findBySub(sub)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     public User getUserByName(String name) {
         return userRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("User not found"));
