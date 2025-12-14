@@ -37,7 +37,7 @@ public class MomoServiceImpl implements MomoService {
     @Value("${momo.secret-key}")
     private String SECRET_KEY;
 
-    @Value("http.localhost:3000/")
+    @Value("${momo.return-url}")
     private String REDIRECT_URL;
 
     @Value("${momo.ipn-url}")

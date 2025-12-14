@@ -12,6 +12,8 @@ import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -92,20 +94,60 @@ public class AuthController {
         }
     }
 
+//    @GetMapping("/me")
+//    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+//        try {
+//            if (authentication != null && authentication.isAuthenticated()) {
+//                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//                User user = authService.getUserByEmail(userDetails.getUsername());
+//                UserDto userDto = UserMapper.toUserDto(user);
+//                return ResponseEntity.ok(userDto);
+//            }
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+//        }
+//    }
+
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+        System.out.println("Authentication: " + authentication);
+        System.out.println("Principal type: " + (authentication != null ? authentication.getPrincipal().getClass() : "null"));
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         try {
-            if (authentication != null && authentication.isAuthenticated()) {
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                User user = authService.getUserByEmail(userDetails.getUsername());
-                UserDto userDto = UserMapper.toUserDto(user);
-                return ResponseEntity.ok(userDto);
+            String sub = null;
+            String email = null;
+
+            // Handle JWT token from Cognito
+            if (authentication.getPrincipal() instanceof Jwt jwt) {
+                sub = jwt.getClaimAsString("sub");
+                email = jwt.getClaimAsString("email");
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            // Handle UserDetails (local login)
+            else if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+                email = userDetails.getUsername();
+            }
+
+            User user = null;
+            if (sub != null) {
+                user = authService.getUserBySub(sub);
+            } else if (email != null) {
+                user = authService.getUserByEmail(email);
+            }
+
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(UserMapper.toUserDto(user));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
 
     @PutMapping("/me/profile")
     public ResponseEntity<?> updateProfile(
